@@ -1,0 +1,3805 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>    <link href="/rappasoft/laravel-livewire-tables/core.min.css" rel="stylesheet" />     <link href="/rappasoft/laravel-livewire-tables/thirdparty.css" rel="stylesheet" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="modulepreload" href="https://www.honeysplace.com/build/assets/app-4ed993c7.js" /><link rel="modulepreload" href="https://www.honeysplace.com/build/assets/app-c42ce534.js" /><script type="module" src="https://www.honeysplace.com/build/assets/app-4ed993c7.js" data-navigate-track="reload"></script><script type="module" src="https://www.honeysplace.com/build/assets/app-c42ce534.js" data-navigate-track="reload"></script>
+            <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z5QXH7PSMN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-Z5QXH7PSMN');
+    </script>
+
+        <title> | Honey&#039;s Place Website</title>
+            <meta name="description" content="">
+            <meta name="keywords" content="">
+        
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://www.honeysplace.com/vendor/wire-elements-pro/css/bootstrap-overlay-component.css">
+    <link rel="stylesheet" href="/css/honeys.css">
+    
+<script src="/rappasoft/laravel-livewire-tables/core.min.js"  ></script> <script src="/rappasoft/laravel-livewire-tables/thirdparty.min.js"  ></script><!-- Livewire Styles --><style >[wire\:loading][wire\:loading], [wire\:loading\.delay][wire\:loading\.delay], [wire\:loading\.inline-block][wire\:loading\.inline-block], [wire\:loading\.inline][wire\:loading\.inline], [wire\:loading\.block][wire\:loading\.block], [wire\:loading\.flex][wire\:loading\.flex], [wire\:loading\.table][wire\:loading\.table], [wire\:loading\.grid][wire\:loading\.grid], [wire\:loading\.inline-flex][wire\:loading\.inline-flex] {display: none;}[wire\:loading\.delay\.none][wire\:loading\.delay\.none], [wire\:loading\.delay\.shortest][wire\:loading\.delay\.shortest], [wire\:loading\.delay\.shorter][wire\:loading\.delay\.shorter], [wire\:loading\.delay\.short][wire\:loading\.delay\.short], [wire\:loading\.delay\.default][wire\:loading\.delay\.default], [wire\:loading\.delay\.long][wire\:loading\.delay\.long], [wire\:loading\.delay\.longer][wire\:loading\.delay\.longer], [wire\:loading\.delay\.longest][wire\:loading\.delay\.longest] {display: none;}[wire\:offline][wire\:offline] {display: none;}[wire\:dirty]:not(textarea):not(input):not(select) {display: none;}:root {--livewire-progress-bar-color: #2299dd;}[x-cloak="x-cloak"],[x-cloak=""] {display: none !important;}[wire\:cloak="wire:cloak"],[wire\:cloak=""] {display: none !important;}dialog#livewire-error::backdrop {background-color: rgba(0, 0, 0, .6);}</style>
+</head>
+
+<body>
+    <div class="container-fluid pb-3 flex-grow-1 d-flex flex-column">
+        <div class="row flex-grow-sm-1 flex-grow-0">
+            <main class="col-12 p-0">
+                <!-- ✅ UPDATED MOBILE DRAWER + MODERN DESKTOP LAYOUT -->
+  <div wire:snapshot="{&quot;data&quot;:{&quot;logo&quot;:&quot;Honeys-Logo.png&quot;,&quot;bg_color&quot;:&quot;#d8d3d9&quot;,&quot;font_color&quot;:&quot;#570575&quot;,&quot;show_featured_mans_in_header&quot;:0,&quot;mega_menu_mans_text&quot;:&quot;Featured Manufacturers&quot;,&quot;mega_menu_link_text&quot;:&quot;Categories&quot;,&quot;disable_header_search&quot;:0,&quot;search_header&quot;:null,&quot;search_header_sm&quot;:null,&quot;header_search_results&quot;:null,&quot;header_search_results_sm&quot;:null,&quot;highlightIndex_header&quot;:0,&quot;selectedItem_header&quot;:null,&quot;selected_item_header&quot;:null,&quot;highlightIndex_header_sm&quot;:0,&quot;selectedItem_header_sm&quot;:null,&quot;selected_item_header_sm&quot;:null,&quot;account_number&quot;:null,&quot;account_name&quot;:null,&quot;email&quot;:null,&quot;header_display_role&quot;:&quot;&quot;},&quot;memo&quot;:{&quot;id&quot;:&quot;3vwB0duI5N261JfpqvIG&quot;,&quot;name&quot;:&quot;front.head&quot;,&quot;path&quot;:&quot;login&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:{&quot;mega-menu-desktop&quot;:[&quot;div&quot;,&quot;2Rlj4NeFtp349hFXCGFR&quot;],&quot;mega-menu-mobile&quot;:[&quot;div&quot;,&quot;BcJn6HF8wwSoTToK311u&quot;]},&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;en&quot;},&quot;checksum&quot;:&quot;3f7834e1189efef063c2c556a7aeb795643d1ac6efef313782c94f038d3e096b&quot;}" wire:effects="{&quot;listeners&quot;:[&quot;DisableHeadSearch&quot;]}" wire:id="3vwB0duI5N261JfpqvIG" class="row p-0 m-0 sticky-top hp-header-root" style="background-color:white;color:black;font-size:1rem;">
+  
+    <!-- ✅ DESKTOP — only when the full nav + search + actions actually fit -->
+    <div class="hp-header-desktop d-none d-xxl-block nav-h">
+      <header class="navbar navbar-expand-lg bd-navbar pb-0">
+        <div class="container-fluid pb-2 hp-desktop-grid">
+  
+          <!-- LOGO -->
+          <a class="navbar-brand pb-2 hp-desktop-logo"
+             href=" https://www.honeysplace.com "
+             wirexyz:navigate>
+            <img src="https://d2q2s39fxn78ox.cloudfront.net/img/front/Honeys-Logo.png" alt="Honey's Place Logo"
+                 style="width:180px;height:auto;display:block;">
+          </a>
+  
+          <!-- NAV MENUS -->
+          <div class="hp-desktop-center">
+            <ul class="navbar-nav c-nav guest-width">
+              <!--[if BLOCK]><![endif]-->                <!--[if BLOCK]><![endif]-->                  <li class="nav-item dropdown has-megamenu">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-display="static">
+                      Categories
+                    </a>
+                    <div class="dropdown-menu megamenu p-0" role="menu">
+                      <div wire:snapshot="{&quot;data&quot;:{&quot;top_nav&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;cat_nav&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;children&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;shop_cats&quot;:[[[{&quot;name&quot;:&quot;Lingerie &amp; Sexy Apparel&quot;,&quot;id&quot;:348,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Bachelor &amp; Bachelorette Items&quot;,&quot;id&quot;:25,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Bath &amp; Body&quot;,&quot;id&quot;:28,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Candy&quot;,&quot;id&quot;:668,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Lubricants, Creams &amp; Glides&quot;,&quot;id&quot;:391,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Displays-Bowls &amp; Wall Displays&quot;,&quot;id&quot;:197,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Games&quot;,&quot;id&quot;:289,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Massagers&quot;,&quot;id&quot;:416,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Toy Cleaners&quot;,&quot;id&quot;:102,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Body Jewelry (Non Piercing)&quot;,&quot;id&quot;:74,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Candles&quot;,&quot;id&quot;:95,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Gag Gifts &amp; Novelties&quot;,&quot;id&quot;:275,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Wigs&quot;,&quot;id&quot;:526,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Bondage &amp; Fetish Toys&quot;,&quot;id&quot;:246,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Cockrings&quot;,&quot;id&quot;:121,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Condoms&quot;,&quot;id&quot;:134,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Couples Toys&quot;,&quot;id&quot;:592,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;App Controlled&quot;,&quot;id&quot;:625,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}]],{&quot;s&quot;:&quot;arr&quot;}],&quot;shop_mans&quot;:[[[{&quot;name&quot;:&quot;Leg Avenue&quot;,&quot;link&quot;:&quot;\/manufacturer\/85\/leg-avenue&quot;,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Blush&quot;,&quot;link&quot;:&quot;\/manufacturer\/14\/blush&quot;,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Satisfyer&quot;,&quot;link&quot;:&quot;\/manufacturer\/238\/satisfyer&quot;,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;CalExotics&quot;,&quot;link&quot;:&quot;\/manufacturer\/22\/calexotics&quot;,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Doc Johnson&quot;,&quot;link&quot;:&quot;\/manufacturer\/34\/doc-johnson&quot;,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}]],{&quot;s&quot;:&quot;arr&quot;}],&quot;show_featured_mans_in_header&quot;:0,&quot;mega_menu_mans_text&quot;:&quot;Featured Manufacturers&quot;,&quot;mega_menu_link_text&quot;:&quot;Categories&quot;,&quot;bg_color&quot;:null},&quot;memo&quot;:{&quot;id&quot;:&quot;2Rlj4NeFtp349hFXCGFR&quot;,&quot;name&quot;:&quot;front.head.categories&quot;,&quot;path&quot;:&quot;login&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;en&quot;},&quot;checksum&quot;:&quot;368bd98b1692e44af92cf0cfe0fb7f3629c1da6acd59f731d4989ae2e662a55b&quot;}" wire:effects="[]" wire:id="2Rlj4NeFtp349hFXCGFR">
+    <div class="mm-wrap font-montserrat">
+        <!-- Desktop: multi-column, wraps to a new column every --mm-rows items -->
+        <div class="mm-desktop d-none d-lg-block">
+            <div class="mm-inner">
+                <section class="mm-zone mm-zone--cats">
+                    <h6 class="mm-title">Featured Categories</h6>
+                    <ul class="mm-grid">
+                        <!--[if BLOCK]><![endif]-->                        <li>
+                            <a class="mm-link" href="/category/348">
+                                Lingerie &amp; Sexy Apparel
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/25">
+                                Bachelor &amp; Bachelorette Items
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/28">
+                                Bath &amp; Body
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/668">
+                                Candy
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/391">
+                                Lubricants, Creams &amp; Glides
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/197">
+                                Displays-Bowls &amp; Wall Displays
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/289">
+                                Games
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/416">
+                                Massagers
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/102">
+                                Toy Cleaners
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/74">
+                                Body Jewelry (Non Piercing)
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/95">
+                                Candles
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/275">
+                                Gag Gifts &amp; Novelties
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/526">
+                                Wigs
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/246">
+                                Bondage &amp; Fetish Toys
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/121">
+                                Cockrings
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/134">
+                                Condoms
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/592">
+                                Couples Toys
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/625">
+                                App Controlled
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                        <!--[if ENDBLOCK]><![endif]-->
+                    </ul>
+                </section>
+
+                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            </div>
+
+            <div class="mm-footer">
+                <a class="mm-cta" href="https://www.honeysplace.com/categories">View All Categories <span
+                        aria-hidden="true">&rarr;</span></a>
+                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            </div>
+        </div>
+
+        <!-- Mobile: stacked, two columns from 576px up -->
+        <div class="mm-mobile d-lg-none">
+            <h6 class="mm-title">Featured Categories</h6>
+            <ul class="mm-mgrid">
+                <!--[if BLOCK]><![endif]-->                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/348">
+                        Lingerie &amp; Sexy Apparel
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/25">
+                        Bachelor &amp; Bachelorette Items
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/28">
+                        Bath &amp; Body
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/668">
+                        Candy
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/391">
+                        Lubricants, Creams &amp; Glides
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/197">
+                        Displays-Bowls &amp; Wall Displays
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/289">
+                        Games
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/416">
+                        Massagers
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/102">
+                        Toy Cleaners
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/74">
+                        Body Jewelry (Non Piercing)
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/95">
+                        Candles
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/275">
+                        Gag Gifts &amp; Novelties
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/526">
+                        Wigs
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/246">
+                        Bondage &amp; Fetish Toys
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/121">
+                        Cockrings
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/134">
+                        Condoms
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/592">
+                        Couples Toys
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/625">
+                        App Controlled
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                <!--[if ENDBLOCK]><![endif]-->
+            </ul>
+
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+
+            <div class="mm-footer mm-footer--mobile">
+                <a class="mm-cta" href="https://www.honeysplace.com/categories">View All Categories <span
+                        aria-hidden="true">&rarr;</span></a>
+                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+
+        .font-montserrat {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Items per column. Overridden below for narrower desktops. */
+        .mm-wrap {
+            --mm-rows: 10;
+        }
+
+        /* ===== Panel ===== */
+        .dropdown-menu.megamenu {
+            font-family: 'Montserrat', sans-serif;
+            padding: 0 !important;
+            border: 1px solid var(--hp-border, #e5e7eb);
+            border-radius: 18px;
+            box-shadow: var(--hp-shadow, 0 14px 30px rgba(2, 6, 23, .12));
+            background: var(--hp-surface, #fff);
+            overflow: hidden;
+        }
+
+        .dropdown-menu.megamenu.show {
+            animation: mmIn .16s ease-out both;
+        }
+
+        @keyframes mmIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .mm-desktop {
+            max-height: 70vh;
+            overflow-y: auto;
+            /* Auto rather than hidden: if the columns ever outgrow the max-width
+               cap they stay reachable instead of being clipped. */
+            overflow-x: auto;
+            overscroll-behavior: contain;
+        }
+
+        .mm-inner {
+            display: flex;
+            align-items: flex-start;
+            gap: 2rem;
+            padding: 1.5rem 1.9rem 1.2rem;
+        }
+
+        .mm-zone--cats {
+            flex: 0 1 auto;
+            min-width: 0;
+        }
+
+        .mm-zone--mans {
+            flex: 0 0 auto;
+            align-self: stretch;
+            padding-left: 2rem;
+            margin-left:2rem;
+            border-left: 1px solid var(--hp-border, #e5e7eb);
+        }
+
+        /* ===== Section titles ===== */
+        .mm-title {
+            position: relative;
+            margin: 0 0 .85rem;
+            padding-top: .6rem;
+            font-size: .72rem;
+            font-weight: 800;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+            color: var(--hp-muted, #64748b);
+        }
+
+        .mm-title::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 28px;
+            height: 3px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--hp-primary, #843D8B), var(--hp-primary-2, #6f2e76));
+        }
+
+        /* ===== Column grid ===== */
+        .mm-grid {
+            display: grid;
+            grid-auto-flow: column;
+            grid-template-rows: repeat(var(--mm-rows, 10), auto);
+            grid-auto-columns: minmax(185px, max-content);
+            justify-content: start;
+            column-gap: 1.5rem;
+            row-gap: .1rem;
+            list-style: none !important;
+            margin: 0;
+            padding: 0;
+        }
+
+        .mm-link {
+            display: block;
+            padding: .4rem .6rem;
+            border-radius: 10px;
+            font-size: .9rem;
+            font-weight: 500;
+            line-height: 1.35;
+            color: var(--hp-text, #0f172a);
+            text-decoration: none;
+            transition: background .15s ease, color .15s ease, transform .15s ease;
+        }
+
+        .mm-link:hover,
+        .mm-link:focus-visible {
+            background: rgba(132, 61, 139, .07);
+            color: var(--hp-primary, #843D8B);
+            transform: translateX(2px);
+            text-decoration: none;
+        }
+
+        .mm-link:focus-visible {
+            outline: 2px solid var(--hp-primary, #843D8B);
+            outline-offset: 1px;
+        }
+
+        .mm-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 1px 7px;
+            border-radius: 999px;
+            font-size: .62rem;
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            background: rgba(132, 61, 139, .12);
+            color: var(--hp-primary, #843D8B);
+            vertical-align: middle;
+        }
+
+        /* ===== Footer CTAs ===== */
+        .mm-footer {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .6rem;
+            padding: .9rem 1.9rem 1.05rem;
+            border-top: 1px solid var(--hp-border, #e5e7eb);
+            background: var(--hp-soft, #f7f7fb);
+        }
+
+        .mm-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .55rem 1.1rem;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            font-size: .82rem;
+            font-weight: 800;
+            text-decoration: none;
+            color: #fff;
+            background: linear-gradient(135deg, var(--hp-primary, #843D8B), var(--hp-primary-2, #6f2e76));
+            transition: transform .12s ease, box-shadow .12s ease, background .15s ease;
+        }
+
+        .mm-cta:hover {
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(132, 61, 139, .25);
+        }
+
+        .mm-cta--ghost {
+            background: var(--hp-surface, #fff);
+            color: var(--hp-primary, #843D8B);
+            border-color: rgba(132, 61, 139, .28);
+        }
+
+        .mm-cta--ghost:hover {
+            background: rgba(132, 61, 139, .06);
+            color: var(--hp-primary, #843D8B);
+            box-shadow: 0 10px 18px rgba(2, 6, 23, .08);
+        }
+
+        /* ===== Mobile =====
+           The whole header is sticky, so this panel must stay shorter than the
+           viewport and scroll internally. Without the cap the sticky container
+           grows taller than the screen and its lower rows become unreachable. */
+        .mm-mobile {
+            max-height: 55vh;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .mm-mgrid {
+            display: grid;
+            grid-template-columns: 1fr;
+            column-gap: 1rem;
+            list-style: none !important;
+            margin: 0 0 .25rem;
+            padding: 0;
+        }
+
+        .mm-mobile .mm-link {
+            padding: .65rem .55rem;
+            border-radius: 8px;
+            border-bottom: 1px solid rgba(2, 6, 23, .06);
+        }
+
+        .mm-mobile .mm-link:hover,
+        .mm-mobile .mm-link:focus-visible {
+            background: var(--hp-surface, #fff);
+            transform: none;
+        }
+
+        .mm-footer--mobile {
+            padding: .9rem 0 .25rem;
+            background: transparent;
+        }
+
+        .mm-footer--mobile .mm-cta {
+            flex: 1 1 100%;
+            justify-content: center;
+        }
+
+        @media (min-width: 576px) {
+            .mm-mgrid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .mm-footer--mobile .mm-cta {
+                flex: 1 1 auto;
+            }
+        }
+
+        /* Fewer columns where there is less room, so links never get cramped. */
+        @media (max-width: 1199.98px) {
+            .mm-desktop {
+                --mm-rows: 12;
+            }
+
+            .mm-inner {
+                gap: 1.5rem;
+                padding: 1.35rem 1.4rem 1.1rem;
+            }
+
+            .mm-zone--mans {
+                padding-left: 1.5rem;
+            }
+
+            .mm-footer {
+                padding: .85rem 1.4rem 1rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .dropdown-menu.megamenu.show,
+            .mm-link,
+            .mm-cta {
+                animation: none !important;
+                transition: none !important;
+            }
+
+            .mm-link:hover,
+            .mm-cta:hover {
+                transform: none;
+            }
+        }
+
+        .mm-desktop::-webkit-scrollbar,
+        .mm-mobile::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .mm-desktop::-webkit-scrollbar-thumb,
+        .mm-mobile::-webkit-scrollbar-thumb {
+            background-color: rgba(2, 6, 23, .18);
+            border-radius: 3px;
+        }
+    </style>
+</div>
+                    </div>
+                  </li>
+                <!--[if ENDBLOCK]><![endif]-->                              <!--[if BLOCK]><![endif]-->                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-display="static">
+                      Manufacturers
+                    </a>
+                    <ul class="dropdown-menu hp-menu">
+                      <!--[if BLOCK]><![endif]-->  <li class="hp-menu-item has-flyout">
+    <!--[if BLOCK]><![endif]-->      <a class="hp-menu-link" href="https://www.honeysplace.com/exclusives">
+        <span>Honey&#039;s Place Exclusives</span>
+        <!--[if BLOCK]><![endif]-->          <span class="hp-menu-chev" aria-hidden="true">›</span>
+        <!--[if ENDBLOCK]><![endif]-->      </a>
+    <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]-->      <ul class="hp-flyout" role="menu">
+        <!--[if BLOCK]><![endif]-->  <li class="hp-menu-item ">
+    <!--[if BLOCK]><![endif]-->      <a class="hp-menu-link" href="/">
+        <span>New Sublink</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->      </a>
+    <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  </li>
+<!--[if ENDBLOCK]><![endif]-->      </ul>
+    <!--[if ENDBLOCK]><![endif]-->  </li>
+  <li class="hp-menu-item ">
+    <!--[if BLOCK]><![endif]-->      <a class="hp-menu-link" href="https://www.honeysplace.com/manufacturers">
+        <span>All Manufacturers</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->      </a>
+    <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  </li>
+<!--[if ENDBLOCK]><![endif]-->                    </ul>
+                  </li>
+                <!--[if ENDBLOCK]><![endif]-->                              <!--[if BLOCK]><![endif]-->                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-display="static">
+                      About
+                    </a>
+                    <ul class="dropdown-menu hp-menu">
+                      <!--[if BLOCK]><![endif]-->  <li class="hp-menu-item ">
+    <!--[if BLOCK]><![endif]-->      <a class="hp-menu-link" href="/page/about-honeys-place">
+        <span>About Honey&#039;s Place</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->      </a>
+    <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  </li>
+  <li class="hp-menu-item ">
+    <!--[if BLOCK]><![endif]-->      <a class="hp-menu-link" href="/become_a_customer">
+        <span>Become a customer</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->      </a>
+    <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  </li>
+  <li class="hp-menu-item ">
+    <!--[if BLOCK]><![endif]-->      <a class="hp-menu-link" href="/services">
+        <span>Services</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->      </a>
+    <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  </li>
+<!--[if ENDBLOCK]><![endif]-->                    </ul>
+                  </li>
+                <!--[if ENDBLOCK]><![endif]-->                              <!--[if BLOCK]><![endif]-->                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" data-bs-display="static">
+                      Resources
+                    </a>
+                    <ul class="dropdown-menu hp-menu">
+                      <!--[if BLOCK]><![endif]-->  <li class="hp-menu-item ">
+    <!--[if BLOCK]><![endif]-->      <a class="hp-menu-link" href="/services/faq">
+        <span>Wholesale FAQ</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->      </a>
+    <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  </li>
+  <li class="hp-menu-item ">
+    <!--[if BLOCK]><![endif]-->      <a class="hp-menu-link" href="/page/lingerie-resources">
+        <span>Lingerie Resources</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->      </a>
+    <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  </li>
+  <li class="hp-menu-item ">
+    <!--[if BLOCK]><![endif]-->      <a class="hp-menu-link" href="/page/new-brick-and-mortar-store-checklist">
+        <span>Starting a Brick-and-Mortar Store</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->      </a>
+    <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  </li>
+  <li class="hp-menu-item ">
+    <!--[if BLOCK]><![endif]-->      <a class="hp-menu-link" href="/page/how-to-add-lingerie-to-your-retail-store-honeys-place">
+        <span>How to Add Lingerie to Your Store</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->      </a>
+    <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  </li>
+  <li class="hp-menu-item ">
+    <!--[if BLOCK]><![endif]-->      <a class="hp-menu-link" href="/page/drop-shipping-with-honeys-place">
+        <span>Drop Shipping for Retailers</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->      </a>
+    <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  </li>
+  <li class="hp-menu-item ">
+    <!--[if BLOCK]><![endif]-->      <a class="hp-menu-link" href="/services/website">
+        <span>Ordering, Checkout &amp; API Tools</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->      </a>
+    <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  </li>
+  <li class="hp-menu-item ">
+    <!--[if BLOCK]><![endif]-->      <a class="hp-menu-link" href="/services/shipping">
+        <span>Shipping &amp; Fulfillment</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->      </a>
+    <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  </li>
+  <li class="hp-menu-item ">
+    <!--[if BLOCK]><![endif]-->      <a class="hp-menu-link" href="/page/wholesale-account-requirements-data-access-policy">
+        <span>Wholesale Account &amp; Data Access</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->      </a>
+    <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  </li>
+  <li class="hp-menu-item ">
+    <!--[if BLOCK]><![endif]-->      <a class="hp-menu-link" href="/page/adult-dropshipping-automation">
+        <span>Dropshipping Automation</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->      </a>
+    <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  </li>
+  <li class="hp-menu-item ">
+    <!--[if BLOCK]><![endif]-->      <a class="hp-menu-link" href="/page/adult-novelties-for-smoke-shops">
+        <span>Smoke Shop Retail Guide</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->      </a>
+    <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  </li>
+<!--[if ENDBLOCK]><![endif]-->                    </ul>
+                  </li>
+                <!--[if ENDBLOCK]><![endif]-->              <!--[if ENDBLOCK]><![endif]-->            </ul>
+          </div>
+
+          <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  
+          <!-- RIGHT SIDE -->
+          <div class="d-flex align-items-center hp-desktop-right">
+            <!--[if BLOCK]><![endif]-->              <span class="fw-bold" style="color:var(--hp-primary);font-size:1.05rem;font-weight:800;">818-256-1101</span>
+            <!--[if ENDBLOCK]><![endif]-->  
+            <!--[if BLOCK]><![endif]-->              <a class="nav-link" href="https://www.honeysplace.com/login">
+                <span class="fw-bold login">Log in</span>
+              </a>
+            <!--[if ENDBLOCK]><![endif]-->          </div>
+  
+        </div>
+      </header>
+    </div>
+  
+    <!-- ✅ MOBILE/TABLET — phones, tablets, and small laptops -->
+    <div class="hp-header-mobile d-xxl-none">
+      <header class="navbar bd-navbar pb-0">
+        <div class="container-fluid pb-2 d-flex justify-content-between align-items-center">
+          <a class="navbar-brand"
+             href=" https://www.honeysplace.com "
+             wirexyz:navigate>
+            <img src="https://d2q2s39fxn78ox.cloudfront.net/img/front/Honeys-Logo.png" alt="Honey's Place Logo" style="max-height:60px">
+          </a>
+  
+          <div class="hp-mobile-header-actions">
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            <!--[if BLOCK]><![endif]-->              <a class="hp-header-login" href="https://www.honeysplace.com/login">Login</a>
+            <!--[if ENDBLOCK]><![endif]-->
+            <button class="navbar-toggler" type="button" onclick="toggleSidebar()" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          </div>
+        </div>
+      </header>
+  
+      <!-- ✅ Mobile Quick Links -->
+      <!--[if BLOCK]><![endif]-->      <div class="container-fluid px-3 pb-2">
+        <div class="hp-mobile-top-nav">
+          <!--[if BLOCK]><![endif]-->            <!--[if BLOCK]><![endif]-->              <button type="button"
+                      class="btn mobile-top-btn flex-fill d-flex justify-content-between align-items-center"
+                      onclick="toggleSubMenu(event, 'mobile-nav-1')">
+                <span>Categories</span>
+                <span class="arrow">▾</span>
+              </button>
+            <!--[if ENDBLOCK]><![endif]-->                      <!--[if BLOCK]><![endif]-->              <button type="button"
+                      class="btn mobile-top-btn flex-fill d-flex justify-content-between align-items-center"
+                      onclick="toggleSubMenu(event, 'mobile-nav-2')">
+                <span>Manufacturers</span>
+                <span class="arrow">▾</span>
+              </button>
+            <!--[if ENDBLOCK]><![endif]-->          <!--[if ENDBLOCK]><![endif]-->        </div>
+  
+        <!--[if BLOCK]><![endif]-->          <!--[if BLOCK]><![endif]-->            <div id="mobile-nav-1" class="submenu mobile-nav-submenu">
+              <div wire:snapshot="{&quot;data&quot;:{&quot;top_nav&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;cat_nav&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;children&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;shop_cats&quot;:[[[{&quot;name&quot;:&quot;Lingerie &amp; Sexy Apparel&quot;,&quot;id&quot;:348,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Bachelor &amp; Bachelorette Items&quot;,&quot;id&quot;:25,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Bath &amp; Body&quot;,&quot;id&quot;:28,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Candy&quot;,&quot;id&quot;:668,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Lubricants, Creams &amp; Glides&quot;,&quot;id&quot;:391,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Displays-Bowls &amp; Wall Displays&quot;,&quot;id&quot;:197,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Games&quot;,&quot;id&quot;:289,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Massagers&quot;,&quot;id&quot;:416,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Toy Cleaners&quot;,&quot;id&quot;:102,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Body Jewelry (Non Piercing)&quot;,&quot;id&quot;:74,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Candles&quot;,&quot;id&quot;:95,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Gag Gifts &amp; Novelties&quot;,&quot;id&quot;:275,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Wigs&quot;,&quot;id&quot;:526,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Bondage &amp; Fetish Toys&quot;,&quot;id&quot;:246,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Cockrings&quot;,&quot;id&quot;:121,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Condoms&quot;,&quot;id&quot;:134,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Couples Toys&quot;,&quot;id&quot;:592,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;App Controlled&quot;,&quot;id&quot;:625,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}]],{&quot;s&quot;:&quot;arr&quot;}],&quot;shop_mans&quot;:[[[{&quot;name&quot;:&quot;Leg Avenue&quot;,&quot;link&quot;:&quot;\/manufacturer\/85\/leg-avenue&quot;,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Blush&quot;,&quot;link&quot;:&quot;\/manufacturer\/14\/blush&quot;,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Satisfyer&quot;,&quot;link&quot;:&quot;\/manufacturer\/238\/satisfyer&quot;,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;CalExotics&quot;,&quot;link&quot;:&quot;\/manufacturer\/22\/calexotics&quot;,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;name&quot;:&quot;Doc Johnson&quot;,&quot;link&quot;:&quot;\/manufacturer\/34\/doc-johnson&quot;,&quot;hide_mobile&quot;:false,&quot;is_new&quot;:false},{&quot;s&quot;:&quot;arr&quot;}]],{&quot;s&quot;:&quot;arr&quot;}],&quot;show_featured_mans_in_header&quot;:0,&quot;mega_menu_mans_text&quot;:&quot;Featured Manufacturers&quot;,&quot;mega_menu_link_text&quot;:&quot;Categories&quot;,&quot;bg_color&quot;:null},&quot;memo&quot;:{&quot;id&quot;:&quot;BcJn6HF8wwSoTToK311u&quot;,&quot;name&quot;:&quot;front.head.categories&quot;,&quot;path&quot;:&quot;login&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;en&quot;},&quot;checksum&quot;:&quot;ed5cd98837ab5feb4e014c7c7e7a08d19f24537473632b9b7686483a61a2c8b1&quot;}" wire:effects="[]" wire:id="BcJn6HF8wwSoTToK311u">
+    <div class="mm-wrap font-montserrat">
+        <!-- Desktop: multi-column, wraps to a new column every --mm-rows items -->
+        <div class="mm-desktop d-none d-lg-block">
+            <div class="mm-inner">
+                <section class="mm-zone mm-zone--cats">
+                    <h6 class="mm-title">Featured Categories</h6>
+                    <ul class="mm-grid">
+                        <!--[if BLOCK]><![endif]-->                        <li>
+                            <a class="mm-link" href="/category/348">
+                                Lingerie &amp; Sexy Apparel
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/25">
+                                Bachelor &amp; Bachelorette Items
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/28">
+                                Bath &amp; Body
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/668">
+                                Candy
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/391">
+                                Lubricants, Creams &amp; Glides
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/197">
+                                Displays-Bowls &amp; Wall Displays
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/289">
+                                Games
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/416">
+                                Massagers
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/102">
+                                Toy Cleaners
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/74">
+                                Body Jewelry (Non Piercing)
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/95">
+                                Candles
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/275">
+                                Gag Gifts &amp; Novelties
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/526">
+                                Wigs
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/246">
+                                Bondage &amp; Fetish Toys
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/121">
+                                Cockrings
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/134">
+                                Condoms
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/592">
+                                Couples Toys
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                                                <li>
+                            <a class="mm-link" href="/category/625">
+                                App Controlled
+                                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                            </a>
+                        </li>
+                        <!--[if ENDBLOCK]><![endif]-->
+                    </ul>
+                </section>
+
+                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            </div>
+
+            <div class="mm-footer">
+                <a class="mm-cta" href="https://www.honeysplace.com/categories">View All Categories <span
+                        aria-hidden="true">&rarr;</span></a>
+                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            </div>
+        </div>
+
+        <!-- Mobile: stacked, two columns from 576px up -->
+        <div class="mm-mobile d-lg-none">
+            <h6 class="mm-title">Featured Categories</h6>
+            <ul class="mm-mgrid">
+                <!--[if BLOCK]><![endif]-->                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/348">
+                        Lingerie &amp; Sexy Apparel
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/25">
+                        Bachelor &amp; Bachelorette Items
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/28">
+                        Bath &amp; Body
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/668">
+                        Candy
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/391">
+                        Lubricants, Creams &amp; Glides
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/197">
+                        Displays-Bowls &amp; Wall Displays
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/289">
+                        Games
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/416">
+                        Massagers
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/102">
+                        Toy Cleaners
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/74">
+                        Body Jewelry (Non Piercing)
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/95">
+                        Candles
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/275">
+                        Gag Gifts &amp; Novelties
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/526">
+                        Wigs
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/246">
+                        Bondage &amp; Fetish Toys
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/121">
+                        Cockrings
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/134">
+                        Condoms
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/592">
+                        Couples Toys
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                                <!--[if BLOCK]><![endif]-->                <li>
+                    <a class="mm-link" href="/category/625">
+                        App Controlled
+                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+                    </a>
+                </li>
+                <!--[if ENDBLOCK]><![endif]-->
+                <!--[if ENDBLOCK]><![endif]-->
+            </ul>
+
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+
+            <div class="mm-footer mm-footer--mobile">
+                <a class="mm-cta" href="https://www.honeysplace.com/categories">View All Categories <span
+                        aria-hidden="true">&rarr;</span></a>
+                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+
+        .font-montserrat {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Items per column. Overridden below for narrower desktops. */
+        .mm-wrap {
+            --mm-rows: 10;
+        }
+
+        /* ===== Panel ===== */
+        .dropdown-menu.megamenu {
+            font-family: 'Montserrat', sans-serif;
+            padding: 0 !important;
+            border: 1px solid var(--hp-border, #e5e7eb);
+            border-radius: 18px;
+            box-shadow: var(--hp-shadow, 0 14px 30px rgba(2, 6, 23, .12));
+            background: var(--hp-surface, #fff);
+            overflow: hidden;
+        }
+
+        .dropdown-menu.megamenu.show {
+            animation: mmIn .16s ease-out both;
+        }
+
+        @keyframes mmIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .mm-desktop {
+            max-height: 70vh;
+            overflow-y: auto;
+            /* Auto rather than hidden: if the columns ever outgrow the max-width
+               cap they stay reachable instead of being clipped. */
+            overflow-x: auto;
+            overscroll-behavior: contain;
+        }
+
+        .mm-inner {
+            display: flex;
+            align-items: flex-start;
+            gap: 2rem;
+            padding: 1.5rem 1.9rem 1.2rem;
+        }
+
+        .mm-zone--cats {
+            flex: 0 1 auto;
+            min-width: 0;
+        }
+
+        .mm-zone--mans {
+            flex: 0 0 auto;
+            align-self: stretch;
+            padding-left: 2rem;
+            margin-left:2rem;
+            border-left: 1px solid var(--hp-border, #e5e7eb);
+        }
+
+        /* ===== Section titles ===== */
+        .mm-title {
+            position: relative;
+            margin: 0 0 .85rem;
+            padding-top: .6rem;
+            font-size: .72rem;
+            font-weight: 800;
+            letter-spacing: .09em;
+            text-transform: uppercase;
+            color: var(--hp-muted, #64748b);
+        }
+
+        .mm-title::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 28px;
+            height: 3px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--hp-primary, #843D8B), var(--hp-primary-2, #6f2e76));
+        }
+
+        /* ===== Column grid ===== */
+        .mm-grid {
+            display: grid;
+            grid-auto-flow: column;
+            grid-template-rows: repeat(var(--mm-rows, 10), auto);
+            grid-auto-columns: minmax(185px, max-content);
+            justify-content: start;
+            column-gap: 1.5rem;
+            row-gap: .1rem;
+            list-style: none !important;
+            margin: 0;
+            padding: 0;
+        }
+
+        .mm-link {
+            display: block;
+            padding: .4rem .6rem;
+            border-radius: 10px;
+            font-size: .9rem;
+            font-weight: 500;
+            line-height: 1.35;
+            color: var(--hp-text, #0f172a);
+            text-decoration: none;
+            transition: background .15s ease, color .15s ease, transform .15s ease;
+        }
+
+        .mm-link:hover,
+        .mm-link:focus-visible {
+            background: rgba(132, 61, 139, .07);
+            color: var(--hp-primary, #843D8B);
+            transform: translateX(2px);
+            text-decoration: none;
+        }
+
+        .mm-link:focus-visible {
+            outline: 2px solid var(--hp-primary, #843D8B);
+            outline-offset: 1px;
+        }
+
+        .mm-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 1px 7px;
+            border-radius: 999px;
+            font-size: .62rem;
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            background: rgba(132, 61, 139, .12);
+            color: var(--hp-primary, #843D8B);
+            vertical-align: middle;
+        }
+
+        /* ===== Footer CTAs ===== */
+        .mm-footer {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .6rem;
+            padding: .9rem 1.9rem 1.05rem;
+            border-top: 1px solid var(--hp-border, #e5e7eb);
+            background: var(--hp-soft, #f7f7fb);
+        }
+
+        .mm-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .55rem 1.1rem;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            font-size: .82rem;
+            font-weight: 800;
+            text-decoration: none;
+            color: #fff;
+            background: linear-gradient(135deg, var(--hp-primary, #843D8B), var(--hp-primary-2, #6f2e76));
+            transition: transform .12s ease, box-shadow .12s ease, background .15s ease;
+        }
+
+        .mm-cta:hover {
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(132, 61, 139, .25);
+        }
+
+        .mm-cta--ghost {
+            background: var(--hp-surface, #fff);
+            color: var(--hp-primary, #843D8B);
+            border-color: rgba(132, 61, 139, .28);
+        }
+
+        .mm-cta--ghost:hover {
+            background: rgba(132, 61, 139, .06);
+            color: var(--hp-primary, #843D8B);
+            box-shadow: 0 10px 18px rgba(2, 6, 23, .08);
+        }
+
+        /* ===== Mobile =====
+           The whole header is sticky, so this panel must stay shorter than the
+           viewport and scroll internally. Without the cap the sticky container
+           grows taller than the screen and its lower rows become unreachable. */
+        .mm-mobile {
+            max-height: 55vh;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .mm-mgrid {
+            display: grid;
+            grid-template-columns: 1fr;
+            column-gap: 1rem;
+            list-style: none !important;
+            margin: 0 0 .25rem;
+            padding: 0;
+        }
+
+        .mm-mobile .mm-link {
+            padding: .65rem .55rem;
+            border-radius: 8px;
+            border-bottom: 1px solid rgba(2, 6, 23, .06);
+        }
+
+        .mm-mobile .mm-link:hover,
+        .mm-mobile .mm-link:focus-visible {
+            background: var(--hp-surface, #fff);
+            transform: none;
+        }
+
+        .mm-footer--mobile {
+            padding: .9rem 0 .25rem;
+            background: transparent;
+        }
+
+        .mm-footer--mobile .mm-cta {
+            flex: 1 1 100%;
+            justify-content: center;
+        }
+
+        @media (min-width: 576px) {
+            .mm-mgrid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .mm-footer--mobile .mm-cta {
+                flex: 1 1 auto;
+            }
+        }
+
+        /* Fewer columns where there is less room, so links never get cramped. */
+        @media (max-width: 1199.98px) {
+            .mm-desktop {
+                --mm-rows: 12;
+            }
+
+            .mm-inner {
+                gap: 1.5rem;
+                padding: 1.35rem 1.4rem 1.1rem;
+            }
+
+            .mm-zone--mans {
+                padding-left: 1.5rem;
+            }
+
+            .mm-footer {
+                padding: .85rem 1.4rem 1rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .dropdown-menu.megamenu.show,
+            .mm-link,
+            .mm-cta {
+                animation: none !important;
+                transition: none !important;
+            }
+
+            .mm-link:hover,
+            .mm-cta:hover {
+                transform: none;
+            }
+        }
+
+        .mm-desktop::-webkit-scrollbar,
+        .mm-mobile::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .mm-desktop::-webkit-scrollbar-thumb,
+        .mm-mobile::-webkit-scrollbar-thumb {
+            background-color: rgba(2, 6, 23, .18);
+            border-radius: 3px;
+        }
+    </style>
+</div>
+            </div>
+          <!--[if ENDBLOCK]><![endif]-->                  <!--[if BLOCK]><![endif]-->            <div id="mobile-nav-2" class="submenu mobile-nav-submenu">
+              <!--[if BLOCK]><![endif]-->  <!--[if BLOCK]><![endif]-->    <button type="button"
+            class="dropdown-item d-flex justify-content-between align-items-center"
+            onclick="toggleSubMenu(event, 'mobile-node-3')">
+      <span>Honey&#039;s Place Exclusives</span>
+      <span class="arrow">▾</span>
+    </button>
+    <div id="mobile-node-3" class="submenu">
+      <!--[if BLOCK]><![endif]-->        <a class="dropdown-item" href="https://www.honeysplace.com/exclusives">Honey&#039;s Place Exclusives</a>
+      <!--[if ENDBLOCK]><![endif]-->      <!--[if BLOCK]><![endif]-->  <!--[if BLOCK]><![endif]-->    <a class="dropdown-item" href="/">New Sublink</a>
+  <!--[if ENDBLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </div>
+  <!--[if ENDBLOCK]><![endif]-->  <!--[if BLOCK]><![endif]-->    <a class="dropdown-item" href="https://www.honeysplace.com/manufacturers">All Manufacturers</a>
+  <!--[if ENDBLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->            </div>
+          <!--[if ENDBLOCK]><![endif]-->        <!--[if ENDBLOCK]><![endif]-->      </div>
+      <!--[if ENDBLOCK]><![endif]-->  
+      <!-- Mobile Search -->
+      <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  
+      <!-- Backdrop -->
+      <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="toggleSidebar()"></div>
+  
+      <!-- ✅ Sidebar -->
+      <div id="sidebarMobile" class="sidebar-mobile" aria-hidden="true">
+        <div class="sidebar-header">
+          <img src="/img/front/Honeys-Logo-white.png" alt="Honey's Place Logo" class="log-o" />
+          <h4 class="menu-title-text">Menu</h4>
+          <button type="button" class="close-btn" onclick="toggleSidebar()" aria-label="Close menu">×</button>
+        </div>
+  
+        <div class="sidebar-footer">
+  
+          
+          <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  
+          
+          <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->  
+          
+          <div class="drawer-section-title">Contact Us</div>
+          <div class="drawer-card">
+            <a class="drawer-pill" href="tel:8182561101" aria-label="Call 818-256-1101">
+              <span style="font-size:1.05rem;">📞</span>
+              <span>818-256-1101</span>
+            </a>
+          </div>
+  
+          
+          <!--[if BLOCK]><![endif]-->            <div class="drawer-section-title">About</div>
+            <div class="drawer-card">
+              <div class="button-group" style="margin-top:0;">
+                <!--[if BLOCK]><![endif]-->                  <!--[if BLOCK]><![endif]-->  <!--[if BLOCK]><![endif]-->    <a class="custom-btn row-btn" href="/page/about-honeys-place" >
+      <span class="left"><span>ℹ️</span><span>About Honey&#039;s Place</span></span>
+      <span class="chev">›</span>
+    </a>
+  <!--[if ENDBLOCK]><![endif]-->  <!--[if BLOCK]><![endif]-->    <a class="custom-btn row-btn" href="/become_a_customer" >
+      <span class="left"><span>📝</span><span>Become a customer</span></span>
+      <span class="chev">›</span>
+    </a>
+  <!--[if ENDBLOCK]><![endif]-->  <!--[if BLOCK]><![endif]-->    <a class="custom-btn row-btn" href="/services" >
+      <span class="left"><span>🛠️</span><span>Services</span></span>
+      <span class="chev">›</span>
+    </a>
+  <!--[if ENDBLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                <!--[if ENDBLOCK]><![endif]-->              </div>
+            </div>
+                      <div class="drawer-section-title">Resources</div>
+            <div class="drawer-card">
+              <div class="button-group" style="margin-top:0;">
+                <!--[if BLOCK]><![endif]-->                  <!--[if BLOCK]><![endif]-->  <!--[if BLOCK]><![endif]-->    <a class="custom-btn row-btn" href="/services/faq" >
+      <span class="left"><span></span><span>Wholesale FAQ</span></span>
+      <span class="chev">›</span>
+    </a>
+  <!--[if ENDBLOCK]><![endif]-->  <!--[if BLOCK]><![endif]-->    <a class="custom-btn row-btn" href="/page/lingerie-resources" >
+      <span class="left"><span></span><span>Lingerie Resources</span></span>
+      <span class="chev">›</span>
+    </a>
+  <!--[if ENDBLOCK]><![endif]-->  <!--[if BLOCK]><![endif]-->    <a class="custom-btn row-btn" href="/page/new-brick-and-mortar-store-checklist" >
+      <span class="left"><span></span><span>Starting a Brick-and-Mortar Store</span></span>
+      <span class="chev">›</span>
+    </a>
+  <!--[if ENDBLOCK]><![endif]-->  <!--[if BLOCK]><![endif]-->    <a class="custom-btn row-btn" href="/page/how-to-add-lingerie-to-your-retail-store-honeys-place" >
+      <span class="left"><span></span><span>How to Add Lingerie to Your Store</span></span>
+      <span class="chev">›</span>
+    </a>
+  <!--[if ENDBLOCK]><![endif]-->  <!--[if BLOCK]><![endif]-->    <a class="custom-btn row-btn" href="/page/drop-shipping-with-honeys-place" >
+      <span class="left"><span></span><span>Drop Shipping for Retailers</span></span>
+      <span class="chev">›</span>
+    </a>
+  <!--[if ENDBLOCK]><![endif]-->  <!--[if BLOCK]><![endif]-->    <a class="custom-btn row-btn" href="/services/website" >
+      <span class="left"><span></span><span>Ordering, Checkout &amp; API Tools</span></span>
+      <span class="chev">›</span>
+    </a>
+  <!--[if ENDBLOCK]><![endif]-->  <!--[if BLOCK]><![endif]-->    <a class="custom-btn row-btn" href="/services/shipping" >
+      <span class="left"><span></span><span>Shipping &amp; Fulfillment</span></span>
+      <span class="chev">›</span>
+    </a>
+  <!--[if ENDBLOCK]><![endif]-->  <!--[if BLOCK]><![endif]-->    <a class="custom-btn row-btn" href="/page/wholesale-account-requirements-data-access-policy" >
+      <span class="left"><span></span><span>Wholesale Account &amp; Data Access</span></span>
+      <span class="chev">›</span>
+    </a>
+  <!--[if ENDBLOCK]><![endif]-->  <!--[if BLOCK]><![endif]-->    <a class="custom-btn row-btn" href="/page/adult-dropshipping-automation" >
+      <span class="left"><span></span><span>Dropshipping Automation</span></span>
+      <span class="chev">›</span>
+    </a>
+  <!--[if ENDBLOCK]><![endif]-->  <!--[if BLOCK]><![endif]-->    <a class="custom-btn row-btn" href="/page/adult-novelties-for-smoke-shops" >
+      <span class="left"><span></span><span>Smoke Shop Retail Guide</span></span>
+      <span class="chev">›</span>
+    </a>
+  <!--[if ENDBLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                <!--[if ENDBLOCK]><![endif]-->              </div>
+            </div>
+          <!--[if ENDBLOCK]><![endif]-->  
+        </div>
+      </div>
+    </div>
+  
+    <script>
+      function toggleSidebar() {
+        const sidebar = document.getElementById('sidebarMobile');
+        const backdrop = document.getElementById('sidebarBackdrop');
+  
+        const isOpen = sidebar.classList.toggle('open');
+        backdrop.classList.toggle('show');
+  
+        sidebar.setAttribute('aria-hidden', String(!isOpen));
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+      }
+  
+      function toggleSubMenu(event, id) {
+        event.preventDefault();
+        const submenu = document.getElementById(id);
+        if (!submenu) return;
+  
+        submenu.classList.toggle('show');
+  
+        const arrow = event.currentTarget.querySelector('.arrow');
+        if (arrow) {
+          arrow.style.transform = submenu.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+      }
+  
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const sidebar = document.getElementById('sidebarMobile');
+          if (sidebar && sidebar.classList.contains('open')) toggleSidebar();
+        }
+      });
+    </script>
+
+<style>
+  /* ===========================
+     COMPLETE CSS (Desktop + Mobile Drawer)
+     Paste this ONCE (replace your current <style> block)
+     =========================== */
+  
+     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+  
+  :root{
+    --hp-primary:#843D8B;
+    --hp-primary-2:#6f2e76;
+    --hp-text:#0f172a;
+    --hp-muted:#64748b;
+    --hp-border:#e5e7eb;
+    --hp-surface:#ffffff;
+    --hp-soft:#f7f7fb;
+    --hp-shadow: 0 14px 30px rgba(2,6,23,.12);
+  }
+  
+  *{ font-family:'Montserrat',sans-serif; }
+  ul, li{ list-style:none !important; margin:0; padding:0; }
+
+  /*
+    Compact single-row desktop from 1440px. Narrower viewports keep the
+    hamburger header so extra menus never collide with search or actions.
+  */
+  .hp-header-desktop{ display: none !important; }
+  .hp-header-mobile{ display: block !important; }
+  @media (min-width: 1440px){
+    .hp-header-desktop{ display: block !important; }
+    .hp-header-mobile{ display: none !important; }
+  }
+
+  .hp-header-root{
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  /* =========================================================
+     DESKTOP (>= 1440px) — one compact row
+     ========================================================= */
+  @media (min-width: 1440px){
+    .nav-h{ padding-left:1.25rem; padding-right:1.25rem; }
+  
+    .hp-desktop-grid{
+      display:grid;
+      grid-template-columns: auto auto minmax(180px, 1fr) auto;
+      grid-template-areas: "logo nav search right";
+      align-items:center;
+      column-gap: 12px;
+      row-gap: 0;
+      max-width:none;
+      margin:0 auto;
+      width:100%;
+      box-sizing:border-box;
+      position:relative;
+    }
+
+    .hp-desktop-grid:not(:has(.hp-desktop-search)){
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-areas: "logo nav right";
+    }
+
+    .hp-desktop-logo{ grid-area: logo; }
+    .hp-desktop-center{ grid-area: nav; }
+    .hp-desktop-search{ grid-area: search; }
+    .hp-desktop-right{ grid-area: right; }
+
+    .hp-desktop-logo img{
+      width: 150px !important;
+      height: auto;
+      display: block;
+    }
+
+    .hp-desktop-center{
+      display:flex;
+      align-items:center;
+      min-width: 0;
+    }
+
+    .hp-desktop-right{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-shrink:0;
+      min-width: 0;
+    }
+  
+    /* Categories / Manufacturers / extra menus on ONE LINE */
+    .c-nav{
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      gap:2px;
+      margin:0;
+      white-space: nowrap;
+      flex-wrap: nowrap;
+      flex-shrink:0;
+    }
+  
+    .c-nav .nav-link{
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: .2px;
+      color: var(--hp-text);
+      padding: .4rem .55rem;
+      border-radius: 14px;
+      transition: background .15s ease, color .15s ease, transform .12s ease;
+    }
+  
+    .c-nav .nav-link:hover{
+      background: var(--hp-soft);
+      color: var(--hp-primary);
+      transform: translateY(-1px);
+    }
+  
+    .c-nav .dropdown-toggle::after{
+      margin-left:.45rem;
+      opacity:.75;
+      vertical-align:.1em;
+    }
+
+    /* Compact nav dropdowns, matched to the mega menu panel. */
+    .dropdown-menu.hp-menu{
+      font-family:'Montserrat',sans-serif;
+      min-width: 250px;
+      padding: 1.15rem .5rem .5rem;
+      border: 1px solid var(--hp-border);
+      border-radius: 14px;
+      box-shadow: var(--hp-shadow);
+      background: var(--hp-surface);
+      overflow: visible;
+      z-index: 1055;
+    }
+
+    .c-nav .dropdown,
+    .c-nav .dropdown-menu.hp-menu{
+      overflow: visible;
+    }
+
+    /* Violet accent bar, aligned to the link text like the mega menu titles. */
+    .dropdown-menu.hp-menu::before{
+      content:'';
+      position:absolute;
+      top:.7rem;
+      left:1.2rem;
+      width:28px;
+      height:3px;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--hp-primary), var(--hp-primary-2));
+    }
+
+    .dropdown-menu.hp-menu.show{
+      animation: hpMenuIn .16s ease-out both;
+    }
+
+    @keyframes hpMenuIn{
+      from{ opacity:0; transform: translateY(-6px); }
+      to{ opacity:1; transform: none; }
+    }
+
+    .hp-menu-item{
+      position: relative;
+      list-style: none;
+      overflow: visible;
+    }
+
+    .hp-menu-link{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:.75rem;
+      padding:.55rem .75rem;
+      border-radius:10px;
+      font-size:.9rem;
+      font-weight:500;
+      line-height:1.35;
+      color: var(--hp-text);
+      text-decoration:none;
+      cursor:pointer;
+      transition: background .15s ease, color .15s ease;
+    }
+
+    .hp-menu-chev{
+      margin-left:auto;
+      color:#94a3b8;
+      font-weight:700;
+      font-size:1rem;
+      line-height:1;
+      flex-shrink:0;
+    }
+
+    .hp-menu-item.has-flyout:hover > .hp-menu-link,
+    .hp-menu-item.has-flyout:focus-within > .hp-menu-link,
+    .hp-menu-link:hover,
+    .hp-menu-link:focus-visible{
+      background: rgba(132,61,139,.08);
+      color: var(--hp-primary);
+      text-decoration:none;
+    }
+
+    .hp-menu-link:focus-visible{
+      outline: 2px solid var(--hp-primary);
+      outline-offset: 1px;
+    }
+
+    /* Bridge so the pointer can cross the gap without losing hover. */
+    .hp-menu-item.has-flyout::after{
+      content:'';
+      position:absolute;
+      top:0;
+      width:14px;
+      height:100%;
+      left:100%;
+    }
+
+    /* Always open to the right of the dropdown link. */
+    .dropdown-menu.hp-menu .hp-flyout,
+    .hp-flyout{
+      display:none;
+      position:absolute;
+      top:-8px;
+      right: auto !important;
+      left: calc(100% + 10px) !important;
+      inset-inline-end: auto !important;
+      inset-inline-start: calc(100% + 10px) !important;
+      min-width: 240px;
+      padding: .5rem;
+      margin:0;
+      list-style:none;
+      border: 1px solid var(--hp-border);
+      border-radius: 14px;
+      box-shadow: var(--hp-shadow);
+      background: var(--hp-surface);
+      z-index: 1060;
+      transform: none;
+      overflow: visible;
+    }
+
+    .hp-flyout .hp-flyout{
+      z-index: 1070;
+    }
+
+    .hp-menu-item.has-flyout:hover > .hp-flyout,
+    .hp-menu-item.has-flyout:focus-within > .hp-flyout{
+      display:block;
+      animation: hpMenuIn .16s ease-out both;
+      z-index: 1080;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .dropdown-menu.hp-menu.show,
+      .hp-flyout,
+      .hp-menu-link{
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  
+    /* Search sits between menus and account actions */
+    .hp-desktop-search{
+      width: 100%;
+      min-width: 160px;
+      max-width: 240px;
+      justify-self: center;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+      position:relative;
+      margin: 0;
+    }
+  
+    /* Welcome text above search (centered) */
+    .hp-welcome .hp-w1{
+      font-size:.9rem;
+      font-weight:900;
+      color: var(--hp-primary);
+      line-height:1.1;
+      text-align:center;
+    }
+    .hp-welcome .hp-w2{
+      font-size:.85rem;
+      font-weight:900;
+      color: var(--hp-primary);
+      line-height:1.1;
+      text-align:center;
+    }
+  
+    /* Search input (desktop bigger/taller) */
+    .search-input-container{ position:relative; width:100%; }
+  
+    .search-input-container input{
+      border: 1px solid var(--hp-border);
+      border-radius: 999px;
+      padding-left: 44px;
+      height: 50px;
+      font-size: 1rem;
+      box-shadow: 0 1px 0 rgba(0,0,0,.03);
+    }
+  
+    .search-input-container input:focus{
+      border-color: rgba(132,61,139,.55);
+      box-shadow: 0 0 0 .25rem rgba(132,61,139,.15);
+    }
+  
+    .search-input-container .search-icon{
+      position:absolute;
+      left: 16px;
+      top:50%;
+      transform:translateY(-50%);
+      color: var(--hp-primary);
+    }
+  
+    /* Advanced search link */
+    .hp-adv-search{
+      font-size:.95rem;
+      font-weight:900;
+      color: var(--hp-primary);
+      text-decoration:none;
+    }
+    .hp-adv-search:hover{ text-decoration:underline; }
+  
+    /* results dropdown */
+    .hp-search-results{
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(760px, 70vw);
+      max-height: 300px;
+      overflow-y:auto;
+      z-index: 2000;
+      border-radius: 18px;
+      border: 1px solid var(--hp-border);
+      box-shadow: var(--hp-shadow);
+      background: var(--hp-surface);
+    }
+  
+    .hp-no-results{
+      margin-top:6px;
+      font-size:.9rem;
+      color: var(--hp-muted);
+    }
+  
+    /* Right side: action buttons */
+    .button-group{
+      margin-top: 0;
+      display:flex;
+      gap:10px;
+      flex-direction:column;
+      min-width: 165px;
+    }
+
+    .hp-quick-actions-grid{
+      display: grid;
+      grid-template-columns: max-content max-content;
+      grid-template-rows: auto auto;
+      gap: 6px 8px;
+      width: max-content;
+      min-width: 0;
+      max-width: none;
+      flex-shrink:0;
+    }
+
+    .hp-quick-actions-grid .custom-btn{
+      min-width: 0;
+      white-space: nowrap;
+    }
+
+    .hp-user-wrap{
+      flex-shrink:0;
+      width: auto;
+      padding: 0;
+    }
+
+    .hp-desktop-right .hp-user-avatar{
+      width: 44px;
+      height: 44px;
+    }
+
+    .hp-desktop-right .hp-user-avatar svg{
+      width: 22px;
+      height: 22px;
+    }
+  
+    .custom-btn{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding: 12px 14px;
+      border: 1px solid var(--hp-border);
+      border-radius: 16px;
+      color: var(--hp-text);
+      text-decoration:none;
+      background: var(--hp-surface);
+      box-shadow: 0 1px 0 rgba(0,0,0,.03);
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease, color .12s ease;
+      font-weight: 900;
+    }
+  
+    /* Violet hover for My Account / Quick Order / Order Upload */
+    .button-group .custom-btn:hover{
+      background: linear-gradient(135deg, var(--hp-primary), var(--hp-primary-2));
+      color:#fff;
+      border-color: rgba(132,61,139,.35);
+      box-shadow: 0 14px 28px rgba(132,61,139,.22);
+      transform: translateY(-2px);
+    }
+    .button-group .custom-btn:active{ transform: translateY(-1px) scale(.99); }
+  }
+  
+  /* Quick actions: one button per row on mobile/tablet */
+  @media (max-width: 1439.98px) {
+    .hp-quick-actions-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      min-width: 0;
+      width: 100%;
+    }
+
+    .hp-quick-actions-grid .custom-btn {
+      width: 100%;
+    }
+  }
+
+  /* =========================================================
+     MOBILE/TABLET (< 1440px) — quick links + drawer
+     ========================================================= */
+  .hp-mobile-header-actions{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-left:auto;
+  }
+  .hp-header-login{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:8px 14px;
+    background:var(--hp-surface);
+    border:1px solid var(--hp-border);
+    border-radius:8px;
+    box-shadow:0 1px 0 rgba(0,0,0,.03);
+    color:var(--hp-primary) !important;
+    font-weight:700;
+    font-size:1rem;
+    line-height:1;
+    text-decoration:none !important;
+    white-space:nowrap;
+    transition: border-color .12s ease, box-shadow .12s ease, color .12s ease;
+  }
+  .hp-header-login:link,
+  .hp-header-login:visited{
+    color:var(--hp-primary) !important;
+  }
+  .hp-header-login:hover,
+  .hp-header-login:focus{
+    color:var(--hp-primary-2) !important;
+    text-decoration:none !important;
+    border-color: rgba(132,61,139,.35);
+    box-shadow: 0 4px 10px rgba(132,61,139,.12);
+  }
+  .mobile-top-btn{
+    border: 1px solid var(--hp-border);
+    border-radius: 14px;
+    background: var(--hp-surface);
+    font-weight: 700;
+    padding: 12px 12px;
+    min-width: 0;
+    box-shadow: 0 1px 0 rgba(0,0,0,.03);
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  }
+  .hp-mobile-top-nav{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  @media (min-width: 576px){
+    .hp-mobile-top-nav{
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+  }
+  .hp-mobile-top-nav .mobile-top-btn > span:first-child{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .mobile-top-btn:active{ transform: scale(.99); }
+  .mobile-top-btn:hover{
+    border-color:#d6dae1;
+    box-shadow: 0 10px 18px rgba(0,0,0,.08);
+  }
+  
+  .arrow{
+    font-size: 0.85rem;
+    transform: rotate(0deg);
+    transition: transform 0.25s ease;
+    color: var(--hp-muted);
+  }
+  
+  .submenu{
+    display:none;
+    padding: .75rem 1rem 1rem 1rem;
+    background-color: var(--hp-soft);
+    border: 1px solid var(--hp-border);
+    border-radius: 14px;
+    margin-top: .75rem;
+  }
+  .submenu.show{
+    display:block;
+    animation: slideDown .2s ease forwards;
+  }
+  
+  @keyframes slideDown{
+    from{ opacity:0; transform:translateY(-6px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  
+  /* submenu links */
+  .submenu a.dropdown-item{
+    padding: .6rem .85rem;
+    font-size: .95rem;
+    font-weight: 600;
+    color:#1f2937;
+    text-decoration:none;
+    border-radius: 12px;
+    display:block;
+    transition: background-color .15s ease, color .15s ease;
+  }
+  .submenu a.dropdown-item:hover{
+    background:#fff;
+    color: var(--hp-primary);
+  }
+
+  .submenu button.dropdown-item{
+    padding: .6rem .85rem;
+    font-size: .95rem;
+    font-weight: 600;
+    color:#1f2937;
+    background: none;
+    border: 0;
+    width: 100%;
+    text-align: left;
+    border-radius: 12px;
+  }
+
+  .submenu button.dropdown-item:hover{
+    background:#fff;
+    color: var(--hp-primary);
+  }
+
+  .submenu .submenu{
+    margin-top: .4rem;
+    margin-left: .4rem;
+  }
+  
+  /* Mobile search (same container) */
+  .search-input-container{ position: relative; width: 100%; }
+  .search-input-container input{
+    border: 1px solid var(--hp-border);
+    border-radius: 999px;
+    padding-left: 38px;
+    height: 42px;
+    box-shadow: 0 1px 0 rgba(0,0,0,.03);
+  }
+  .search-input-container input:focus{
+    border-color: rgba(132,61,139,.55);
+    box-shadow: 0 0 0 .25rem rgba(132,61,139,.15);
+  }
+  .search-input-container .search-icon{
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--hp-primary);
+  }
+  
+  /* Backdrop */
+  .sidebar-backdrop{
+    position:fixed;
+    inset:0;
+    background: rgba(17,24,39,.55);
+    backdrop-filter: blur(4px);
+    display:none;
+    z-index:1049;
+  }
+  .sidebar-backdrop.show{ display:block; }
+  
+  /* Drawer */
+  .sidebar-mobile{
+    position:fixed;
+    top:0;
+    left:-320px;
+    width:320px;
+    height:100vh;
+    overflow-y:auto;
+    overflow-x:hidden;
+    background: var(--hp-surface);
+    box-shadow: var(--hp-shadow);
+    transition:left .25s ease;
+    z-index:1050;
+  }
+  .sidebar-mobile.open{ left:0; }
+  
+  /* Drawer header */
+  .sidebar-header{
+    position:sticky;
+    top:0;
+    z-index:2;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 12px;
+    background: linear-gradient(135deg, var(--hp-primary), var(--hp-primary-2));
+    color:white;
+  }
+  .sidebar-header img.log-o{ max-height:34px; width:auto; }
+  .menu-title-text{
+    font-size:1.05rem;
+    font-weight:900;
+    margin:0;
+    color:white;
+    letter-spacing:.2px;
+  }
+  .close-btn{
+    margin-left:auto;
+    width:38px;
+    height:38px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.22);
+    background: rgba(255,255,255,.12);
+    color:#fff;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+    transition: background .15s ease, transform .12s ease;
+  }
+  .close-btn:hover{ background: rgba(255,255,255,.18); }
+  .close-btn:active{ transform: scale(.98); }
+  
+  /* Drawer body */
+  .sidebar-footer{
+    padding:14px;
+    padding-bottom:100px;
+    background: var(--hp-surface);
+  }
+  
+  /* Section title */
+  .drawer-section-title{
+    margin:12px 0 10px 2px;
+    font-size:.72rem;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    font-weight:900;
+    color: var(--hp-muted);
+  }
+  
+  /* Card blocks */
+  .drawer-card{
+    background: #f6f6fb; /* matches your screenshot */
+    border:1px solid var(--hp-border);
+    border-radius:18px;
+    padding:12px;
+    box-shadow: 0 1px 0 rgba(0,0,0,.03);
+  }
+  
+  /* Account badge */
+  .account-badge{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:12px 12px;
+    border-radius:16px;
+    background:#fff;
+    border:1px solid rgba(132,61,139,.18);
+    color: var(--hp-primary);
+    font-weight:900;
+    font-size:1.05rem;
+    text-align:center;
+    margin-bottom:10px;
+  }
+  .account-badge .sub{
+    display:block;
+    color: var(--hp-muted);
+    font-weight:800;
+    font-size:.82rem;
+    margin-top:2px;
+  }
+  
+  /* Contact pill */
+  .drawer-pill{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:10px 12px;
+    border-radius:999px;
+    background:#fff;
+    border:1px solid var(--hp-border);
+    font-weight:900;
+    color: var(--hp-primary);
+    text-decoration:none;
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  }
+  .drawer-pill:hover{
+    border-color: rgba(132,61,139,.25);
+    box-shadow: 0 10px 18px rgba(2,6,23,.10);
+    transform: translateY(-1px);
+  }
+  
+  /* =========================================================
+     MOBILE DRAWER BUTTONS — force the screenshot look
+     ========================================================= */
+  
+  /* kill default link blue/underline inside drawer */
+  #sidebarMobile a,
+  #sidebarMobile a:visited{
+    color: inherit;
+    text-decoration: none !important;
+  }
+  
+  /* shared button-group stack inside drawer */
+  #sidebarMobile .button-group{
+    margin-top: 0;
+    display:flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  #sidebarMobile .hp-quick-actions-grid{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    width: 100%;
+  }
+  
+  /* base button in drawer */
+  #sidebarMobile .custom-btn{
+    width: 100%;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 14px 14px;
+    border-radius: 16px;
+    border: 1px solid var(--hp-border);
+    background: #fff;
+    box-shadow: 0 1px 0 rgba(0,0,0,.03);
+    font-weight: 900;
+    color: var(--hp-primary); /* violet text */
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  }
+  
+  #sidebarMobile .custom-btn:hover{
+    border-color: rgba(132,61,139,.25);
+    box-shadow: 0 10px 18px rgba(2,6,23,.08);
+    transform: translateY(-1px);
+  }
+  
+  /*
+   * Quick actions: fixed icon column so every row lines up (mobile drawer).
+   * qa-left uses display:contents so icon / label participate in the button grid.
+   */
+  #sidebarMobile .custom-btn.qa-btn,
+  .hp-quick-actions-card .custom-btn.qa-btn {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    column-gap: 12px;
+    align-items: center;
+  }
+
+  #sidebarMobile .qa-left,
+  .hp-quick-actions-card .qa-left {
+    display: contents;
+  }
+
+  #sidebarMobile .qa-ico,
+  .hp-quick-actions-card .qa-ico {
+    grid-column: 1;
+    grid-row: 1;
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    justify-self: center;
+    align-self: center;
+    flex-shrink: 0;
+    background: transparent;
+    color: var(--hp-primary);
+    line-height: 1;
+  }
+
+  #sidebarMobile .qa-left > :not(.qa-ico),
+  .hp-quick-actions-card .qa-left > :not(.qa-ico) {
+    grid-column: 2;
+    grid-row: 1;
+    text-align: center;
+    justify-self: center;
+    align-self: center;
+  }
+
+  #sidebarMobile .qa-arrow,
+  .hp-quick-actions-card .qa-arrow {
+    grid-column: 3;
+    grid-row: 1;
+    color: #94a3b8;
+    font-weight: 900;
+    font-size: 18px;
+    justify-self: end;
+    align-self: center;
+  }
+
+  #sidebarMobile .qa-ico .bi,
+  .hp-quick-actions-card .qa-ico .bi {
+    display: block;
+    font-size: 16px;
+    line-height: 1;
+  }
+  
+  /* Account row buttons (center label + right chevron) */
+  #sidebarMobile .custom-btn.row-btn{
+    justify-content:center;
+    position:relative;
+    color: var(--hp-primary);
+    background: #fff;
+  }
+  
+  #sidebarMobile .custom-btn.row-btn .left{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    justify-content:center;
+    flex: 1;
+  }
+  
+  #sidebarMobile .custom-btn.row-btn .chev{
+    position:absolute;
+    right:14px;
+    color:#94a3b8;
+    font-weight:900;
+  }
+  
+  /* Hide any injected account footer text */
+  .sidebar-footer .account-chip,
+  .sidebar-footer .account-footer,
+  .sidebar-footer .account-name-footer{
+    display:none !important;
+  }
+  
+  /* Desktop-only cleanup */
+  @media (min-width: 1440px){
+    .mobile-nav-submenu, .mobile-top-btn{ display:none !important; }
+
+    /* Static parent so the panel is positioned against the full header row,
+       not the Categories button. Popper is already off via data-bs-display. */
+    .navbar .has-megamenu{
+      position:static !important;
+    }
+
+    /* Width follows the content. left/right:0 plus auto side margins centres
+       it under the header without a transform, which would clash with the
+       open animation. */
+    .navbar .megamenu{
+      left:0;
+      right:0;
+      width:max-content;
+      max-width:calc(100% - 2rem);
+      margin:8px auto 0;
+    }
+  }
+  
+  /* Mobile navbar collapse */
+  @media (max-width: 1439px){
+    .navbar.fixed-top .navbar-collapse,
+    .navbar.sticky-top .navbar-collapse{
+      overflow-y:auto;
+      max-height:90vh;
+      margin-top:10px;
+    }
+  }
+  /* ===========================
+     MODERN CART (INLINE / NO BOX)
+     Wrap cart with: .hp-cart-wrap.hp-cart--inline
+     =========================== */
+  
+     .hp-cart-wrap.hp-cart--inline{
+    display:flex;
+    align-items:center;
+  }
+  
+  /* Make whatever link/button inside look like inline UI (no border/box) */
+  .hp-cart-wrap.hp-cart--inline a{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:4px 6px;                 /* tiny hit area, not a “box” */
+    border:0 !important;
+    background:transparent !important;
+    border-radius:12px;
+    text-decoration:none !important;
+    color: var(--hp-text);
+    transition: transform .12s ease, color .12s ease, background .12s ease;
+  }
+  
+  .hp-cart-wrap.hp-cart--inline a:hover{
+    color: var(--hp-primary);
+    background: rgba(132,61,139,.06); /* soft hover, still not a box */
+    transform: translateY(-1px);
+  }
+  
+  /* SVG icons: modern violet */
+  .hp-cart-wrap.hp-cart--inline svg{
+    width:22px;
+    height:22px;
+    color: var(--hp-primary);
+  }
+  
+  /* If your cart output is text blocks, tighten it and make it modern */
+  .hp-cart-wrap.hp-cart--inline{
+    font-family: 'Montserrat', sans-serif;
+  }
+  
+  /* Common “two-line” look: items/top line + total/bottom line */
+  .hp-cart-wrap.hp-cart--inline .hp-cart-lines,
+  .hp-cart-wrap.hp-cart--inline .meta,
+  .hp-cart-wrap.hp-cart--inline .cart-meta{
+    display:flex;
+    flex-direction:column;
+    line-height:1.05;
+    gap:2px;
+  }
+  
+  /* Fallback: if it’s just plain spans/divs, still make it look nice */
+  .hp-cart-wrap.hp-cart--inline span,
+  .hp-cart-wrap.hp-cart--inline div{
+    font-weight:800;
+  }
+  
+  /* Top line (items) */
+  .hp-cart-wrap.hp-cart--inline .items,
+  .hp-cart-wrap.hp-cart--inline .qty{
+    font-size:.92rem;
+    font-weight:900;
+    color: var(--hp-primary);
+  }
+  
+  /* Bottom line (amount) */
+  .hp-cart-wrap.hp-cart--inline .total,
+  .hp-cart-wrap.hp-cart--inline .price,
+  .hp-cart-wrap.hp-cart--inline .amount{
+    font-size:.86rem;
+    font-weight:900;
+    color: var(--hp-muted);
+  }
+  
+  /* Heart icon / wishlist: keep aligned + violet */
+  .hp-cart-wrap.hp-cart--inline .bi-heart-fill,
+  .hp-cart-wrap.hp-cart--inline .heart,
+  .hp-cart-wrap.hp-cart--inline .wishlist,
+  .hp-cart-wrap.hp-cart--inline .fav{
+    color: var(--hp-primary);
+  }
+  
+  /* Optional: if the cart has a count number, make it a tiny badge look */
+  .hp-cart-wrap.hp-cart--inline .badge,
+  .hp-cart-wrap.hp-cart--inline .count,
+  .hp-cart-wrap.hp-cart--inline .cart-count{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:22px;
+    height:22px;
+    padding:0 6px;
+    border-radius:999px;
+    background: rgba(132,61,139,.12);
+    color: var(--hp-primary);
+    font-weight:900;
+    font-size:.78rem;
+    margin-left:2px;
+  }
+  
+  /* Mobile tighten */
+  @media (max-width: 1439px){
+    .hp-cart-wrap.hp-cart--inline a{ gap:8px; padding:3px 4px; }
+    .hp-cart-wrap.hp-cart--inline svg{ width:20px; height:20px; }
+  }
+  /* Quick Actions Card container */
+  .hp-quick-actions-card{
+      background: #f4f4f8;        /* same soft gray as Account */
+      border: 1px solid #e5e7eb;
+      border-radius: 18px;
+      padding: 12px;
+  }
+  
+  /* Remove white background from buttons inside that card */
+  .hp-quick-actions-card .custom-btn{
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 14px 12px;
+  }
+  
+  /* Add spacing between buttons */
+  .hp-quick-actions-card .custom-btn + .custom-btn{
+      margin-top: 8px;
+  }
+  
+  /* Optional: soft divider look */
+  .hp-quick-actions-card .custom-btn:hover{
+      background: rgba(255,255,255,0.6);
+  }
+  /* =========================================
+     Smaller + Not Bold + Less Spacing
+     ========================================= */
+  
+     @media (min-width: 1440px){
+  
+  /* Reduce space between buttons */
+  .button-group{
+    gap: 6px !important;   /* was 10px */
+  }
+
+  .hp-quick-actions-grid{
+    gap: 6px 8px !important;
+  }
+  
+  /* Make buttons smaller + not bold */
+  .button-group .custom-btn{
+    font-size: 1rem !important;   /* smaller text */
+    font-weight: 500 !important;    /* remove bold */
+    padding: 8px 12px !important;   /* shorter height */
+  }
+  
+  /* Desktop quick actions: same fixed icon column as mobile */
+  .button-group .qa-btn {
+    display: grid !important;
+    grid-template-columns: 22px 1fr auto;
+    column-gap: 6px;
+    align-items: center;
+    justify-content: unset !important;
+  }
+
+  .button-group .qa-left {
+    display: contents;
+  }
+
+  .button-group .qa-ico {
+    grid-column: 1;
+    grid-row: 1;
+    width: 22px !important;
+    height: 22px !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    justify-self: center;
+    align-self: center;
+    flex-shrink: 0;
+    background: transparent;
+    color: var(--hp-primary);
+  }
+
+  .button-group .qa-left > :not(.qa-ico) {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: max-content;
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  .hp-header-desktop .qa-btn {
+    white-space: nowrap;
+  }
+
+  .button-group .qa-ico .bi {
+    display: block;
+    font-size: 14px !important;
+    line-height: 1;
+  }
+
+  .button-group .qa-arrow {
+    grid-column: 3;
+    grid-row: 1;
+    font-size: 16px !important;
+    flex-shrink: 0;
+    justify-self: end;
+    align-self: center;
+  }
+  }
+
+  /* Reorder quick action — same shimmer as product page "Your Price" (.fancy-ribbon) */
+  @keyframes hp-reorder-shimmer {
+    0% {
+      background-position: 200% center;
+    }
+    100% {
+      background-position: -200% center;
+    }
+  }
+
+  .button-group .qa-btn--reorder,
+  #sidebarMobile .qa-btn--reorder {
+    background: linear-gradient(
+      120deg,
+      #a36bb0,
+      #843d8b,
+      #a36bb0,
+      #843d8b
+    );
+    background-size: 200% auto;
+    animation: hp-reorder-shimmer 2s linear infinite;
+    color: #fff !important;
+    border-color: rgba(132, 61, 139, 0.5) !important;
+    box-shadow: 0 4px 14px rgba(132, 61, 139, 0.28);
+    font-weight: 700 !important;
+  }
+
+  .button-group .qa-btn--reorder:hover,
+  #sidebarMobile .qa-btn--reorder:hover {
+    background: linear-gradient(
+      120deg,
+      #b57bc4,
+      #943f9d,
+      #b57bc4,
+      #943f9d
+    );
+    background-size: 200% auto;
+    animation: hp-reorder-shimmer 2s linear infinite;
+    color: #fff !important;
+    border-color: rgba(132, 61, 139, 0.65) !important;
+    box-shadow: 0 8px 22px rgba(132, 61, 139, 0.38);
+    transform: translateY(-2px);
+  }
+
+  .qa-btn--reorder .qa-arrow {
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  .qa-btn--reorder .qa-ico {
+    background: transparent !important;
+    color: #fff !important;
+  }
+
+  .hp-quick-actions-card .qa-btn--reorder {
+    background: linear-gradient(
+      120deg,
+      #a36bb0,
+      #843d8b,
+      #a36bb0,
+      #843d8b
+    ) !important;
+    background-size: 200% auto !important;
+    animation: hp-reorder-shimmer 2s linear infinite;
+    border: 1px solid rgba(132, 61, 139, 0.45) !important;
+    box-shadow: 0 4px 12px rgba(132, 61, 139, 0.22);
+  }
+
+  .hp-quick-actions-card .qa-btn--reorder:hover {
+    background: linear-gradient(
+      120deg,
+      #b57bc4,
+      #943f9d,
+      #b57bc4,
+      #943f9d
+    ) !important;
+    background-size: 200% auto !important;
+    color: #fff !important;
+  }
+    </style>
+    
+  </div>                <style>
+    body {
+        background: white;
+        background-attachment: fixed;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .login-wrapper {
+        padding-top: 40px;
+        padding-bottom: 40px;
+        display: flex;
+        justify-content: center;
+    }
+
+    @media (min-height: 600px) {
+        .login-wrapper {
+            min-height: calc(100vh - 80px);
+            align-items: center;
+        }
+    }
+
+    .login-card {
+        background: #843D8B;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 420px;
+    }
+
+    .login-title {
+        font-weight: 600;
+        font-size: 1.6rem;
+        color: white;
+        text-align: center;
+    }
+
+    .form-label {
+        font-weight: 500;
+        font-size: 0.95rem;
+        color: white;
+        margin-bottom: 0.25rem;
+    }
+
+    h5 {
+        color: white;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        height: 44px;
+        font-size: 0.95rem;
+    }
+
+    .btn-primary-custom {
+        background-color: white;
+        border: none;
+        color: #843D8B;
+        font-weight: 500;
+        border-radius: 12px;
+        height: 44px;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary-custom:hover {
+        border-style: solid;
+        border-color: #843D8B;
+        background-color: white;
+        color: #843D8B;
+    }
+
+    .forgot-password {
+        color: white;
+        font-size: 0.9rem;
+        text-decoration: none;
+    }
+
+    .forgot-password:hover {
+        text-decoration: underline;
+    }
+
+    .form-check-label {
+        color: white;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .alert {
+        font-size: 0.9rem;
+    }
+
+    .components {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .log-o {
+        width: 200px;
+        /* Adjust the width as needed */
+        height: auto;
+        /* Keeps the image proportional */
+    }
+
+    @media (max-width: 768px) {
+        .login-card {
+            padding: 2rem;
+        }
+
+        .login-title {
+            font-size: 1.4rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .login-card {
+            padding: 1.5rem;
+            border-radius: 16px;
+        }
+    }
+</style>
+<section class="vh-80" style="background-color: white;">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col col-xl-10">
+                <div class="card" style="border-radius: 1rem; overflow: hidden;">
+                    <div class="row g-0">
+
+                        <!-- Form first on mobile, second on desktop -->
+                        <div class="col-12 col-md-6 d-flex align-items-center order-1 order-md-2"
+                            style="background-color: #843D8B;">
+                            <div class="card-body p-4 p-lg-5 text-black w-100">
+
+                                <form method="POST" action="/login">
+                                    <input type="hidden" name="_token" value="aJS4anGFWMFGlM8VbVJVpfBaCslpkr8N6OuMJhkH" autocomplete="off">
+        <div class="d-flex align-items-center justify-content-center mb-3 pb-1">
+    <img src="https://d2q2s39fxn78ox.cloudfront.net/img/front/Honeys-Logo.png" alt="Honey's Place Logo"
+         style="width:220px !important; height:auto !important; display:block;">
+</div>
+
+
+
+                                    <h5 class="fw-normal mb-3 pb-3" style="letter-spacing: 1px;">Sign into your account
+                                    </h5>
+
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">E-Mail Address</label>
+                                        <input type="email" class="form-control" id="email" name="email"
+                                            value="" required autofocus placeholder="Email Address">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="password" name="password"
+                                            required placeholder="Password">
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="remember"
+                                                id="remember">
+                                            <label class="form-check-label" for="remember">
+                                                Remember Me
+                                            </label>
+                                        </div>
+                                        <a href="/password/email" class="forgot-password">Forgot Password?  Click here!</a>
+                                    </div>
+
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary-custom">
+                                            Login
+                                        </button>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+
+                        <!-- Image second on mobile, first on desktop -->
+                        <div class="col-12 col-md-6 order-2 order-md-1">
+                            <img src="/img/front/loginbg2.jpg" alt="login form" class="img-fluid w-100 h-100"
+                                style="object-fit: cover; height: 100%; border-radius: 0 0 0 1rem; border-top-left-radius: 0; border-bottom-left-radius: 1rem;">
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<div class="components">
+    <div wire:snapshot="{&quot;data&quot;:[],&quot;memo&quot;:{&quot;id&quot;:&quot;EFrr1mQ6yBKIQqYGpHTS&quot;,&quot;name&quot;:&quot;front.home.brand&quot;,&quot;path&quot;:&quot;login&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;en&quot;},&quot;checksum&quot;:&quot;2025a08dce8bdfe7f8b0910ad2d0c8c1a7e2fb7254a8a42748245f9ae668fb0e&quot;}" wire:effects="[]" wire:id="EFrr1mQ6yBKIQqYGpHTS" class="hotbrand-container px-3 mb-5">
+    
+    <div class="d-none d-md-block">
+        <!-- Centered heading -->
+        <div class="text-center mb-4">
+            <h2 class="brand-highlight-header" style="color: #843d8b;">Brands of the Month</h2>
+        </div>
+
+        <!-- Brand logos -->
+        <div class="d-flex justify-content-center align-items-center flex-wrap gap-3">
+            <!--[if BLOCK]><![endif]-->                <div class="text-center">
+    <!--[if BLOCK]><![endif]-->        <a href="https://www.honeysplace.com/manufacturer/120/Pipedream?items%5Bquery%5D=Pipedream" target="_blank" rel="noopener noreferrer">
+            <div class="hotbrand-logo-box">
+                <img
+                    src="https://d2q2s39fxn78ox.cloudfront.net/img/hotzone/nFirKswT.jpg"
+                    alt="Hotbrand"
+                    class="brand-img"
+                >
+            </div>
+        </a>
+        <small class="text-muted brand-size-info d-block mt-1"></small>
+    <!--[if ENDBLOCK]><![endif]--></div>
+
+                            <div class="text-center">
+    <!--[if BLOCK]><![endif]-->        <a href="https://www.honeysplace.com/manufacturer/109/Oxballs?items%5Bquery%5D=Oxballs" target="_blank" rel="noopener noreferrer">
+            <div class="hotbrand-logo-box">
+                <img
+                    src="https://d2q2s39fxn78ox.cloudfront.net/img/hotzone/a8wJNK6b.png"
+                    alt="Hotbrand"
+                    class="brand-img"
+                >
+            </div>
+        </a>
+        <small class="text-muted brand-size-info d-block mt-1"></small>
+    <!--[if ENDBLOCK]><![endif]--></div>
+
+            <!--[if ENDBLOCK]><![endif]-->        </div>
+    </div>
+
+    
+    <div class="d-md-none">
+        <!-- Centered heading -->
+        <div class="text-center mb-3">
+            <h2 class="brand-highlight-header" style="color: #843d8b;">Brands Highlights</h2>
+        </div>
+
+        <!-- 2 logos per row -->
+        <div class="row justify-content-center gx-2 gy-3">
+            <!--[if BLOCK]><![endif]-->                <div class="col-6 d-flex justify-content-center">
+                    <a href="https://www.honeysplace.com/manufacturer/120/Pipedream?items%5Bquery%5D=Pipedream" target="_blank" rel="noopener noreferrer">
+                        <div class="hotbrand-logo-box">
+                            <img src="https://d2q2s39fxn78ox.cloudfront.net/img/hotzone/nFirKswT.jpg"
+                                 alt="Hotbrand">
+                        </div>
+                    </a>
+                </div>
+                            <div class="col-6 d-flex justify-content-center">
+                    <a href="https://www.honeysplace.com/manufacturer/109/Oxballs?items%5Bquery%5D=Oxballs" target="_blank" rel="noopener noreferrer">
+                        <div class="hotbrand-logo-box">
+                            <img src="https://d2q2s39fxn78ox.cloudfront.net/img/hotzone/a8wJNK6b.png"
+                                 alt="Hotbrand">
+                        </div>
+                    </a>
+                </div>
+            <!--[if ENDBLOCK]><![endif]-->        </div>
+    </div>
+
+  <style>
+    .hotbrand-logo-box {
+        width: 160px;           /* Increased from 120px */
+        height: 160px;          /* Increased from 120px */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        background-color: #fff; /* Optional: background for contrast */
+    }
+
+    .hotbrand-logo-box img {
+        max-width: 95%;         /* Allow image to fill more of the box */
+        max-height: 95%;
+        object-fit: contain;    /* Maintain aspect ratio inside container */
+        display: block;
+    }
+
+    @media (max-width: 575.98px) {
+        .hotbrand-logo-box {
+            width: 130px;       /* Increased from 100px */
+            height: 130px;
+        }
+
+        .hotbrand-logo-box img {
+            max-width: 95%;
+            max-height: 95%;
+        }
+    }
+
+    .brand-size-info {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #555;
+        margin-top: 4px;
+    }
+</style>
+
+</div>
+    <div wire:snapshot="{&quot;data&quot;:[],&quot;memo&quot;:{&quot;id&quot;:&quot;PLFMXcdMaEqmoOjZdemy&quot;,&quot;name&quot;:&quot;front.landing.cta&quot;,&quot;path&quot;:&quot;login&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;en&quot;},&quot;checksum&quot;:&quot;ce927ab104fe8e1c6a345969ad485d59d61d5026e8eaeb8f47c514c690a3ac21&quot;}" wire:effects="[]" wire:id="PLFMXcdMaEqmoOjZdemy" class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        <div class="row">
+            <div class="col-12 text-center" style="font-size: 1.25rem; color: #000;">
+                <p class="wholesale-header">🔞 Wholesale Access Notice</p>
+                <p class="wholesale-subheading">
+                    Honey's Place is a B2B distributor of adult products. Access is restricted to verified retail businesses and individuals 18 years or older.
+                </p>
+            </div>
+        </div>
+
+        <!-- Buttons: Become a Customer and Contact Us -->
+        <div class="btn-container">
+            <div class="btn-b">
+    <div class="mb-3 d-flex justify-content-center">
+        <a href="/become_a_customer" class="btn btn-custom">Become a Customer</a>
+    </div>
+    <div class="mb-3 d-flex justify-content-center">
+        <a href="/contact" class="btn btn-custom">Contact Us</a>
+    </div>
+</div>
+
+        </div>
+
+        <!-- Subscribe Section -->
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-12">
+                    <p class="subscribe-header">Subscribe to our mailing list</p>
+                </div>
+                <div class="col-12 col-md-6 mx-auto">
+                    <p class="subscribe-description">
+                        <span class="line-part-1">Be the first to discover new arrivals, exclusive deals,</span>
+                        <span class="line-part-2">and the latest trends—delivered right to your inbox!</span>
+                    </p>
+                </div>
+                <div class="col-12">
+                    <a href="/email_signup" class="btn btn-custom subscribe-btn ">Subscribe</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-1"></div>
+    <style>
+        .wholesale-header {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+    
+        .wholesale-subheading {
+            margin-top: 0;
+            font-size: 1rem;
+   
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 15px;
+        }
+    
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .btn-b {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 50px;
+            width: 40%;
+        }
+        
+        .btn-custom {
+            background-color: #ffffff;
+            color: #8d5e92;
+            border: 1px solid #843D8B;
+            padding: 15px 30px;
+            font-weight: bold;
+            border-radius: 25px;
+            transition: background-color 0.3s;
+            white-space: nowrap;
+            min-width: 200px;
+            max-width: 300px;
+            text-align: center;
+            display: inline-block;
+        }
+    
+        .btn-custom:hover {
+            background-color: #843D8B;
+            color:white;
+        }
+    .subscribe-btn{
+    margin-top: 16px;
+    border-color: #843D8B;
+    }
+        .subscribe-header {
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+        }
+    
+        .subscribe-description {
+            font-size: 1rem;
+            margin-bottom: 25px;
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Default mobile view - single line */
+        .line-part-1, .line-part-2 {
+            display: inline;
+        }
+        .line-part-1::after {
+            content: " ";
+        }
+        
+        /* Desktop view - two equal lines */
+        @media (min-width: 768px) {
+            .subscribe-description {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            .line-part-1, .line-part-2 {
+                display: block;
+            }
+            .line-part-1::after {
+                content: "";
+            }
+            .btn-b {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 50px;
+                width: 40%;
+            }
+        }
+    
+        /* Responsive Design */
+        @media (max-width: 1199.98px) {
+            .btn-b {
+                gap: 90px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .btn-custom {
+                min-width: 180px;
+                max-width: 280px;
+            }
+            .btn-b {
+                min-width: 180px;
+                max-width: 320px;
+            }
+        }
+    
+       @media (max-width: 768px) {
+    .btn-container {
+        flex-direction: column;
+    }
+
+    .btn-b {
+        flex-direction: column;
+        gap: 15px;
+        width: 100%; /* Let it expand */
+    }
+
+    .btn-custom {
+        width: 100%;       /* Take full available width */
+        max-width: 300px;  /* But don't get too wide */
+    }
+}
+
+    
+        @media (max-width: 576px) {
+            .wholesale-header {
+                font-size: 1.25rem;
+            }
+            .wholesale-subheading {
+                font-size: 1rem;
+            }
+            .subscribe-header, .subscribe-description {
+                font-size: 1.125rem;
+            }
+     
+        }
+        .btn-b {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+    </style>
+</div>    <div wire:snapshot="{&quot;data&quot;:{&quot;features&quot;:[[[{&quot;logo&quot;:&quot;customer_service.png&quot;,&quot;description&quot;:&quot;Customer Service&quot;},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;logo&quot;:&quot;inventory_sync.png&quot;,&quot;description&quot;:&quot;Inventory Sync&quot;},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;logo&quot;:&quot;years_industry.png&quot;,&quot;description&quot;:&quot;Years in the Industry&quot;},{&quot;s&quot;:&quot;arr&quot;}],[{&quot;logo&quot;:&quot;drop_shipping.png&quot;,&quot;description&quot;:&quot;Drop  Shipping&quot;},{&quot;s&quot;:&quot;arr&quot;}]],{&quot;s&quot;:&quot;arr&quot;}]},&quot;memo&quot;:{&quot;id&quot;:&quot;UoSchekKgwQZiTtxFIP6&quot;,&quot;name&quot;:&quot;front.landing.feature&quot;,&quot;path&quot;:&quot;login&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;en&quot;},&quot;checksum&quot;:&quot;f31ba31ca000e29a45c5beb246f468ecea7c59954b72fe17ea0bdd2885cfb5b6&quot;}" wire:effects="[]" wire:id="UoSchekKgwQZiTtxFIP6" class="main-container">
+     <div class="features-container">
+                        <div class="feature-item">
+                  <div class="feature-icon">
+                      <img src="/assets/customer_service.png" alt="Customer Service">
+                  </div>
+                  <div class="feature-description" style="color: #843d8b;">
+                      <span class="line">Customer</span>
+                      <span class="line">Service</span>
+                  </div>
+              </div>
+                        <div class="feature-item">
+                  <div class="feature-icon">
+                      <img src="/assets/inventory_sync.png" alt="Inventory Sync">
+                  </div>
+                  <div class="feature-description" style="color: #843d8b;">
+                      <span class="line">Inventory</span>
+                      <span class="line">Sync</span>
+                  </div>
+              </div>
+                        <div class="feature-item">
+                  <div class="feature-icon">
+                      <img src="/assets/years_industry.png" alt="Years in the Industry">
+                  </div>
+                  <div class="feature-description" style="color: #843d8b;">
+                      <span class="line">Years</span>
+                      <span class="line">in the Industry</span>
+                  </div>
+              </div>
+                        <div class="feature-item">
+                  <div class="feature-icon">
+                      <img src="/assets/drop_shipping.png" alt="Drop  Shipping">
+                  </div>
+                  <div class="feature-description" style="color: #843d8b;">
+                      <span class="line">Drop</span>
+                      <span class="line"> Shipping</span>
+                  </div>
+              </div>
+                    <style>
+               .main-container{
+                    margin: auto;
+               display: flex;
+               justify-content: center;
+               align-items: center;
+               width: 90%;
+               }
+               .features-container {
+                   display: flex;
+                   flex-wrap: wrap;
+                   justify-content: space-around;
+                   gap: 20px;
+                   padding: 20px;
+               }
+               
+               .feature-item {
+                   display: flex;
+                   align-items: center;
+                   gap: 15px;
+                   min-width: 200px;
+               }
+               
+               .feature-icon img {
+                   width: 60px;
+                   height: 60px;
+               }
+               
+               .feature-description {
+                   display: flex;
+                   flex-direction: column;
+                   font-weight: 500;
+                   font-size: 16px;
+               }
+               
+               .line {
+                   display: block;
+                   text-align: center;
+               }
+           </style>
+      </div>
+</div>
+ 
+</div>
+
+                 <div wire:snapshot="{&quot;data&quot;:{&quot;footers&quot;:[{&quot;1&quot;:[{&quot;title&quot;:&quot;Information&quot;,&quot;hide_mobile&quot;:false,&quot;foot&quot;:[{&quot;0&quot;:[{&quot;text&quot;:&quot;About Us&quot;,&quot;link&quot;:&quot;\/page\/about-honeys-place&quot;,&quot;hide_mobile&quot;:false,&quot;new_window&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],&quot;2&quot;:[{&quot;text&quot;:&quot;Drop Ship Information&quot;,&quot;link&quot;:&quot;\/services\/dropship&quot;,&quot;hide_mobile&quot;:false,&quot;new_window&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],&quot;3&quot;:[{&quot;text&quot;:&quot;FAQ&quot;,&quot;link&quot;:&quot;\/services\/faq&quot;,&quot;hide_mobile&quot;:false,&quot;new_window&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],&quot;5&quot;:[{&quot;text&quot;:&quot;Contact Us&quot;,&quot;link&quot;:&quot;\/contact&quot;,&quot;hide_mobile&quot;:false,&quot;new_window&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],&quot;7&quot;:[{&quot;text&quot;:&quot;Privacy Policy&quot;,&quot;link&quot;:&quot;\/page\/privacy-policy&quot;,&quot;hide_mobile&quot;:false,&quot;new_window&quot;:false},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}],&quot;2&quot;:[{&quot;title&quot;:&quot;My Account&quot;,&quot;hide_mobile&quot;:false,&quot;foot&quot;:[{&quot;4&quot;:[{&quot;text&quot;:&quot;Services&quot;,&quot;link&quot;:&quot;\/services&quot;,&quot;hide_mobile&quot;:false,&quot;new_window&quot;:false},{&quot;s&quot;:&quot;arr&quot;}],&quot;6&quot;:[{&quot;text&quot;:&quot;Become a Customer&quot;,&quot;link&quot;:&quot;\/new_customer_forms&quot;,&quot;hide_mobile&quot;:false,&quot;new_window&quot;:false},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}],&quot;3&quot;:[{&quot;title&quot;:&quot;Sign Up for our Newsletter&quot;,&quot;hide_mobile&quot;:false,&quot;foot&quot;:[{&quot;1&quot;:[{&quot;text&quot;:&quot;Sign up for our newsletter and get exclusive deals you will not find anywhere else straight to your inbox!&quot;,&quot;link&quot;:&quot;\/email_signup&quot;,&quot;hide_mobile&quot;:false,&quot;new_window&quot;:false},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}],&quot;4&quot;:[{&quot;title&quot;:&quot;Contact Us&quot;,&quot;hide_mobile&quot;:false},{&quot;s&quot;:&quot;arr&quot;}]},{&quot;s&quot;:&quot;arr&quot;}],&quot;ageVerificationContent&quot;:null,&quot;smsPolicyContent&quot;:null,&quot;informationContent&quot;:&quot;&lt;p&gt;&lt;a href=\&quot;https:\/\/honeysplace.com\/page\/about-honeys-place\&quot;&gt;About Us&lt;\/a&gt;&lt;\/p&gt;\n&lt;p&gt;&lt;a href=\&quot;https:\/\/honeysplace.com\/page\/from-the-ceo\&quot;&gt;CEO Message&lt;\/a&gt;&lt;\/p&gt;\n&lt;p&gt;&lt;a href=\&quot;https:\/\/honeysplace.com\/page\/faq\&quot;&gt;FAQs&lt;\/a&gt;&lt;\/p&gt;\n&lt;p&gt;&lt;a href=\&quot;https:\/\/honeysplace.com\/page\/wholesale-account-requirements-data-access-policy\&quot;&gt;Account Policy&lt;\/a&gt;&lt;\/p&gt;\n&lt;p&gt;&lt;a href=\&quot;https:\/\/honeysplace.com\/page\/privacy-policy\&quot;&gt;Privacy Policy&lt;\/a&gt;&lt;\/p&gt;\n&lt;p&gt;&lt;a href=\&quot;https:\/\/honeysplace.com\/page\/sobre-nosotros\&quot;&gt;Sobre Nosotros&lt;\/a&gt;&lt;\/p&gt;\n&quot;,&quot;whatWeDoContent&quot;:&quot;&lt;p&gt;&lt;a href=\&quot;https:\/\/honeysplace.com\/services\&quot;&gt;Services&lt;\/a&gt;&lt;\/p&gt;\n&lt;p&gt;&lt;a href=\&quot;https:\/\/honeysplace.com\/page\/drop-shipping-with-honeys-place\&quot;&gt;Drop Shipping&lt;\/a&gt;&lt;\/p&gt;\n&lt;p&gt;&lt;a href=\&quot;https:\/\/honeysplace.com\/page\/home-party-consultants\&quot;&gt;Home Party&lt;\/a&gt;&lt;\/p&gt;\n&lt;p&gt;&lt;a href=\&quot;https:\/\/honeysplace.com\/page\/tips-for-sex-toy-home-party-consultants\&quot;&gt;Party Tips&lt;\/a&gt;&lt;\/p&gt;\n &quot;,&quot;resourcesContent&quot;:&quot;&lt;p&gt;&lt;a href=\&quot;https:\/\/honeysplace.com\/become_a_customer\&quot;&gt;Sign Up&lt;\/a&gt;&lt;\/p&gt;\n&lt;p&gt;&lt;a href=\&quot;https:\/\/honeysplace.com\/contact\&quot;&gt;Contact Us&lt;\/a&gt;&lt;\/p&gt;\n&quot;,&quot;contactUsContent&quot;:null},&quot;memo&quot;:{&quot;id&quot;:&quot;uH6CUJXw4iuIxhQvtl1G&quot;,&quot;name&quot;:&quot;front.foot&quot;,&quot;path&quot;:&quot;login&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;en&quot;},&quot;checksum&quot;:&quot;e10c5951290126f49cbf3d6bbbc0f6118a58035c250b2606aa9734e5d41b0a50&quot;}" wire:effects="[]" wire:id="uH6CUJXw4iuIxhQvtl1G" class="footer-container" style="overflow:hidden">
+<div class="footer-row">
+<div class="footer-column information-column">
+<h5 class="footer-title ">Information</h5>
+  <div class="footer-content">
+    <p><a href="https://honeysplace.com/page/about-honeys-place">About Us</a></p>
+<p><a href="https://honeysplace.com/page/from-the-ceo">CEO Message</a></p>
+<p><a href="https://honeysplace.com/page/faq">FAQs</a></p>
+<p><a href="https://honeysplace.com/page/wholesale-account-requirements-data-access-policy">Account Policy</a></p>
+<p><a href="https://honeysplace.com/page/privacy-policy">Privacy Policy</a></p>
+<p><a href="https://honeysplace.com/page/sobre-nosotros">Sobre Nosotros</a></p>
+
+  </div>
+<div class="footer-column follow-us-tablet">
+<h5 class="footer-title">Follow Us</h5>
+<div class="social-icons">
+    <a class="text-decoration-none" href="https://www.facebook.com/honeysplace" target="_blank" rel="NOFOLLOW">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-facebook" viewBox="0 0 16 16">
+            <path d="M16 8.049c0-4.446-3.582-8.05-8-8.05C3.58 0-.002 3.603-.002 8.05c0 4.017 2.926 7.347 6.75 7.951v-5.625h-2.03V8.05H6.75V6.275c0-2.017 1.195-3.131 3.022-3.131.876 0 1.791.157 1.791.157v1.98h-1.009c-.993 0-1.303.621-1.303 1.258v1.51h2.218l-.354 2.326H9.25V16c3.824-.604 6.75-3.934 6.75-7.951"/>
+        </svg>
+        
+        </a>
+
+        <a class="text-decoration-none" href="https://www.instagram.com/honeysplace" target="_blank" rel="NOFOLLOW">
+
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 132.004 132" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <defs>
+                    <linearGradient id="b">
+                        <stop offset="0" stop-color="#3771c8"/>
+                        <stop stop-color="#3771c8" offset=".128"/>
+                        <stop offset="1" stop-color="#60f" stop-opacity="0"/>
+                    </linearGradient>
+                    <linearGradient id="a">
+                        <stop offset="0" stop-color="#fd5"/>
+                        <stop offset=".1" stop-color="#fd5"/>
+                        <stop offset=".5" stop-color="#ff543e"/>
+                        <stop offset="1" stop-color="#c837ab"/>
+                    </linearGradient>
+                    <radialGradient id="c" cx="158.429" cy="578.088" r="65" xlink:href="#a" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0 -1.98198 1.8439 0 -1031.402 454.004)" fx="158.429" fy="578.088"/>
+                    <radialGradient id="d" cx="147.694" cy="473.455" r="65" xlink:href="#b" gradientUnits="userSpaceOnUse" gradientTransform="matrix(.17394 .86872 -3.5818 .71718 1648.348 -458.493)" fx="147.694" fy="473.455"/>
+                </defs>
+                <path fill="url(#c)" d="M65.03 0C37.888 0 29.95.028 28.407.156c-5.57.463-9.036 1.34-12.812 3.22-2.91 1.445-5.205 3.12-7.47 5.468C4 13.126 1.5 18.394.595 24.656c-.44 3.04-.568 3.66-.594 19.188-.01 5.176 0 11.988 0 21.125 0 27.12.03 35.05.16 36.59.45 5.42 1.3 8.83 3.1 12.56 3.44 7.14 10.01 12.5 17.75 14.5 2.68.69 5.64 1.07 9.44 1.25 1.61.07 18.02.12 34.44.12 16.42 0 32.84-.02 34.41-.1 4.4-.207 6.955-.55 9.78-1.28 7.79-2.01 14.24-7.29 17.75-14.53 1.765-3.64 2.66-7.18 3.065-12.317.088-1.12.125-18.977.125-36.81 0-17.836-.04-35.66-.128-36.78-.41-5.22-1.305-8.73-3.127-12.44-1.495-3.037-3.155-5.305-5.565-7.624C116.9 4 111.64 1.5 105.372.596 102.335.157 101.73.027 86.19 0H65.03z" transform="translate(1.004 1)"/>
+                <path fill="url(#d)" d="M65.03 0C37.888 0 29.95.028 28.407.156c-5.57.463-9.036 1.34-12.812 3.22-2.91 1.445-5.205 3.12-7.47 5.468C4 13.126 1.5 18.394.595 24.656c-.44 3.04-.568 3.66-.594 19.188-.01 5.176 0 11.988 0 21.125 0 27.12.03 35.05.16 36.59.45 5.42 1.3 8.83 3.1 12.56 3.44 7.14 10.01 12.5 17.75 14.5 2.68.69 5.64 1.07 9.44 1.25 1.61.07 18.02.12 34.44.12 16.42 0 32.84-.02 34.41-.1 4.4-.207 6.955-.55 9.78-1.28 7.79-2.01 14.24-7.29 17.75-14.53 1.765-3.64 2.66-7.18 3.065-12.317.088-1.12.125-18.977.125-36.81 0-17.836-.04-35.66-.128-36.78-.41-5.22-1.305-8.73-3.127-12.44-1.495-3.037-3.155-5.305-5.565-7.624C116.9 4 111.64 1.5 105.372.596 102.335.157 101.73.027 86.19 0H65.03z" transform="translate(1.004 1)"/>
+                <path fill="#fff" d="M66.004 18c-13.036 0-14.672.057-19.792.29-5.11.234-8.598 1.043-11.65 2.23-3.157 1.226-5.835 2.866-8.503 5.535-2.67 2.668-4.31 5.346-5.54 8.502-1.19 3.053-2 6.542-2.23 11.65C18.06 51.327 18 52.964 18 66s.058 14.667.29 19.787c.235 5.11 1.044 8.598 2.23 11.65 1.227 3.157 2.867 5.835 5.536 8.503 2.667 2.67 5.345 4.314 8.5 5.54 3.054 1.187 6.543 1.996 11.652 2.23 5.12.233 6.755.29 19.79.29 13.037 0 14.668-.057 19.788-.29 5.11-.234 8.602-1.043 11.656-2.23 3.156-1.226 5.83-2.87 8.497-5.54 2.67-2.668 4.31-5.346 5.54-8.502 1.18-3.053 1.99-6.542 2.23-11.65.23-5.12.29-6.752.29-19.788 0-13.036-.06-14.672-.29-19.792-.24-5.11-1.05-8.598-2.23-11.65-1.23-3.157-2.87-5.835-5.54-8.503-2.67-2.67-5.34-4.31-8.5-5.535-3.06-1.187-6.55-1.996-11.66-2.23-5.12-.233-6.75-.29-19.79-.29zm-4.306 8.65c1.278-.002 2.704 0 4.306 0 12.816 0 14.335.046 19.396.276 4.68.214 7.22.996 8.912 1.653 2.24.87 3.837 1.91 5.516 3.59 1.68 1.68 2.72 3.28 3.592 5.52.657 1.69 1.44 4.23 1.653 8.91.23 5.06.28 6.58.28 19.39s-.05 14.33-.28 19.39c-.214 4.68-.996 7.22-1.653 8.91-.87 2.24-1.912 3.835-3.592 5.514-1.68 1.68-3.275 2.72-5.516 3.59-1.69.66-4.232 1.44-8.912 1.654-5.06.23-6.58.28-19.396.28-12.817 0-14.336-.05-19.396-.28-4.68-.216-7.22-.998-8.913-1.655-2.24-.87-3.84-1.91-5.52-3.59-1.68-1.68-2.72-3.276-3.592-5.517-.657-1.69-1.44-4.23-1.653-8.91-.23-5.06-.276-6.58-.276-19.398s.046-14.33.276-19.39c.214-4.68.996-7.22 1.653-8.912.87-2.24 1.912-3.84 3.592-5.52 1.68-1.68 3.28-2.72 5.52-3.592 1.692-.66 4.233-1.44 8.913-1.655 4.428-.2 6.144-.26 15.09-.27zm29.928 7.97c-3.18 0-5.76 2.577-5.76 5.758 0 3.18 2.58 5.76 5.76 5.76 3.18 0 5.76-2.58 5.76-5.76 0-3.18-2.58-5.76-5.76-5.76zm-25.622 6.73c-13.613 0-24.65 11.037-24.65 24.65 0 13.613 11.037 24.645 24.65 24.645C79.617 90.645 90.65 79.613 90.65 66S79.616 41.35 66.003 41.35zm0 8.65c8.836 0 16 7.163 16 16 0 8.836-7.164 16-16 16-8.837 0-16-7.164-16-16 0-8.837 7.163-16 16-16z"/>
+            </svg>
+        </a>
+        <a class="text-decoration-none" href="https://www.x.com/honeysplace" target="_blank" rel="NOFOLLOW">
+            <svg version="1.1" id="Layer_1" width="32" height="32" viewBox="0 0 36.711864 36.711864" xml:space="preserve" sodipodi:docname="11053970_x_logo_twitter_new_brand_icon.svg" inkscape:version="1.2.1 (9c6d41e, 2022-07-14)" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg"><defs id="defs64"/><sodipodi:namedview id="namedview62" pagecolor="#ffffff" bordercolor="#666666" borderopacity="1.0" inkscape:showpageshadow="2" inkscape:pageopacity="0.0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#d1d1d1" showgrid="false" inkscape:zoom="9.8333333" inkscape:cx="-0.76271186" inkscape:cy="17.440678" inkscape:window-width="1246" inkscape:window-height="720" inkscape:window-x="185" inkscape:window-y="65" inkscape:window-maximized="0" inkscape:current-layer="Layer_1"/><circle style="fill:#105c90;fill-opacity:1;stroke-width:7.55906" id="path915" cx="18.355932" cy="18.355932" r="18.355932"/><path d="M 20.451411,16.672414 28.642286,7.3559323 H 26.701568 L 19.586216,15.443614 13.907346,7.3559323 H 7.3559322 L 15.94542,19.587025 7.3559322,29.355932 h 1.9407166 l 7.5093722,-8.542861 5.998498,8.542861 h 6.551413 z M 17.792454,19.694397 16.92083,18.475693 9.9965188,8.7875433 h 2.9813392 l 5.58978,7.8215497 0.867949,1.218704 7.26506,10.166271 h -2.981339 z" id="path59" style="fill:#ffffff;fill-opacity:1"/></svg>
+        </a>
+        <a class="text-decoration-none" href="https://www.linkedin.com/company/honey-s-place" target="_blank" rel="NOFOLLOW">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-linkedin" viewBox="0 0 16 16">
+                <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .632-.526 1.146-1.175 1.146H1.175C.526 16 0 15.486 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zM3.743 5.012c.837 0 1.357-.554 1.357-1.25C5.1 3.042 4.58 2.5 3.762 2.5c-.82 0-1.357.542-1.357 1.262 0 .696.52 1.25 1.318 1.25zm4.964 8.382V9.359c0-.224.016-.448.08-.608.176-.448.579-.912 1.257-.912.888 0 1.243.686 1.243 1.69v3.671h2.4V9.231c0-2.194-1.17-3.213-2.733-3.213-1.26 0-1.822.697-2.134 1.2v.032h-.016l.016-.032V6.17H6.306c.032.513 0 7.224 0 7.224h2.401z"/>
+            </svg>
+        </a>
+    
+        </div>
+</div>
+</div>
+
+<div class="age-sms-wrapper">
+
+<div class="footer-row-wide">
+  <div class="footer-column age-verification-column">
+    <h5 class="footer-title-age">Age & Business Verification</h5>
+          <ul class="footer-list">
+        <li>Honey's Place is a B2B distributor of adult products. By using this site, you confirm that you are 18+ and a verified retailer</li>
+      </ul>
+      </div>
+</div>
+
+<div class="footer-row-wide">
+  <div class="footer-column age-verification-column">
+    <h5 class="footer-title-age">SMS Policy</h5>
+          <ul class="footer-list">
+        <li>
+
+By providing a telephone number and submitting this form you are consenting
+to be contacted by SMS text message. 
+
+Message & data rates may apply. Message frequency may vary.
+
+Here's our <a href="https://www.honeysplace.com/page/privacy-policy" style="text-decoration: underline; font-weight: bold; color: inherit;">Privacy Policy</a> Reply Help for more information. 
+
+You can reply STOP to opt-out of further messaging .</li>
+      </ul>
+      </div>
+</div>
+</div>
+<div class="parent-fc">
+  <div class="fc-sub">
+    <div class="footer-column">
+      <h5 class="footer-title">What We Do</h5>
+              <div class="footer-content">
+          <p><a href="https://honeysplace.com/services">Services</a></p>
+<p><a href="https://honeysplace.com/page/drop-shipping-with-honeys-place">Drop Shipping</a></p>
+<p><a href="https://honeysplace.com/page/home-party-consultants">Home Party</a></p>
+<p><a href="https://honeysplace.com/page/tips-for-sex-toy-home-party-consultants">Party Tips</a></p>
+ 
+        </div>
+          </div>
+        </div>
+</div>
+
+<div class="footer-column contact-column">
+<h5 class="footer-title">Contact Us</h5>
+<ul class="footer-list">
+    <li class="contact-item">
+        <i class="bi-envelope"></i>
+        <a href="mailto:sales@honeysplace.com">sales@honeysplace.com</a>
+    </li>
+    <li class="contact-item">
+        <i class="bi-geo-alt"></i>
+        <div>
+            640 Glenoaks Blvd<br>
+            San Fernando, CA 91340
+        </div>
+    </li>
+    <li class="contact-item">
+        <i class="bi-telephone"></i>
+        <span>818-256-1101</span>
+    </li>
+    <li class="contact-item">
+        <i class="bi-file-break"></i>
+        <span>818-256-1115 (fax)</span>
+    </li>
+    <li class="contact-item">
+        <i class="bi-clock-fill"></i>
+        <div>
+            <span>Monday-Friday: 8:00am - 4:30pm</span><br>
+            <span>Saturday & Sunday: Closed</span>
+        </div>
+    </li>
+</ul>
+</div>
+
+
+</div>
+
+<style>
+
+* {
+font-family: 'Montserrat', sans-serif;
+}
+.footer-list a {
+position: relative;
+color: #fff;
+text-decoration: none;
+transition: color 0.2s ease;
+}
+
+.footer-list a::after {
+content: '';
+position: absolute;
+left: 0;
+bottom: -2px;
+width: 0;
+height: 2px;
+background: #ffffff;
+transition: width 0.3s ease;
+}
+
+.footer-list a:hover {
+color: #ffffff;
+}
+
+.footer-list a:hover::after {
+width: 100%;
+}
+
+
+.fc-sub {
+display: flex;
+gap: 1rem;
+  flex-wrap: wrap;
+}
+.fc-sub .footer-column {
+  flex: 1 1 100%; /* each takes full width */
+  max-width: none;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  min-width: 0; /* Allow flex items to shrink below content size */
+}
+.information-column .follow-us-tablet {
+margin-top: 1rem; /* or adjust to your liking */
+ max-width: 180px;
+  flex: 0 0 180px;
+}
+
+.fl {
+max-width: 385px;
+}
+
+.parent-fc {
+display: flex;
+flex-direction: column;
+gap: 1rem;
+max-width: 100%;
+overflow: hidden;
+}
+
+.footer-container {
+padding: 2rem 0;
+width: 100%;
+background-color: #843D8B;
+color: #ffffff;
+}
+
+    .footer-row {
+   display: grid;
+  grid-template-columns: 180px 2fr 140px 280px; /* customize widths */
+  gap: 1rem;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  overflow: hidden; /* Prevent overflow */
+}
+
+.footer-column {
+flex: 1;
+min-width: 0; /* Allow flex items to shrink below content size */
+max-width: 220px;
+padding: 0 0.5rem;
+word-wrap: break-word;
+overflow-wrap: break-word;
+}
+
+.footer-title,
+.footer-title-age {
+font-size: 1.2rem;
+font-weight: 600;
+color: #ffffff;
+}
+
+.footer-list {
+list-style: none;
+padding: 0;
+margin: 0;
+}
+
+.footer-list li {
+padding-left: 16px;
+}
+
+.footer-list a {
+text-decoration: none;
+color: #ffffff;
+transition: color 0.2s;
+line-height: 1.4;
+}
+
+.contact-item {
+display: flex;
+align-items: flex-start;
+gap: 0.75rem;
+}
+
+.contact-item i {
+margin-top: 0.2rem;
+flex-shrink: 0;
+}
+
+.social-icons {
+display: flex;
+flex-wrap: nowrap;
+gap: 0.75rem;
+white-space: nowrap;
+}
+
+/* Tablet (max 992px) — 3-column layout */
+@media (max-width: 992px) {
+  .follow-us-tablet {
+    display: block;
+  }
+
+  .footer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .footer-row {
+    order: 1;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .footer-column {
+    max-width: none;
+    flex: unset;
+  }
+
+  .fc-sub {
+    flex-direction: column;
+  }
+
+  .parent-fc {
+    gap: 1.5rem;
+  }
+
+  .age-sms-wrapper {
+    order: 2;
+    width: 100%;
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .footer-row-wide {
+    width: 100%;
+    padding: 0;
+  }
+
+  .age-verification-column {
+    max-width: 100%;
+  }
+}
+
+
+/* Mobile (max 600px) — stack columns */
+@media (max-width: 600px) {
+.footer-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    text-align: center;
+}
+
+.footer-column {
+    max-width: 100%;
+}
+
+.social-icons {
+    justify-content: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+.contact-item {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.footer-list li {
+    padding-left: 0;
+}
+
+
+}
+.contact-column {
+  word-wrap: break-word
+}
+@media (min-width: 993px) {
+    .contact-column {
+        max-width: 350px;
+    }
+}
+.footer-row-wide {
+  display: flex;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.age-verification-column {
+  flex: 1;
+  max-width: 100%;
+}
+
+.footer-content {
+  color: #ffffff;
+  line-height: 1.6;
+  padding-left: 16px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+.footer-content ul,
+.footer-content ol {
+  margin: 1em 0 !important;
+  padding-left: 2em !important;
+  list-style-position: outside !important;
+}
+
+.footer-content ul {
+  list-style-type: disc !important;
+}
+
+.footer-content ol {
+  list-style-type: decimal !important;
+}
+
+.footer-content ul ul {
+  list-style-type: circle !important;
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
+}
+
+.footer-content ul ul ul {
+  list-style-type: square !important;
+}
+
+.footer-content ul li,
+.footer-content ol li {
+  margin: 0.5em 0 !important;
+  padding: 0 !important;
+  line-height: 1.6 !important;
+  display: list-item !important;
+  list-style-type: inherit !important;
+  list-style-position: outside !important;
+}
+
+.footer-content a {
+  text-decoration: none;
+  font-weight: bold;
+  color: inherit;
+  transition: color 0.2s, text-decoration 0.2s;
+}
+
+.footer-content a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.footer-content p {
+  margin: 0.5em 0;
+}
+
+</style>
+
+</div>
+
+            </main>
+        </div>
+    </div>
+
+            <script src="//cdn.jsdelivr.net/npm/sweetalert2@11" crossorigin="anonymous"></script>
+
+    <script>
+    /**** Livewire Alert Scripts ****/
+    (()=>{var __webpack_modules__={757:(e,t,r)=>{e.exports=r(666)},666:e=>{var t=function(e){"use strict";var t,r=Object.prototype,n=r.hasOwnProperty,o="function"==typeof Symbol?Symbol:{},i=o.iterator||"@@iterator",a=o.asyncIterator||"@@asyncIterator",c=o.toStringTag||"@@toStringTag";function s(e,t,r){return Object.defineProperty(e,t,{value:r,enumerable:!0,configurable:!0,writable:!0}),e[t]}try{s({},"")}catch(e){s=function(e,t,r){return e[t]=r}}function l(e,t,r,n){var o=t&&t.prototype instanceof y?t:y,i=Object.create(o.prototype),a=new x(n||[]);return i._invoke=function(e,t,r){var n=f;return function(o,i){if(n===_)throw new Error("Generator is already running");if(n===d){if("throw"===o)throw i;return S()}for(r.method=o,r.arg=i;;){var a=r.delegate;if(a){var c=L(a,r);if(c){if(c===h)continue;return c}}if("next"===r.method)r.sent=r._sent=r.arg;else if("throw"===r.method){if(n===f)throw n=d,r.arg;r.dispatchException(r.arg)}else"return"===r.method&&r.abrupt("return",r.arg);n=_;var s=u(e,t,r);if("normal"===s.type){if(n=r.done?d:p,s.arg===h)continue;return{value:s.arg,done:r.done}}"throw"===s.type&&(n=d,r.method="throw",r.arg=s.arg)}}}(e,r,a),i}function u(e,t,r){try{return{type:"normal",arg:e.call(t,r)}}catch(e){return{type:"throw",arg:e}}}e.wrap=l;var f="suspendedStart",p="suspendedYield",_="executing",d="completed",h={};function y(){}function v(){}function b(){}var m={};s(m,i,(function(){return this}));var w=Object.getPrototypeOf,g=w&&w(w(D([])));g&&g!==r&&n.call(g,i)&&(m=g);var O=b.prototype=y.prototype=Object.create(m);function E(e){["next","throw","return"].forEach((function(t){s(e,t,(function(e){return this._invoke(t,e)}))}))}function k(e,t){function r(o,i,a,c){var s=u(e[o],e,i);if("throw"!==s.type){var l=s.arg,f=l.value;return f&&"object"==typeof f&&n.call(f,"__await")?t.resolve(f.__await).then((function(e){r("next",e,a,c)}),(function(e){r("throw",e,a,c)})):t.resolve(f).then((function(e){l.value=e,a(l)}),(function(e){return r("throw",e,a,c)}))}c(s.arg)}var o;this._invoke=function(e,n){function i(){return new t((function(t,o){r(e,n,t,o)}))}return o=o?o.then(i,i):i()}}function L(e,r){var n=e.iterator[r.method];if(n===t){if(r.delegate=null,"throw"===r.method){if(e.iterator.return&&(r.method="return",r.arg=t,L(e,r),"throw"===r.method))return h;r.method="throw",r.arg=new TypeError("The iterator does not provide a 'throw' method")}return h}var o=u(n,e.iterator,r.arg);if("throw"===o.type)return r.method="throw",r.arg=o.arg,r.delegate=null,h;var i=o.arg;return i?i.done?(r[e.resultName]=i.value,r.next=e.nextLoc,"return"!==r.method&&(r.method="next",r.arg=t),r.delegate=null,h):i:(r.method="throw",r.arg=new TypeError("iterator result is not an object"),r.delegate=null,h)}function j(e){var t={tryLoc:e[0]};1 in e&&(t.catchLoc=e[1]),2 in e&&(t.finallyLoc=e[2],t.afterLoc=e[3]),this.tryEntries.push(t)}function P(e){var t=e.completion||{};t.type="normal",delete t.arg,e.completion=t}function x(e){this.tryEntries=[{tryLoc:"root"}],e.forEach(j,this),this.reset(!0)}function D(e){if(e){var r=e[i];if(r)return r.call(e);if("function"==typeof e.next)return e;if(!isNaN(e.length)){var o=-1,a=function r(){for(;++o<e.length;)if(n.call(e,o))return r.value=e[o],r.done=!1,r;return r.value=t,r.done=!0,r};return a.next=a}}return{next:S}}function S(){return{value:t,done:!0}}return v.prototype=b,s(O,"constructor",b),s(b,"constructor",v),v.displayName=s(b,c,"GeneratorFunction"),e.isGeneratorFunction=function(e){var t="function"==typeof e&&e.constructor;return!!t&&(t===v||"GeneratorFunction"===(t.displayName||t.name))},e.mark=function(e){return Object.setPrototypeOf?Object.setPrototypeOf(e,b):(e.__proto__=b,s(e,c,"GeneratorFunction")),e.prototype=Object.create(O),e},e.awrap=function(e){return{__await:e}},E(k.prototype),s(k.prototype,a,(function(){return this})),e.AsyncIterator=k,e.async=function(t,r,n,o,i){void 0===i&&(i=Promise);var a=new k(l(t,r,n,o),i);return e.isGeneratorFunction(r)?a:a.next().then((function(e){return e.done?e.value:a.next()}))},E(O),s(O,c,"Generator"),s(O,i,(function(){return this})),s(O,"toString",(function(){return"[object Generator]"})),e.keys=function(e){var t=[];for(var r in e)t.push(r);return t.reverse(),function r(){for(;t.length;){var n=t.pop();if(n in e)return r.value=n,r.done=!1,r}return r.done=!0,r}},e.values=D,x.prototype={constructor:x,reset:function(e){if(this.prev=0,this.next=0,this.sent=this._sent=t,this.done=!1,this.delegate=null,this.method="next",this.arg=t,this.tryEntries.forEach(P),!e)for(var r in this)"t"===r.charAt(0)&&n.call(this,r)&&!isNaN(+r.slice(1))&&(this[r]=t)},stop:function(){this.done=!0;var e=this.tryEntries[0].completion;if("throw"===e.type)throw e.arg;return this.rval},dispatchException:function(e){if(this.done)throw e;var r=this;function o(n,o){return c.type="throw",c.arg=e,r.next=n,o&&(r.method="next",r.arg=t),!!o}for(var i=this.tryEntries.length-1;i>=0;--i){var a=this.tryEntries[i],c=a.completion;if("root"===a.tryLoc)return o("end");if(a.tryLoc<=this.prev){var s=n.call(a,"catchLoc"),l=n.call(a,"finallyLoc");if(s&&l){if(this.prev<a.catchLoc)return o(a.catchLoc,!0);if(this.prev<a.finallyLoc)return o(a.finallyLoc)}else if(s){if(this.prev<a.catchLoc)return o(a.catchLoc,!0)}else{if(!l)throw new Error("try statement without catch or finally");if(this.prev<a.finallyLoc)return o(a.finallyLoc)}}}},abrupt:function(e,t){for(var r=this.tryEntries.length-1;r>=0;--r){var o=this.tryEntries[r];if(o.tryLoc<=this.prev&&n.call(o,"finallyLoc")&&this.prev<o.finallyLoc){var i=o;break}}i&&("break"===e||"continue"===e)&&i.tryLoc<=t&&t<=i.finallyLoc&&(i=null);var a=i?i.completion:{};return a.type=e,a.arg=t,i?(this.method="next",this.next=i.finallyLoc,h):this.complete(a)},complete:function(e,t){if("throw"===e.type)throw e.arg;return"break"===e.type||"continue"===e.type?this.next=e.arg:"return"===e.type?(this.rval=this.arg=e.arg,this.method="return",this.next="end"):"normal"===e.type&&t&&(this.next=t),h},finish:function(e){for(var t=this.tryEntries.length-1;t>=0;--t){var r=this.tryEntries[t];if(r.finallyLoc===e)return this.complete(r.completion,r.afterLoc),P(r),h}},catch:function(e){for(var t=this.tryEntries.length-1;t>=0;--t){var r=this.tryEntries[t];if(r.tryLoc===e){var n=r.completion;if("throw"===n.type){var o=n.arg;P(r)}return o}}throw new Error("illegal catch attempt")},delegateYield:function(e,r,n){return this.delegate={iterator:D(e),resultName:r,nextLoc:n},"next"===this.method&&(this.arg=t),h}},e}(e.exports);try{regeneratorRuntime=t}catch(e){"object"==typeof globalThis?globalThis.regeneratorRuntime=t:Function("r","regeneratorRuntime = r")(t)}}},__webpack_module_cache__={};function __webpack_require__(e){var t=__webpack_module_cache__[e];if(void 0!==t)return t.exports;var r=__webpack_module_cache__[e]={exports:{}};return __webpack_modules__[e](r,r.exports,__webpack_require__),r.exports}__webpack_require__.n=e=>{var t=e&&e.__esModule?()=>e.default:()=>e;return __webpack_require__.d(t,{a:t}),t},__webpack_require__.d=(e,t)=>{for(var r in t)__webpack_require__.o(t,r)&&!__webpack_require__.o(e,r)&&Object.defineProperty(e,r,{enumerable:!0,get:t[r]})},__webpack_require__.o=(e,t)=>Object.prototype.hasOwnProperty.call(e,t);var __webpack_exports__={};(()=>{"use strict";var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__=__webpack_require__(757),_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default=__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);function ownKeys(e,t){var r=Object.keys(e);if(Object.getOwnPropertySymbols){var n=Object.getOwnPropertySymbols(e);t&&(n=n.filter((function(t){return Object.getOwnPropertyDescriptor(e,t).enumerable}))),r.push.apply(r,n)}return r}function _objectSpread(e){for(var t=1;t<arguments.length;t++){var r=null!=arguments[t]?arguments[t]:{};t%2?ownKeys(Object(r),!0).forEach((function(t){_defineProperty(e,t,r[t])})):Object.getOwnPropertyDescriptors?Object.defineProperties(e,Object.getOwnPropertyDescriptors(r)):ownKeys(Object(r)).forEach((function(t){Object.defineProperty(e,t,Object.getOwnPropertyDescriptor(r,t))}))}return e}function _defineProperty(e,t,r){return t in e?Object.defineProperty(e,t,{value:r,enumerable:!0,configurable:!0,writable:!0}):e[t]=r,e}function asyncGeneratorStep(e,t,r,n,o,i,a){try{var c=e[i](a),s=c.value}catch(e){return void r(e)}c.done?t(s):Promise.resolve(s).then(n,o)}function _asyncToGenerator(e){return function(){var t=this,r=arguments;return new Promise((function(n,o){var i=e.apply(t,r);function a(e){asyncGeneratorStep(i,n,o,a,c,"next",e)}function c(e){asyncGeneratorStep(i,n,o,a,c,"throw",e)}a(void 0)}))}}function evalCallbacksOptions(options){for(var callbacksKeysAllowed=["allowOutsideClick","allowEscapeKey","allowEnterKey","loaderHtml","inputOptions","inputValidator","preConfirm","preDeny","didClose","didDestroy","didOpen","didRender","willClose","willOpen"],_i=0,_callbacksKeysAllowed=callbacksKeysAllowed;_i<_callbacksKeysAllowed.length;_i++){var callbackKey=_callbacksKeysAllowed[_i];options.hasOwnProperty(callbackKey)&&("string"==typeof options[callbackKey]||options[callbackKey]instanceof String)&&options[callbackKey]&&""!=options[callbackKey].trim()&&(options[callbackKey]=eval(options[callbackKey]))}}function afterAlertInteraction(e){if(e.confirmed)return"self"===e.onConfirmed.component?void Livewire.find(e.onConfirmed.id).dispatchSelf(e.onConfirmed.listener,e.result):void Livewire.dispatchTo(e.onConfirmed.component,e.onConfirmed.listener,e.result);if(e.isDenied)return"self"===e.onDenied.component?void Livewire.find(e.onDenied.id).dispatchSelf(e.onDenied.listener,e.result):void Livewire.dispatchTo(e.onDenied.component,e.onDenied.listener,e.result);if(e.onProgressFinished&&e.dismiss===Swal.DismissReason.timer)return"self"===e.onProgressFinished.component?void Livewire.find(e.onProgressFinished.id).dispatchSelf(e.onProgressFinished.listener,e.result):void Livewire.dispatchTo(e.onProgressFinished.component,e.onProgressFinished.listener,e.result);if(e.onDismissed){if("self"===e.onDismissed.component)return void Livewire.find(e.onDismissed.id).dispatch(e.onDismissed.listener,e.result);Livewire.dispatchTo(e.onDismissed.component,e.onDismissed.listener,e.result)}}window.addEventListener("alert",function(){var e=_asyncToGenerator(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark((function e(t){var r,n,o,i,a,c,s,l;return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return o=t.detail.message,i=null!==(r=t.detail.type)&&void 0!==r?r:null,a=t.detail.data,c=t.detail.events,evalCallbacksOptions(s=t.detail.options),e.next=8,Swal.fire(_objectSpread({title:o,icon:i},s));case 8:afterAlertInteraction(_objectSpread(_objectSpread(_objectSpread({confirmed:(l=e.sent).isConfirmed,denied:l.isDenied,dismiss:l.dismiss,result:_objectSpread(_objectSpread({},l),{},{data:_objectSpread(_objectSpread({},a),{},{inputAttributes:null!==(n=s.inputAttributes)&&void 0!==n?n:null})})},c),l),s));case 10:case"end":return e.stop()}}),e)})));return function(t){return e.apply(this,arguments)}}()),window.flashAlert=function(){var e=_asyncToGenerator(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark((function e(t){var r,n,o,i,a,c,s;return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap((function(e){for(;;)switch(e.prev=e.next){case 0:return i=t.events,a=t.events.data,evalCallbacksOptions(c=t.options),e.next=6,Swal.fire(_objectSpread({title:null!==(r=t.message)&&void 0!==r?r:"",icon:null!==(n=t.type)&&void 0!==n?n:null},c));case 6:afterAlertInteraction(_objectSpread(_objectSpread({confirmed:(s=e.sent).isConfirmed,denied:s.isDenied,dismiss:s.dismiss,result:_objectSpread(_objectSpread({},s),{},{data:_objectSpread(_objectSpread({},a),{},{inputAttributes:null!==(o=c.inputAttributes)&&void 0!==o?o:null})})},i),t.options));case 8:case"end":return e.stop()}}),e)})));return function(t){return e.apply(this,arguments)}}()})()})();
+</script>
+
+    <div wire:snapshot="{&quot;data&quot;:{&quot;activeComponent&quot;:null,&quot;components&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}]},&quot;memo&quot;:{&quot;id&quot;:&quot;zTahUkur3UIJa7kuQfwx&quot;,&quot;name&quot;:&quot;slide-over-pro&quot;,&quot;path&quot;:&quot;login&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;en&quot;},&quot;checksum&quot;:&quot;a62abc98989312b07480a3436e80dea17dc25fdd898cdcd083ab9dcb6caa5beb&quot;}" wire:effects="{&quot;listeners&quot;:[&quot;slide-over.open&quot;]}" wire:id="zTahUkur3UIJa7kuQfwx" x-data="WepOverlayComponent({ type: 'slide-over', animationOverlapDuration: 500 })"
+     @keydown.window.escape="closeIf('close-on-escape')"
+     x-show="open"
+     class="wep-slide-over"
+     :class="{ [getElementAttribute('component-class')]: true, 'wep-slide-over-top': onTop }"
+     aria-modal="true"
+     x-cloak>
+    <div x-show="open"
+         @click="open = false"
+         x-transition:enter="enter"
+         x-transition:enter-start="start"
+         x-transition:enter-end="end"
+         x-transition:leave="leave"
+         x-transition:leave-start="start"
+         x-transition:leave-end="end"
+         class="wep-slide-over-backdrop"
+         aria-hidden="true">
+    </div>
+
+    <div class="wep-slide-over-container">
+        <div class="wep-slide-over-container-backdrop" @click="closeIf('close-on-backdrop-click')" aria-hidden="true"></div>
+        <div class="wep-slide-over-container-inner">
+            <div x-show="open && showActiveComponent"
+                 x-trap.inert.noscroll="getElementBehavior('trap-focus') && open"
+                 x-transition:enter="enter"
+                 x-transition:enter-start="start"
+                 x-transition:enter-end="end"
+                 x-transition:leave="leave"
+                 x-transition:leave-start="start"
+                 x-transition:leave-end="end"
+                 x-bind:class="activeComponentWidth"
+                 class="wep-slide-over-container-inner-wrap">
+
+                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            </div>
+        </div>
+    </div>
+</div>
+    <div wire:snapshot="{&quot;data&quot;:{&quot;activeComponent&quot;:null,&quot;components&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}]},&quot;memo&quot;:{&quot;id&quot;:&quot;5bXmpJeQHpD1WGH3EOHa&quot;,&quot;name&quot;:&quot;modal-pro&quot;,&quot;path&quot;:&quot;login&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;en&quot;},&quot;checksum&quot;:&quot;1fce90a22bbb5124553d863ebebe6654aac48dd1957b4e97eb5dd349187213c2&quot;}" wire:effects="{&quot;listeners&quot;:[&quot;modal.open&quot;]}" wire:id="5bXmpJeQHpD1WGH3EOHa" x-data="WepOverlayComponent({ type: 'modal', animationOverlapDuration: 350 })"
+     @keydown.window.escape="closeIf('close-on-escape')"
+     x-show="open"
+     class="wep-modal"
+     :class="getElementAttribute('component-class')"
+     aria-modal="true"
+     x-cloak>
+    <div x-show="open"
+         x-transition:enter="enter"
+         x-transition:enter-start="start"
+         x-transition:enter-end="end"
+         x-transition:leave="leave"
+         x-transition:leave-start="start"
+         x-transition:leave-end="end"
+         class="wep-modal-backdrop"
+         aria-hidden="true">
+    </div>
+
+    <div class="wep-modal-container">
+        <div class="wep-modal-inner-container">
+            <div x-show="open && showActiveComponent"
+                 x-transition:enter="enter"
+                 x-transition:enter-start="start"
+                 x-transition:enter-end="end"
+                 x-transition:leave="leave"
+                 x-transition:leave-start="start"
+                 x-transition:leave-end="end"
+                 x-bind:class="activeComponentWidth"
+                 x-trap.inert.noscroll="getElementBehavior('trap-focus') && open"
+                 class="wep-modal-content">
+                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://www.honeysplace.com/vendor/wire-elements-pro/js/overlay-component.js"></script>
+    <script src="/js/product-image-lightbox.js?v=1781088553"></script>
+    <script>
+        function waitForElm(selector) {
+            return new Promise(resolve => {
+                if (document.querySelector(selector)) {
+                    return resolve(document.querySelector(selector));
+                }
+
+                const observer = new MutationObserver(mutations => {
+                    if (document.querySelector(selector)) {
+                        observer.disconnect();
+                        resolve(document.querySelector(selector));
+                    }
+                });
+
+                // If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
+            });
+        }
+    </script>
+<script src="https://www.honeysplace.com/vendor/livewire/livewire.min.js?id=d17cab3a"   data-csrf="aJS4anGFWMFGlM8VbVJVpfBaCslpkr8N6OuMJhkH" data-update-uri="/livewire/update" data-navigate-once="true"></script>
+</body>
+
+</html>
