@@ -1,9 +1,26 @@
-/** Claude Haiku 4.5 — per million tokens */
-export const HAIKU_INPUT_PER_M = 1
-export const HAIKU_OUTPUT_PER_M = 5
+import {
+  DEFAULT_AI_INPUT_PRICE_PER_M,
+  DEFAULT_AI_OUTPUT_PRICE_PER_M,
+  type AiQcPricingSettings,
+  type AiQcRates,
+  resolveAiQcRates,
+} from '../config/aiQc'
 
-export function tokenCostUsd(inputTokens: number, outputTokens: number): number {
-  return (inputTokens / 1_000_000) * HAIKU_INPUT_PER_M + (outputTokens / 1_000_000) * HAIKU_OUTPUT_PER_M
+export { DEFAULT_AI_INPUT_PRICE_PER_M as HAIKU_INPUT_PER_M }
+export { DEFAULT_AI_OUTPUT_PRICE_PER_M as HAIKU_OUTPUT_PER_M }
+
+export function tokenCostUsd(
+  inputTokens: number,
+  outputTokens: number,
+  settings?: Partial<AiQcPricingSettings> | null,
+): number {
+  const rates: AiQcRates = settings ? resolveAiQcRates(settings) : {
+    inputPerM: DEFAULT_AI_INPUT_PRICE_PER_M,
+    outputPerM: DEFAULT_AI_OUTPUT_PRICE_PER_M,
+  }
+  const input = Math.max(0, inputTokens)
+  const output = Math.max(0, outputTokens)
+  return (input / 1_000_000) * rates.inputPerM + (output / 1_000_000) * rates.outputPerM
 }
 
 export function formatUsd(n: number): string {

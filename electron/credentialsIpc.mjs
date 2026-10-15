@@ -64,6 +64,110 @@ export function registerCredentialsIpc() {
     return { groups }
   })
 
+  function buildGroupUpdates(meta, values) {
+    const allowed = new Set(meta.fieldKeys)
+    const updates = {}
+    for (const [key, value] of Object.entries(values ?? {})) {
+      if (!allowed.has(key)) continue
+      if (typeof value !== 'string') continue
+      if (value === '') continue
+      updates[key] = value
+    }
+    return updates
+  }
+
+  ipcMain.handle('credentials:saveAndTest', async (event, payload) => {
+    const groupId = payload?.groupId ?? payload?.vendorId
+    const values = payload?.values
+    if (!groupId || typeof values !== 'object' || values === null) {
+      return { ok: false, error: 'Invalid save payload.', log: [] }
+    }
+    const meta = groupMeta(groupId)
+    if (!meta) {
+      return { ok: false, error: 'Unknown credential group.', log: [] }
+    }
+
+    const updates = buildGroupUpdates(meta, values)
+    if (Object.keys(updates).length === 0) {
+      return { ok: false, error: 'Enter credential values before saving.', log: [] }
+    }
+
+    try {
+      const existing = await getDecryptedValues(meta.fieldKeys)
+      const merged = { ...existing, ...updates }
+      const missing = meta.requiredKeys.filter((k) => !String(merged[k] ?? '').trim())
+      if (missing.length > 0) {
+        return { ok: false, error: 'Fill all required fields before saving.', log: [] }
+      }
+
+      const emitLog = (line) => {
+        const text = String(line)
+        pushAppLog(event.sender, { category: 'CREDENTIALS', message: text })
+        if (meta.testHandler === 'amazon_sp_api') {
+          pushAppLog(event.sender, { category: 'SCRAPING', message: text })
+        }
+        event.sender.send('credentials:testLog', { groupId, line: text })
+      }
+
+      pushAppLog(event.sender, {
+        category: 'CREDENTIALS',
+        message: `Credential save & test started — ${groupId}`,
+      })
+      if (meta.testHandler === 'amazon_sp_api') {
+        pushAppLog(event.sender, {
+          category: 'SCRAPING',
+          message: 'Amazon SP-API connection test started',
+        })
+      }
+
+      const headlessScraping =
+        typeof payload?.headlessScraping === 'boolean' ? payload.headlessScraping : true
+      const outcome = await runCredentialTestHandler(
+        meta.testHandler,
+        merged,
+        meta.testConfig,
+        emitLog,
+        { headlessScraping },
+      )
+      const log = Array.isArray(outcome.log) ? outcome.log.map(String) : []
+
+      if (!outcome.ok) {
+        if (meta.testHandler === 'amazon_sp_api') {
+          pushAppLog(event.sender, {
+            category: 'ERROR',
+            message: 'Amazon SP-API connection test failed',
+            detail: String(outcome.message ?? ''),
+          })
+        }
+        return {
+          ok: false,
+          error: String(outcome.message ?? 'Credential test failed.'),
+          log,
+        }
+      }
+
+      const toSave = {}
+      for (const key of meta.fieldKeys) {
+        const value = String(merged[key] ?? '').trim()
+        if (value) toSave[key] = value
+      }
+      await saveCredentialFields(toSave, meta.secretKeys)
+      await afterCredentialGroupsSaved([groupId])
+
+      if (meta.testHandler === 'amazon_sp_api') {
+        pushAppLog(event.sender, {
+          category: 'SCRAPING',
+          message: 'Amazon SP-API connection test completed successfully',
+        })
+      }
+
+      return { ok: true, message: String(outcome.message ?? ''), log }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Save & test failed.'
+      return { ok: false, error: message, log: [message] }
+    }
+  })
+
   ipcMain.handle('credentials:save', async (_event, payload) => {
     const groupId = payload?.groupId ?? payload?.vendorId
     const values = payload?.values
@@ -75,14 +179,7 @@ export function registerCredentialsIpc() {
       return { ok: false, error: 'Unknown credential group.' }
     }
 
-    const allowed = new Set(meta.fieldKeys)
-    const updates = {}
-    for (const [key, value] of Object.entries(values)) {
-      if (!allowed.has(key)) continue
-      if (typeof value !== 'string') continue
-      if (value === '') continue
-      updates[key] = value
-    }
+    const updates = buildGroupUpdates(meta, values)
 
     if (Object.keys(updates).length === 0) {
       return { ok: false, error: 'Enter at least one value to save.' }
@@ -218,7 +315,7 @@ export function registerCredentialsIpc() {
       if (meta.testHandler === 'anthropic_api') {
         pushAppLog(event.sender, {
           category: 'AI',
-          message: 'Claude AI connection test started',
+          message: 'Claude Haiku 5.5 connection test started',
         })
       }
       const headlessScraping =
@@ -239,8 +336,8 @@ export function registerCredentialsIpc() {
         pushAppLog(event.sender, {
           category: outcome.ok ? 'AI' : 'ERROR',
           message: outcome.ok
-            ? 'Claude AI connection test completed successfully'
-            : 'Claude AI connection test failed',
+            ? 'Claude Haiku 5.5 connection test completed successfully'
+            : 'Claude Haiku 5.5 connection test failed',
           detail: String(outcome.message ?? ''),
         })
       }

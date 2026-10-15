@@ -14,9 +14,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     pauseBatch: (payload) => ipcRenderer.invoke('qc:pauseBatch', payload),
     resumeBatch: (payload) => ipcRenderer.invoke('qc:resumeBatch', payload),
     stopBatch: (payload) => ipcRenderer.invoke('qc:stopBatch', payload),
+    clearWorkspace: () => ipcRenderer.invoke('qc:clearWorkspace'),
     getSession: (payload) => ipcRenderer.invoke('qc:getSession', payload),
     exportBatch: (request) => ipcRenderer.invoke('qc:exportBatch', request),
     processRow: (payload) => ipcRenderer.invoke('qc:processRow', payload),
+    resetAiMetrics: () => ipcRenderer.invoke('qc:resetAiMetrics'),
+    getAiUsageMetrics: () => ipcRenderer.invoke('qc:getAiUsageMetrics'),
+    runPipelineExport: (payload) => ipcRenderer.invoke('qc:runPipelineExport', payload),
+    revealExportFile: (payload) => ipcRenderer.invoke('qc:revealExportFile', payload),
     processBatchInBackground: (payload) =>
       ipcRenderer.invoke('qc:processBatchInBackground', payload),
     onBatchProcessing: (callback) => {
@@ -30,7 +35,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     login: (request) => ipcRenderer.invoke('vendorSession:login', request),
   },
   errorEngine: {
-    cancelSession: () => ipcRenderer.invoke('errorEngine:cancelSession'),
+    cancelSession: (payload) => ipcRenderer.invoke('errorEngine:cancelSession', payload),
     relogin: (payload) => ipcRenderer.invoke('errorEngine:relogin', payload),
     executeScrape: (payload) => ipcRenderer.invoke('errorEngine:executeScrape', payload),
   },
@@ -39,6 +44,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getDisplayValues: () => ipcRenderer.invoke('credentials:getDisplayValues'),
     getFormValues: () => ipcRenderer.invoke('credentials:getFormValues'),
     save: (groupId, values) => ipcRenderer.invoke('credentials:save', { groupId, values }),
+    saveAndTest: (groupId, values, options) =>
+      ipcRenderer.invoke('credentials:saveAndTest', {
+        groupId,
+        values,
+        headlessScraping: options?.headlessScraping,
+      }),
     saveAll: (items) => ipcRenderer.invoke('credentials:saveAll', { items }),
     clear: (groupId) => ipcRenderer.invoke('credentials:clear', { groupId }),
     test: (groupId, options) =>

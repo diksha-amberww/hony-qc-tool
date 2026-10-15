@@ -6,6 +6,19 @@ export const QC_VALIDATE_PREVIEW_ROWS = 100
 const ALLOWED_FILE_EXTENSIONS = new Set(['.csv', '.txt', '.tsv'])
 const ASIN_RE = /^B[0-9A-Z]{9}$/i
 const UPC_RE = /^\d{8,14}$/
+
+function asinStartsWithDigit(value) {
+  return /^\d/.test(value)
+}
+
+function isValidAsinValue(value) {
+  if (asinStartsWithDigit(value)) return true
+  return ASIN_RE.test(value)
+}
+
+function shouldTrackAsinDuplicate(value) {
+  return value.length > 0 && !asinStartsWithDigit(value)
+}
 const DEFAULT_MAX_ERRORS = 200
 
 function splitLine(line) {
@@ -91,15 +104,21 @@ function parseDelimitedText(raw, fields, maxErrors = DEFAULT_MAX_ERRORS) {
 
 function validateRows(rows, fields, maxErrors = DEFAULT_MAX_ERRORS) {
   const errors = []
+  const duplicateAsinWarnings = []
   if (fields.length === 0) {
-    return ['No input fields selected. Save at least one field first.']
+    return {
+      errors: ['No input fields selected. Save at least one field first.'],
+      duplicateAsinWarnings: [],
+    }
   }
   if (rows.length === 0) {
-    return ['No valid data rows to validate']
+    return { errors: ['No valid data rows to validate'], duplicateAsinWarnings: [] }
   }
-  const uniqueField = fields.find((f) => f.id === 'part_sku') ?? fields[0]
-  const seen = new Set()
+  const asinField = fields.find((f) => f.id === 'asin')
+  const skuField = fields.find((f) => f.id === 'part_sku')
+  const seenAsins = new Set()
   let truncated = false
+  let duplicateTruncated = false
   for (let index = 0; index < rows.length; index++) {
     if (errors.length >= maxErrors) {
       truncated = true
@@ -116,7 +135,7 @@ function validateRows(rows, fields, maxErrors = DEFAULT_MAX_ERRORS) {
         }
         continue
       }
-      if (field.kind === 'asin' && !ASIN_RE.test(value)) {
+      if (field.kind === 'asin' && !isValidAsinValue(value)) {
         if (
           !pushCapped(
             errors,
@@ -136,23 +155,35 @@ function validateRows(rows, fields, maxErrors = DEFAULT_MAX_ERRORS) {
       }
     }
     if (truncated) break
-    const key = (row[uniqueField.id] ?? '').trim()
-    if (key) {
-      if (seen.has(key)) {
-        if (
-          !pushCapped(errors, `Row ${rowNum}: duplicate ${uniqueField.label} "${key}"`, maxErrors)
-        ) {
-          truncated = true
-          break
+    if (asinField) {
+      const asin = (row[asinField.id] ?? '').trim()
+      if (shouldTrackAsinDuplicate(asin)) {
+        const asinKey = asin.toUpperCase()
+        if (seenAsins.has(asinKey)) {
+          if (duplicateAsinWarnings.length < maxErrors) {
+            const sku = skuField ? (row[skuField.id] ?? '').trim() : ''
+            const skuNote = sku ? ` (SKU ${sku})` : ''
+            duplicateAsinWarnings.push(
+              `Row ${rowNum}: duplicate ASIN "${asin}"${skuNote} — remove the SKU or continue anyway`,
+            )
+          } else {
+            duplicateTruncated = true
+          }
+        } else {
+          seenAsins.add(asinKey)
         }
       }
-      seen.add(key)
     }
   }
   if (truncated) {
     errors.push(`… additional validation issues omitted (showing first ${maxErrors})`)
   }
-  return errors
+  if (duplicateTruncated) {
+    duplicateAsinWarnings.push(
+      `… additional duplicate ASIN rows omitted (showing first ${maxErrors})`,
+    )
+  }
+  return { errors, duplicateAsinWarnings }
 }
 
 function stripBom(raw) {
@@ -238,9 +269,15 @@ export function runUploadValidation(request) {
   if (rows.length < 1 && parseErrors.length === 0) {
     errors.push('At least one data row is required')
   }
-  errors.push(...validateRows(rows, fields))
+  const { errors: rowErrors, duplicateAsinWarnings } = validateRows(rows, fields)
+  errors.push(...rowErrors)
   if (errors.length > 0) {
     return { ok: false, errors }
   }
-  return { ok: true, rows, fields }
+  return {
+    ok: true,
+    rows,
+    fields,
+    duplicateAsinWarnings: duplicateAsinWarnings.length > 0 ? duplicateAsinWarnings : undefined,
+  }
 }

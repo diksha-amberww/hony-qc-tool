@@ -94,13 +94,14 @@ export function ErrorEngineProvider({ children }: { children: ReactNode }) {
           return false
         }
 
+        const headless = settings.headlessScraping
         const result = await runErrorEngineRecovery(
           scrapeError,
           settings,
           {
-            cancelSession: cancelVendorSession,
+            cancelSession: () => cancelVendorSession({ headless }),
             relogin: (attempt, vendorLoginRequired) =>
-              reloginVendorSession(attempt, vendorLoginRequired),
+              reloginVendorSession(attempt, vendorLoginRequired, { headless }),
           },
           {
             onPhase,

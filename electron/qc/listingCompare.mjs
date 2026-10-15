@@ -1,3 +1,6 @@
+import { deriveQcVerdictFromComparisons } from '../../scripts/qcVerdictCore.mjs'
+import { brandNamesMatch } from '../../scripts/brandNameMatch.mjs'
+
 const DEFAULT_PRICE_VARIANCE_PERCENT = 15
 
 function normalizeLoose(value) {
@@ -88,17 +91,13 @@ function comparisonOutcomeForKey(key, sourceValue, targetValue, thresholds, bran
     }
     case 'brand': {
       if (isBrandAliasMatch(sourceValue, targetValue, brandAliases)) return 'MATCH'
-      return exactCompareOutcome(sourceValue, targetValue)
+      if (isReviewSentinel(sourceValue) || isReviewSentinel(targetValue)) return 'REVIEW'
+      if (brandNamesMatch(sourceValue, targetValue)) return 'MATCH'
+      return 'MISMATCH'
     }
     default:
       return exactCompareOutcome(sourceValue, targetValue)
   }
-}
-
-function deriveVerdict(comparisons) {
-  if (comparisons.some((c) => c.outcome === 'MISMATCH')) return 'FAIL'
-  if (comparisons.some((c) => c.outcome === 'REVIEW')) return 'MANUAL_REVIEW'
-  return 'PASS'
 }
 
 function formatPriceUsd(value) {
@@ -223,7 +222,7 @@ export function compareListings(vendorExtract, amazonExtract, row, thresholds, b
 
   return {
     identity,
-    verdict: deriveVerdict(comparisons),
+    verdict: deriveQcVerdictFromComparisons(comparisons),
     comparisons,
     asinExtract: amazonExtract,
     vendorExtract,

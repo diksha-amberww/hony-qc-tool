@@ -11,16 +11,19 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "electron:dev": "node scripts/dev-electron.mjs",
-    "electron:build": "npm run build && electron-builder"
+    "electron:build": "npm run build && electron-builder",
+    "scrape:honeys": "node scripts/scrape-honeys-product.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^9.4.0",
     "@mui/material": "^9.4.0",
+    "cheerio": "^1.2.0",
     "exceljs": "^4.4.0",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",

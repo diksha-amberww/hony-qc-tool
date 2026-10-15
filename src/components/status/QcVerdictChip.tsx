@@ -11,11 +11,35 @@ export function verdictTone(verdict: QcVerdict): QcVerdictTone {
 }
 
 export function formatVerdictLabel(verdict: QcVerdict): string {
+  if (verdict === 'MANUAL_REVIEW') return 'MANUAL REVIEW'
   return verdict.replace(/_/g, ' ')
 }
 
+const MANUAL_REVIEW_ORANGE = '#f59e0b'
+
 /** Dark-mode: surrounding UI bg, colored text + border. Light: filled chip. */
-export function verdictChipSx(tone: QcVerdictTone, mode: 'light' | 'dark'): SxProps<Theme> {
+export function verdictChipSx(verdict: QcVerdict, mode: 'light' | 'dark'): SxProps<Theme> {
+  if (verdict === 'MANUAL_REVIEW') {
+    if (mode === 'dark') {
+      return {
+        bgcolor: 'transparent !important',
+        backgroundColor: 'transparent !important',
+        border: '1px solid',
+        borderColor: MANUAL_REVIEW_ORANGE,
+        color: MANUAL_REVIEW_ORANGE,
+        '& .MuiChip-label': { color: 'inherit', px: 0.85, fontWeight: 800 },
+      }
+    }
+    return {
+      bgcolor: MANUAL_REVIEW_ORANGE,
+      color: '#1a1a1a',
+      border: '1px solid',
+      borderColor: '#d97706',
+      '& .MuiChip-label': { color: 'inherit', fontWeight: 800 },
+    }
+  }
+
+  const tone = verdictTone(verdict)
   if (mode !== 'dark') return {}
 
   return {
@@ -41,7 +65,6 @@ export type QcVerdictChipProps = {
 
 /**
  * Shared PASS / FAIL / MANUAL REVIEW chip for Live Output, Export, and Sandbox.
- * Dark mode uses outline + colored text on a transparent (surrounding) background.
  */
 export const QcVerdictChip = memo(function QcVerdictChip({
   verdict,
@@ -54,6 +77,7 @@ export const QcVerdictChip = memo(function QcVerdictChip({
   const mode = theme.palette.mode
   const tone = verdictTone(verdict)
   const isDark = mode === 'dark'
+  const isManual = verdict === 'MANUAL_REVIEW'
 
   const densitySx: SxProps<Theme> =
     density === 'compact'
@@ -65,9 +89,13 @@ export const QcVerdictChip = memo(function QcVerdictChip({
       {...rest}
       size={size}
       label={formatVerdictLabel(verdict)}
-      color={tone}
-      variant={isDark ? 'outlined' : 'filled'}
-      sx={[densitySx, verdictChipSx(tone, mode), ...(Array.isArray(sx) ? sx : sx ? [sx] : [])] as SxProps<Theme>}
+      color={isManual ? undefined : tone}
+      variant={isManual || isDark ? 'outlined' : 'filled'}
+      sx={[
+        densitySx,
+        verdictChipSx(verdict, mode),
+        ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+      ] as SxProps<Theme>}
     />
   )
 })

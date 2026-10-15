@@ -2,7 +2,13 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { app } from 'electron'
 import { getDecryptedValues } from '../credentialsStore.mjs'
-import { HoneysCookieJar } from './honeysCookieJar.mjs'
+import {
+  applyJarCookiesToHeaders,
+  HoneysCookieJar,
+  syncElectronSessionToHoneysJar,
+} from './honeysCookieJar.mjs'
+import { clearHoneysPortalPersistPartition } from './honeysPortalBrowser.mjs'
+import { honeysSessionFilePath } from './honeysUserDataPath.mjs'
 import {
   loginHoneysPlaceWithBrowser,
   isChooseAccountUrl,
@@ -19,19 +25,49 @@ const DEFAULT_CONFIRM_PATH = '/choose-account'
 const DEFAULT_HOME_PATH = '/home'
 const SESSION_FILE = 'honeys-portal-session.json'
 
+export const HONEYS_CHROME_USER_AGENT =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+
 const BROWSER_HEADERS = {
   accept:
     'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
   'accept-language': 'en-US,en;q=0.9',
-  'user-agent':
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+  'user-agent': HONEYS_CHROME_USER_AGENT,
+}
+
+/**
+ * Headers for a top-level document navigation (search / product pages).
+ * @param {string} [referer]
+ */
+export function honeysDocumentNavigationHeaders(referer) {
+  const headers = {
+    'user-agent': HONEYS_CHROME_USER_AGENT,
+    accept:
+      'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'accept-language': 'en-US,en;q=0.9',
+    'sec-fetch-dest': 'document',
+    'sec-fetch-mode': 'navigate',
+    'sec-fetch-site': 'same-origin',
+    'sec-fetch-user': '?1',
+    'upgrade-insecure-requests': '1',
+    'cache-control': 'max-age=0',
+  }
+  if (referer) headers.referer = referer
+  return headers
 }
 
 /** @type {HoneysCookieJar | null} */
 let activeJar = null
 
 function sessionPath() {
-  return path.join(app.getPath('userData'), SESSION_FILE)
+  try {
+    if (app?.isReady?.()) {
+      return path.join(app.getPath('userData'), SESSION_FILE)
+    }
+  } catch {
+    /* app not ready */
+  }
+  return honeysSessionFilePath()
 }
 
 function collapseDuplicateSlashes(url) {
@@ -147,26 +183,64 @@ async function persistSession(jar, meta) {
   await fs.writeFile(sessionPath(), JSON.stringify(payload, null, 2), 'utf8')
 }
 
+function emitFetchDebug(onLogLine, message) {
+  console.log(message)
+  if (typeof onLogLine === 'function') {
+    onLogLine(message)
+  }
+}
+
+/**
+ * @param {HoneysCookieJar | null} jar
+ * @param {string} url
+ * @param {RequestInit & { timeoutMs?: number, onLogLine?: (line: string) => void }} options
+ */
 async function fetchWithJar(jar, url, options = {}) {
+  const { onLogLine, timeoutMs: timeoutOverride, ...fetchOptions } = options
   const headers = {
     ...BROWSER_HEADERS,
-    ...(options.headers ?? {}),
+    ...(fetchOptions.headers ?? {}),
   }
-  const cookieHeader = jar.headerFor(url)
-  if (cookieHeader) headers.cookie = cookieHeader
+
+  const storedCount = jar?.countStored?.() ?? 0
+  const cookieHeader = jar ? applyJarCookiesToHeaders(headers, jar, url) : ''
+  const cookieNames = jar?.cookieNamesForUrl?.(url) ?? []
+
+  emitFetchDebug(
+    onLogLine,
+    `DEBUG: Session jar has ${storedCount} stored cookie(s); attaching ${cookieNames.length} cookie(s) to request`,
+  )
+  emitFetchDebug(
+    onLogLine,
+    `DEBUG: Attaching cookie names: ${cookieNames.length ? cookieNames.join(', ') : '(none)'}`,
+  )
+  emitFetchDebug(onLogLine, `DEBUG: Request URL: ${url}`)
+  if (cookieNames.length === 0) {
+    emitFetchDebug(
+      onLogLine,
+      'DEBUG: Cookie header is EMPTY — server will treat this request as unauthenticated',
+    )
+  }
 
   const controller = new AbortController()
-  const timeoutMs = options.timeoutMs ?? 45_000
+  const timeoutMs = timeoutOverride ?? 45_000
   const timer = setTimeout(() => controller.abort(), timeoutMs)
 
   try {
     const res = await fetch(url, {
-      ...options,
+      ...fetchOptions,
       headers,
-      redirect: options.redirect ?? 'follow',
+      redirect: fetchOptions.redirect ?? 'follow',
       signal: controller.signal,
     })
-    jar.ingest(res, url)
+    if (jar) jar.ingest(res, url)
+    emitFetchDebug(
+      onLogLine,
+      `DEBUG: HTTP response status=${res.status} finalUrl=${res.url}`,
+    )
+    if (res.url && res.url !== url) {
+      emitFetchDebug(onLogLine, `DEBUG: Redirected from ${url} → ${res.url}`)
+    }
     return res
   } finally {
     clearTimeout(timer)
@@ -225,6 +299,46 @@ export async function clearHoneysSession() {
   } catch {
     // no file
   }
+  try {
+    const creds = await loadPortalCredentials()
+    const origin = creds.origin ?? new URL(creds.loginUrl).origin
+    await clearHoneysPortalPersistPartition(origin)
+  } catch {
+    // credentials or partition cleanup unavailable
+  }
+}
+
+/**
+ * Refresh in-memory + on-disk session cookies from the shared portal browser partition.
+ * @param {import('electron').WebContents} webContents
+ * @param {string} [portalOrigin]
+ */
+export async function refreshHoneysJarFromBrowser(webContents, portalOrigin) {
+  if (!webContents || webContents.isDestroyed()) return
+  const origin =
+    portalOrigin ??
+    (() => {
+      try {
+        return new URL(webContents.getURL()).origin
+      } catch {
+        return ''
+      }
+    })()
+  if (!origin) return
+
+  const creds = await loadPortalCredentials()
+  const jar = activeJar ?? new HoneysCookieJar()
+  await syncElectronSessionToHoneysJar(jar, webContents.session, origin)
+  if (jar.countStored() === 0) return
+
+  activeJar = jar
+  const savedAt = Date.now()
+  await persistSession(jar, {
+    savedAt,
+    portalUrl: creds.portalBase,
+    email: creds.email,
+    ttlMinutes: creds.ttlMinutes ?? 120,
+  })
 }
 
 /**
@@ -304,6 +418,7 @@ export async function ensureHoneysPortalSession(opts = {}) {
     password: creds.password,
     headless,
     freshSession: opts.freshSession !== false,
+    keepBrowserForScraping: opts.keepBrowserForScraping === true,
     log,
   })
 
@@ -329,12 +444,59 @@ export async function ensureHoneysPortalSession(opts = {}) {
  * @param {string} url
  * @param {RequestInit & { timeoutMs?: number }} [options]
  */
+/**
+ * Load cookies from honeys-portal-session.json (same file as credential login test).
+ * @returns {Promise<HoneysCookieJar | null>}
+ */
+export async function loadSessionJarFromDisk() {
+  const persisted = await loadPersistedSession()
+  return persisted?.jar ?? null
+}
+
+/** Absolute path to honeys-portal-session.json (under %APPDATA%\\HonyQCTool when unset). */
+export function getHoneysPortalSessionFilePath() {
+  return sessionPath()
+}
+
 export async function honeysAuthenticatedFetch(url, options = {}) {
-  if (!activeJar) {
-    const session = await ensureHoneysPortalSession({ reuseSession: true })
-    if (!session.ok) {
-      throw new Error(session.error ?? 'Not authenticated')
+  const sessionFile = getHoneysPortalSessionFilePath()
+  const { onLogLine } = options
+  const persisted = await loadPersistedSession()
+
+  if (persisted?.jar) {
+    activeJar = persisted.jar
+    emitFetchDebug(
+      onLogLine,
+      `DEBUG: Loaded session cookies from ${sessionFile} (${activeJar.countStored()} stored cookie(s))`,
+    )
+  } else {
+    emitFetchDebug(
+      onLogLine,
+      `DEBUG: No session file at ${sessionFile} (or file has no cookies)`,
+    )
+    if (!activeJar) {
+      const session = await ensureHoneysPortalSession({
+        reuseSession: true,
+        onLogLine,
+      })
+      if (!session.ok) {
+        throw new Error(session.error ?? 'Not authenticated')
+      }
+      emitFetchDebug(
+        onLogLine,
+        `DEBUG: Active session jar after login (${activeJar?.countStored?.() ?? 0} stored cookie(s))`,
+      )
+    } else {
+      emitFetchDebug(
+        onLogLine,
+        `DEBUG: Using in-memory session jar (${activeJar.countStored()} stored cookie(s))`,
+      )
     }
   }
+
+  if (!activeJar) {
+    throw new Error('Honey\'s Place session jar is not available.')
+  }
+
   return fetchWithJar(activeJar, url, options)
 }

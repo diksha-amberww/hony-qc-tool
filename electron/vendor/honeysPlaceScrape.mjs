@@ -1,17 +1,28 @@
 import {
   ensureHoneysPortalSession,
-  honeysAuthenticatedFetch,
+  getActiveCookieJar,
+  getHoneysPortalSessionFilePath,
   loadPortalCredentials,
+  loadSessionJarFromDisk,
+  refreshHoneysJarFromBrowser,
 } from './honeysPlaceSession.mjs'
 import {
   isHoneysAuthOrBlockPage,
-  isHoneysProductPageHtml,
+  isHoneysProductDetailPage,
   parseHoneysProductHtml,
+  diagnoseEmptyStructuredSearchCards,
+  extractHoneysSearchResultCards,
+  honeysDetailPageMatchesIdentifier,
+  htmlContainsHoneysProductLinks,
+  isHoneysGenericLivewireShell,
+  resolveHoneysSearchProductDetailUrl,
 } from './honeysPlaceParse.mjs'
-import { withHoneysRequestCooldown } from './honeysRequestGate.mjs'
-
-const CATALOG_ACCEPT =
-  'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'
+import {
+  getSharedHoneysPortalBrowserWindow,
+  loadHoneysPortalPageHtml,
+  releaseHoneysPortalBrowserWindow,
+} from './honeysPortalBrowser.mjs'
+import { HoneysPortalSessionExpiredError } from './honeysPortalSessionSignals.mjs'
 
 function pick(row, ...keys) {
   for (const key of keys) {
@@ -21,78 +32,54 @@ function pick(row, ...keys) {
   return ''
 }
 
-function catalogHeaders(referer) {
-  const headers = {
-    accept: CATALOG_ACCEPT,
-    'accept-language': 'en-US,en;q=0.9',
-    'cache-control': 'max-age=0',
-    'upgrade-insecure-requests': '1',
+const NO_MATCHING_PRODUCT = 'No product found with matching SKU/UPC in search results'
+
+/** Row SKU/UPC used for search-result verification (same as manual pick). */
+function searchMatchCriteriaFromRow(row) {
+  return {
+    sku: pick(row, 'part_sku', 'sku', 'model_number', 'modelNumber', 'model'),
+    upc: pick(row, 'upc'),
   }
-  if (referer) headers.referer = referer
-  return headers
 }
 
-function classifyFetchError(err) {
-  const msg = err instanceof Error ? err.message : 'Vendor request failed.'
-  if (err instanceof Error && err.name === 'AbortError') {
+/** Values that must appear on the loaded product detail page. */
+function detailMatchTargetsFromRow(row) {
+  const criteria = searchMatchCriteriaFromRow(row)
+  const targets = []
+  const seen = new Set()
+  for (const value of [criteria.sku, criteria.upc]) {
+    if (!value) continue
+    const id = value.toLowerCase()
+    if (seen.has(id)) continue
+    seen.add(id)
+    targets.push(value)
+  }
+  return targets
+}
+
+function classifyBrowserNavigationError(err) {
+  const msg = err instanceof Error ? err.message : 'Vendor browser navigation failed.'
+  if (/timeout/i.test(msg)) {
     return { kind: 'timeout', error: msg }
   }
   return { kind: 'network', error: msg }
 }
 
-/**
- * @param {Response} res
- * @param {string} html
- */
-function classifyHttpFailure(res, html, context) {
-  if (res.status === 401 || res.status === 403 || isHoneysAuthOrBlockPage(html)) {
+function classifyRenderedHtmlFailure(html, context) {
+  if (isHoneysAuthOrBlockPage(html)) {
     return {
       ok: false,
       kind: 'authentication',
       error: `Vendor session expired or blocked during ${context}.`,
     }
   }
-  if (!res.ok) {
-    return {
-      ok: false,
-      kind: 'network',
-      error: `${context} HTTP ${res.status}`,
-    }
-  }
   return null
 }
 
-/**
- * @param {string} html
- * @param {string} portalUrl
- * @param {string} query
- */
-function findProductUrl(html, portalUrl, query) {
-  const normalizedQuery = query.trim()
-  if (!normalizedQuery) return null
-
-  const escaped = normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  const slugRe = new RegExp(`href="(/product/\\d+/[^"]*${escaped}[^"]*)"`, 'i')
-  const slugMatch = html.match(slugRe)
-  if (slugMatch?.[1]) return `${portalUrl}${slugMatch[1]}`
-
-  const linkRe = /href="(\/product\/\d+\/[^"]+)"/gi
-  let m
-  const needle = normalizedQuery.toLowerCase()
-  while ((m = linkRe.exec(html))) {
-    if (m[1].toLowerCase().includes(needle)) {
-      return `${portalUrl}${m[1]}`
-    }
+function scrapeLog(ctx, message) {
+  if (typeof ctx.onLogLine === 'function') {
+    ctx.onLogLine(message)
   }
-  return null
-}
-
-/**
- * @param {string} url
- * @param {RequestInit & { timeoutMs?: number }} options
- */
-async function gatedHoneysFetch(url, options) {
-  return withHoneysRequestCooldown(() => honeysAuthenticatedFetch(url, options))
 }
 
 /**
@@ -100,109 +87,278 @@ async function gatedHoneysFetch(url, options) {
  */
 export async function honeysPlaceScrapeListing(ctx) {
   const row = ctx.row ?? {}
-  const skuQuery = pick(row, 'part_sku', 'sku', 'upc')
+  const searchCriteria = searchMatchCriteriaFromRow(row)
+  const matchTargets = detailMatchTargetsFromRow(row)
+  const skuQuery = searchCriteria.sku || searchCriteria.upc || ''
+  const headless = ctx.headless !== false
+  const scrapeLogLines = []
+  const log = (message) => {
+    scrapeLogLines.push(message)
+    scrapeLog(ctx, message)
+  }
+  const fail = (payload) => ({
+    ...payload,
+    scrapeLog: scrapeLogLines.join('\n'),
+  })
+
   if (!skuQuery) {
-    return { ok: false, kind: 'parse', error: 'Row is missing SKU/UPC for vendor search.' }
+    return fail({ ok: false, kind: 'parse', error: 'Row is missing SKU/UPC for vendor search.' })
   }
 
-  const session = await ensureHoneysPortalSession({ reuseSession: true })
-  if (!session.ok) {
-    return {
-      ok: false,
-      kind: 'authentication',
-      error: session.error ?? 'Vendor login required.',
-    }
-  }
+  log(`Honey's Place scrape started for SKU/UPC query: ${skuQuery}`)
+  log(`Session cookie file: ${getHoneysPortalSessionFilePath()}`)
+  log('Using Electron browser (Livewire) — not Node fetch — for search and product pages.')
 
-  const creds = await loadPortalCredentials()
-  const portalUrl = creds.portalUrl.replace(/\/+$/, '')
-  const encoded = encodeURIComponent(skuQuery)
-  const searchUrl = `${portalUrl}/advance-search/${encoded}?items%5Bquery%5D=${encoded}`
-
-  let searchRes
-  let searchHtml
   try {
-    searchRes = await gatedHoneysFetch(searchUrl, {
-      method: 'GET',
-      headers: catalogHeaders(`${portalUrl}/home`),
+    const session = await ensureHoneysPortalSession({
+      reuseSession: true,
+      freshSession: false,
+      headless,
+      keepBrowserForScraping: true,
+      onLogLine: log,
     })
-    searchHtml = await searchRes.text()
-  } catch (err) {
-    const classified = classifyFetchError(err)
-    return { ok: false, ...classified }
-  }
-
-  const searchHttpErr = classifyHttpFailure(searchRes, searchHtml, 'search')
-  if (searchHttpErr) return searchHttpErr
-
-  let productUrl = null
-  let productHtml = ''
-  let productPageUrl = ''
-
-  if (isHoneysProductPageHtml(searchHtml) || searchRes.url.includes('/product/')) {
-    productHtml = searchHtml
-    productPageUrl = searchRes.url
-  } else {
-    productUrl = findProductUrl(searchHtml, portalUrl, skuQuery)
-    if (!productUrl) {
-      return { ok: false, kind: 'parse', error: `No product found for ${skuQuery}.` }
-    }
-
-    let productRes
-    try {
-      productRes = await gatedHoneysFetch(productUrl, {
-        method: 'GET',
-        headers: catalogHeaders(searchUrl),
+    if (!session.ok) {
+      return fail({
+        ok: false,
+        kind: 'authentication',
+        error: session.error ?? 'Vendor login required.',
       })
-      productHtml = await productRes.text()
-      productPageUrl = productRes.url
+    }
+
+    const creds = await loadPortalCredentials()
+    const portalUrl = creds.portalUrl.replace(/\/+$/, '')
+    const sessionJar = getActiveCookieJar() ?? (await loadSessionJarFromDisk())
+    if (!sessionJar || sessionJar.countStored() === 0) {
+      return fail({
+        ok: false,
+        kind: 'authentication',
+        error: 'Honey\'s Place session cookies are missing after login.',
+      })
+    }
+
+    const encoded = encodeURIComponent(skuQuery)
+    const searchUrl = `${portalUrl}/advance-search/${encoded}?items%5Bquery%5D=${encoded}`
+
+    let searchHtml = ''
+    let searchResponseUrl = searchUrl
+
+    try {
+      const searchPage = await loadHoneysPortalPageHtml(searchUrl, {
+        headless,
+        log,
+        jar: sessionJar,
+        portalOrigin: portalUrl,
+        waitForProductLinks: true,
+        productLinkTimeoutMs: 15_000,
+      })
+      searchHtml = searchPage.html
+      searchResponseUrl = searchPage.finalUrl || searchUrl
     } catch (err) {
-      const classified = classifyFetchError(err)
-      return { ok: false, ...classified }
+      if (err instanceof HoneysPortalSessionExpiredError) {
+        return fail({ ok: false, kind: 'authentication', error: err.message })
+      }
+      const classified = classifyBrowserNavigationError(err)
+      return fail({ ok: false, ...classified })
     }
 
-    const productHttpErr = classifyHttpFailure(productRes, productHtml, 'product page')
-    if (productHttpErr) return productHttpErr
-  }
+    const searchAuthErr = classifyRenderedHtmlFailure(searchHtml, 'search')
+    if (searchAuthErr) return fail(searchAuthErr)
 
-  const parsed = parseHoneysProductHtml(productHtml, productPageUrl)
-  if (!parsed) {
+    log(`Vendor search: ${searchUrl}`)
+    log(`Search response URL: ${searchResponseUrl}`)
+    if (searchResponseUrl !== searchUrl) {
+      log(`Search was redirected from ${searchUrl} to ${searchResponseUrl}`)
+    }
+    if (isHoneysGenericLivewireShell(searchHtml)) {
+      log(
+        'WARNING: Received generic Livewire shell. Session cookies are likely missing or invalid.',
+      )
+    }
+
+    const searchCards = extractHoneysSearchResultCards(searchHtml)
+    log(`Parsed ${searchCards.length} product cards in search HTML`)
+    if (searchCards.length > 0) {
+      log(`Search results page loaded with ${searchCards.length} products`)
+    }
+
+    if (searchCards.length === 0) {
+      const titleMatch = searchHtml.match(/<title[^>]*>([^<]*)<\/title>/i)
+      const pageTitle = titleMatch?.[1] ? titleMatch[1].replace(/\s+/g, ' ').trim() : '(no title)'
+      log(`Search HTML page title: ${pageTitle}`)
+
+      const diag = diagnoseEmptyStructuredSearchCards(searchHtml)
+      if (diag.noResultsMessage) {
+        log(`Search page indicates no results (matched text: "${diag.noResultsMessage}")`)
+      }
+      const snippet = diag.bodySnippet || '(empty body)'
+      if (!htmlContainsHoneysProductLinks(searchHtml)) {
+        log(`Search HTML has no /product/ links; body snippet (first 500 chars): ${snippet}`)
+      } else {
+        log(`Search HTML body snippet (first 1000 chars): ${snippet}`)
+      }
+    }
+
+    let productHtml = ''
+    let productPageUrl = ''
+
+    const redirectedToProduct =
+      /\/product\/\d+/i.test(searchResponseUrl) && !/\/advance-search/i.test(searchResponseUrl)
+    const detailMatchesTarget =
+      redirectedToProduct &&
+      isHoneysProductDetailPage(searchHtml, searchResponseUrl) &&
+      honeysDetailPageMatchesIdentifier(searchHtml, matchTargets)
+
+    if (detailMatchesTarget) {
+      log('Loaded product detail page directly from search navigation.')
+      productHtml = searchHtml
+      productPageUrl = searchResponseUrl
+    } else {
+      const resolved = resolveHoneysSearchProductDetailUrl(searchHtml, portalUrl, searchCriteria)
+      if (!resolved.ok) {
+        log(NO_MATCHING_PRODUCT)
+        return fail({ ok: false, kind: 'parse', error: NO_MATCHING_PRODUCT })
+      }
+
+      const productDetailUrl = resolved.productDetailUrl || resolved.url
+      log(
+        `Found matching product (${resolved.matchType}) "${resolved.matchedIdentifier || resolved.matchedSku}" at #${resolved.productIndex}, clicking…`,
+      )
+      log(`Product detail URL: ${productDetailUrl}`)
+
+      try {
+        const productPage = await loadHoneysPortalPageHtml(productDetailUrl, {
+          headless,
+          log,
+          jar: sessionJar,
+          portalOrigin: portalUrl,
+          waitForProductLinks: false,
+        })
+        productHtml = productPage.html
+        productPageUrl = productPage.finalUrl || productDetailUrl
+      } catch (err) {
+        if (err instanceof HoneysPortalSessionExpiredError) {
+          return fail({ ok: false, kind: 'authentication', error: err.message })
+        }
+        const classified = classifyBrowserNavigationError(err)
+        return fail({ ok: false, ...classified })
+      }
+
+      const productAuthErr = classifyRenderedHtmlFailure(productHtml, 'product page')
+      if (productAuthErr) return fail(productAuthErr)
+
+      if (!isHoneysProductDetailPage(productHtml, productPageUrl)) {
+        return fail({
+          ok: false,
+          kind: 'parse',
+          error: `Product detail page did not load for ${skuQuery}.`,
+        })
+      }
+
+      if (!honeysDetailPageMatchesIdentifier(productHtml, matchTargets)) {
+        const mismatch = `Product detail page did not contain matching SKU/UPC for ${skuQuery}.`
+        log(mismatch)
+        return fail({ ok: false, kind: 'parse', error: mismatch })
+      }
+
+      log(`Navigated to product detail page (${productPageUrl})`)
+    }
+
+    const sharedWin = getSharedHoneysPortalBrowserWindow()
+    if (sharedWin && !sharedWin.isDestroyed()) {
+      try {
+        await refreshHoneysJarFromBrowser(sharedWin.webContents, portalUrl)
+        log('Synced portal browser cookies back to saved session file.')
+      } catch {
+        // non-fatal
+      }
+    }
+
+    const parsed = parseHoneysProductHtml(productHtml, productPageUrl)
+    if (!parsed) {
+      return fail({
+        ok: false,
+        kind: 'parse',
+        error: `Could not parse product page for ${skuQuery}.`,
+      })
+    }
+
+    const line = pick(row, 'line') || ''
+    const upc = parsed.upc || pick(row, 'upc') || ''
+    const brand = parsed.brand || pick(row, 'brand') || 'Unknown'
+    const sku = parsed.sku || skuQuery
+    const modelNumber = parsed.modelNumber || parsed.manufacturerPartNumber || skuQuery
+    const packSize = parsed.packSize || '1'
+    const packSizeUnit = parsed.packSizeUnit || 'each'
+    const packSizeValue =
+      Number.isFinite(parsed.packSizeValue) && parsed.packSizeValue >= 1
+        ? parsed.packSizeValue
+        : Number.parseInt(packSize, 10) || 1
+    const description = parsed.description || ''
+    const productAttributes = parsed.productAttributes && typeof parsed.productAttributes === 'object'
+      ? parsed.productAttributes
+      : {}
+
+    /** @type {Record<string, string | number | boolean | null>} */
+    const attributeFlat = {}
+    for (const [key, value] of Object.entries(productAttributes)) {
+      const attrKey = `attr_${String(key).replace(/\s+/g, '_')}`
+      attributeFlat[attrKey] = String(value)
+    }
+
     return {
-      ok: false,
-      kind: 'parse',
-      error: `Could not parse product page for ${skuQuery}.`,
-    }
-  }
-
-  const line = pick(row, 'line') || ''
-  const upc = parsed.upc || pick(row, 'upc') || ''
-  const brand = parsed.brand || pick(row, 'brand') || 'Unknown'
-
-  return {
-    ok: true,
-    extract: {
-      source: 'vendor_website',
-      sku: parsed.sku || skuQuery,
-      title: parsed.title,
-      brand,
-      line,
-      modelNumber: parsed.modelNumber || parsed.manufacturerPartNumber || skuQuery,
-      packSize: parsed.packSize,
-      upc,
-      imageUrl: parsed.imageUrl || '',
-      pageUrl: productPageUrl,
-      rawAttributes: {
-        catalogStatus: 'Published',
-        scrapeConfidence: parsed.title && parsed.imageUrl ? 0.94 : 0.8,
-        vendor: 'honeysplace',
-        searchUrl,
-        lastCrawledAt: new Date().toISOString(),
-        priceUsd: parsed.priceUsd,
-        msrpUsd: parsed.msrpUsd,
-        manufacturerPartNumber: parsed.manufacturerPartNumber,
-        originalModelNumber: parsed.originalModelNumber,
-        packSizeSource: parsed.packSizeSource,
+      ok: true,
+      extract: {
+        source: 'vendor_website',
+        sku,
+        title: parsed.title,
+        brand,
+        line,
+        modelNumber,
+        packSize,
+        packSizeValue,
+        packSizeUnit,
+        upc,
+        description,
+        imageUrl: parsed.imageUrl || '',
+        pageUrl: productPageUrl,
+        rawAttributes: {
+          catalogStatus: 'Published',
+          scrapeConfidence: parsed.title && parsed.imageUrl ? 0.94 : 0.8,
+          vendor: 'honeysplace',
+          searchUrl,
+          scrapeLog: scrapeLogLines.join(' · '),
+          lastCrawledAt: new Date().toISOString(),
+          priceUsd: parsed.priceUsd,
+          msrpUsd: parsed.msrpUsd,
+          mapPriceUsd: parsed.mapPriceUsd ?? null,
+          manufacturerPartNumber: parsed.manufacturerPartNumber,
+          originalModelNumber: parsed.originalModelNumber,
+          packSize: packSize,
+          packSizeValue,
+          packSizeUnit,
+          packSizeSource: parsed.packSizeSource,
+          packSizeEvidence: parsed.packSizeEvidence,
+          moqVerified: parsed.moqVerified ?? null,
+          minOrderQty: parsed.minOrderQty ?? null,
+          caseCount: parsed.caseCount ?? null,
+          stock: parsed.stock ?? null,
+          description,
+          sku,
+          upc,
+          brand,
+          modelNumber,
+          title: parsed.title,
+          productAttributesJson:
+            Object.keys(productAttributes).length > 0 ? JSON.stringify(productAttributes) : null,
+          ...attributeFlat,
+        },
       },
-    },
+    }
+  } finally {
+    if (ctx.keepBrowserAfterScrape === true) {
+      log('Keeping Honey\'s Place browser open for the next QC row.')
+    } else {
+      releaseHoneysPortalBrowserWindow({ headless, log })
+    }
   }
 }

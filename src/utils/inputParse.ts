@@ -4,6 +4,26 @@ import { normalizeHeader } from '../data/inputFields'
 export type InputRow = Record<string, string>
 
 const ASIN_RE = /^B[0-9A-Z]{9}$/i
+
+/** Numeric-leading identifiers are accepted without the standard B + 9 pattern. */
+function asinStartsWithDigit(value: string): boolean {
+  return /^\d/.test(value)
+}
+
+function isValidAsinValue(value: string): boolean {
+  if (asinStartsWithDigit(value)) return true
+  return ASIN_RE.test(value)
+}
+
+/** Only standard (non-numeric-leading) ASINs are checked for duplicates. */
+function shouldTrackAsinDuplicate(value: string): boolean {
+  return value.length > 0 && !asinStartsWithDigit(value)
+}
+
+export type ValidateRowsResult = {
+  errors: string[]
+  duplicateAsinWarnings: string[]
+}
 const UPC_RE = /^\d{8,14}$/
 
 /** Cap collected messages so huge invalid pastes don't allocate unbounded error arrays. */
@@ -108,19 +128,26 @@ export function validateRows(
   rows: InputRow[],
   fields: InputFieldDef[],
   options?: { maxErrors?: number },
-): string[] {
+): ValidateRowsResult {
   const maxErrors = options?.maxErrors ?? DEFAULT_MAX_ERRORS
   const errors: string[] = []
+  const duplicateAsinWarnings: string[] = []
   if (fields.length === 0) {
-    return ['No input fields selected. Save at least one field first.']
+    return {
+      errors: ['No input fields selected. Save at least one field first.'],
+      duplicateAsinWarnings: [],
+    }
   }
   if (rows.length === 0) {
-    return ['No valid data rows to validate']
+    return { errors: ['No valid data rows to validate'], duplicateAsinWarnings: [] }
   }
 
-  const uniqueField = fields.find((f) => f.id === 'part_sku') ?? fields[0]
-  const seen = new Set<string>()
+  const asinField = fields.find((f) => f.id === 'asin')
+  const skuField = fields.find((f) => f.id === 'part_sku')
+  const seenAsins = new Set<string>()
   let truncated = false
+  let duplicateTruncated = false
+  const maxDuplicateWarnings = maxErrors
 
   for (let index = 0; index < rows.length; index++) {
     if (errors.length >= maxErrors) {
@@ -140,7 +167,7 @@ export function validateRows(
         }
         continue
       }
-      if (field.kind === 'asin' && !ASIN_RE.test(value)) {
+      if (field.kind === 'asin' && !isValidAsinValue(value)) {
         if (
           !pushCapped(
             errors,
@@ -162,25 +189,37 @@ export function validateRows(
 
     if (truncated) break
 
-    const key = (row[uniqueField.id] ?? '').trim()
-    if (key) {
-      if (seen.has(key)) {
-        if (
-          !pushCapped(errors, `Row ${rowNum}: duplicate ${uniqueField.label} "${key}"`, maxErrors)
-        ) {
-          truncated = true
-          break
+    if (asinField) {
+      const asin = (row[asinField.id] ?? '').trim()
+      if (shouldTrackAsinDuplicate(asin)) {
+        const asinKey = asin.toUpperCase()
+        if (seenAsins.has(asinKey)) {
+          if (duplicateAsinWarnings.length < maxDuplicateWarnings) {
+            const sku = skuField ? (row[skuField.id] ?? '').trim() : ''
+            const skuNote = sku ? ` (SKU ${sku})` : ''
+            duplicateAsinWarnings.push(
+              `Row ${rowNum}: duplicate ASIN "${asin}"${skuNote} — remove the SKU or continue anyway`,
+            )
+          } else {
+            duplicateTruncated = true
+          }
+        } else {
+          seenAsins.add(asinKey)
         }
       }
-      seen.add(key)
     }
   }
 
   if (truncated) {
     errors.push(`… additional validation issues omitted (showing first ${maxErrors})`)
   }
+  if (duplicateTruncated) {
+    duplicateAsinWarnings.push(
+      `… additional duplicate ASIN rows omitted (showing first ${maxDuplicateWarnings})`,
+    )
+  }
 
-  return errors
+  return { errors, duplicateAsinWarnings }
 }
 
 export function buildPastePlaceholder(fields: InputFieldDef[]): string {

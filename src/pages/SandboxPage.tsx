@@ -12,19 +12,22 @@ import {
   Button,
   Chip,
   CircularProgress,
+  LinearProgress,
   Paper,
   TextField,
   Typography,
 } from '@mui/material'
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined'
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
 import { PageFrame } from '../components/layout/PageFrame'
 import { InputFieldChipSelect } from '../components/input/InputFieldChipSelect'
-import { RawScrapeComparePair, SandboxQcComparisons } from '../components/sandbox'
+import { RawScrapeComparePair, SandboxQcComparisons, SandboxScrollReveal } from '../components/sandbox'
+import { CopyLogTextButton } from '../components/logs'
 import { QcVerdictChip } from '../components/status'
 import { useToast } from '../components/toast'
 import { useAiUsage } from '../context/AiUsageContext'
+import { useBatchDemo } from '../context/BatchDemoContext'
 import { useLogs } from '../context/LogsContext'
-import { useBrandAliases } from '../context/BrandAliasContext'
 import { useSettings } from '../context/SettingsContext'
 import { useSandboxRun } from '../context/SandboxRunContext'
 import { useAppTheme } from '../theme'
@@ -37,14 +40,11 @@ import {
   saveSandboxFieldIds,
   type InputFieldDef,
 } from '../data/inputFields'
-import {
-  buildSandboxQcResult,
-  buildSandboxTerminalScript,
-  type SandboxQcResult,
-  type SandboxTerminalLine,
-} from '../data/sandboxQc'
+import { type SandboxQcResult, type SandboxTerminalLine } from '../data/sandboxQc'
 import { VENDOR_INTEGRATION_ID } from '../config/vendorIntegration'
-import { buildFailedQcResult, listingQcPayloadToSandboxQcResult } from '../services/qc/listingQcMapper'
+import { buildFailedQcResult } from '../services/qc/listingQcMapper'
+import { revealQcExportFile, runQcPipelineExport } from '../services/qc/qcPipelineApi'
+import { pipelineSuccessToSandboxQcResult } from '../services/qc/qcPipelineMapper'
 import { useLiveOutput } from '../context/LiveOutputContext'
 import { sandboxQcResultToQcResult } from '../services/qc/sandboxToQcResult'
 import { formatUsd } from '../utils/aiPricing'
@@ -54,8 +54,62 @@ import {
   buildSandboxValuesPlaceholder,
   parseSandboxValuesOnly,
 } from '../utils/sandboxParse'
+import type { QcLogEntry } from '../types/log'
 
 const COLUMN_WIDTH_CH = 14
+
+const TERMINAL_LEVELS = new Set<SandboxTerminalLine['level']>([
+  'SYSTEM',
+  'SCRAPING',
+  'AI',
+  'QC',
+  'ERROR',
+  'WARNING',
+  'INFO',
+])
+
+function logCategoryToTerminalLevel(category: string): SandboxTerminalLine['level'] {
+  const upper = category.toUpperCase()
+  if (TERMINAL_LEVELS.has(upper as SandboxTerminalLine['level'])) {
+    return upper as SandboxTerminalLine['level']
+  }
+  return 'INFO'
+}
+
+function inferRunStatusFromLog(message: string): { label: string; progress?: number } {
+  const m = message.toLowerCase()
+  if (m.includes('amazon') && m.includes('started')) {
+    return { label: 'Fetching Amazon data...', progress: 12 }
+  }
+  if (m.includes('amazon') && m.includes('completed')) {
+    return { label: 'Amazon catalog data ready', progress: 28 }
+  }
+  if (m.includes('vendor website scrape started') || m.includes('vendor scrape started')) {
+    return { label: 'Scraping vendor site...', progress: 38 }
+  }
+  if (m.includes('vendor website scrape completed') || m.includes('vendor scrape completed')) {
+    return { label: 'Vendor scrape complete', progress: 52 }
+  }
+  if (m.includes('qc comparison started')) {
+    return { label: 'Running QC checks...', progress: 62 }
+  }
+  if (m.includes('qc comparison finished')) {
+    return { label: 'QC checks complete', progress: 78 }
+  }
+  if (m.includes('writing excel') || m.includes('excel qc report')) {
+    return { label: 'Generating Excel report...', progress: 88 }
+  }
+  if (m.includes('search results page loaded')) {
+    return { label: 'Scraping vendor site...', progress: 45 }
+  }
+  return { label: message }
+}
+
+function sandboxTerminalClipboardText(
+  lines: Array<{ level: string; text: string }>,
+): string {
+  return lines.map((line) => `[${line.level}] ${line.text}`).join('\n')
+}
 
 /** Single-SKU paste — fixed one-line height so the row never gets clipped under the terminal. */
 const pasteInputSx = {
@@ -226,7 +280,6 @@ export function SandboxPage() {
   const { recordUsage } = useAiUsage()
   const { appendLog } = useLogs()
   const { settings } = useSettings()
-  const { aliasPairs } = useBrandAliases()
   const { mode } = useAppTheme()
   const isDark = mode === 'dark'
 
@@ -246,6 +299,10 @@ export function SandboxPage() {
   const {
     running,
     setRunning,
+    runStatusMessage,
+    setRunStatusMessage,
+    runProgress,
+    setRunProgress,
     terminalLines,
     setTerminalLines,
     qcResult,
@@ -254,14 +311,51 @@ export function SandboxPage() {
     setShowResults,
     runErrors: errors,
     setRunErrors: setErrors,
-    registerTimer,
     clearTimers,
     bumpRunGeneration,
-    runGeneration,
   } = useSandboxRun()
   const { appendRow: appendLiveOutputRow } = useLiveOutput()
+  const { registerExportResult, purgeQcResultsForExport } = useBatchDemo()
+  const { logs } = useLogs()
 
   const terminalRef = useRef<HTMLDivElement | null>(null)
+  const liveOutputSectionRef = useRef<HTMLDivElement | null>(null)
+  const runLogBaselineRef = useRef(0)
+  const activeSandboxRunGenRef = useRef(0)
+
+  const pushTerminalLine = useCallback(
+    (level: SandboxTerminalLine['level'], text: string) => {
+      const trimmed = text.trim()
+      if (!trimmed) return
+      setTerminalLines((prev) => [
+        ...prev,
+        {
+          id: `term-${Date.now()}-${prev.length}`,
+          at: Date.now(),
+          level,
+          text: trimmed,
+        },
+      ])
+      const status = inferRunStatusFromLog(trimmed)
+      setRunStatusMessage(status.label)
+      if (typeof status.progress === 'number') {
+        setRunProgress(status.progress)
+      }
+    },
+    [setRunProgress, setRunStatusMessage, setTerminalLines],
+  )
+
+  const pushVendorLogText = useCallback(
+    (vendorLog?: string) => {
+      if (!vendorLog?.trim()) return
+      for (const line of vendorLog.split('\n')) {
+        const trimmed = line.trim()
+        if (trimmed) pushTerminalLine('SCRAPING', trimmed)
+      }
+    },
+    [pushTerminalLine],
+  )
+  const [excelExportPath, setExcelExportPath] = useState<string | null>(null)
 
   const draftDirty = useMemo(
     () => draftIds.join('\0') !== savedIds.join('\0'),
@@ -272,7 +366,36 @@ export function SandboxPage() {
     const el = terminalRef.current
     if (!el) return
     el.scrollTop = el.scrollHeight
-  }, [terminalLines])
+  }, [terminalLines, runStatusMessage])
+
+  const applyLogToRunUi = useCallback(
+    (entry: QcLogEntry) => {
+      const text = entry.detail ? `${entry.message} · ${entry.detail}` : entry.message
+      setTerminalLines((prev) => [
+        ...prev,
+        {
+          id: entry.id,
+          at: entry.at,
+          level: logCategoryToTerminalLevel(entry.category),
+          text,
+        },
+      ])
+      const status = inferRunStatusFromLog(entry.message)
+      setRunStatusMessage(status.label)
+      if (typeof status.progress === 'number') {
+        setRunProgress(status.progress)
+      }
+    },
+    [setRunProgress, setRunStatusMessage, setTerminalLines],
+  )
+
+  useEffect(() => {
+    if (!running) return
+    for (let i = runLogBaselineRef.current; i < logs.length; i += 1) {
+      applyLogToRunUi(logs[i])
+    }
+    runLogBaselineRef.current = logs.length
+  }, [logs, running, applyLogToRunUi])
 
   const syncPasteText = useCallback(() => {
     const el = pasteInputRef.current
@@ -300,6 +423,7 @@ export function SandboxPage() {
       setQcResult(null)
       setShowResults(false)
       setTerminalLines([])
+      setExcelExportPath(null)
       showToast(toastMessage, 'success')
     },
     [showToast],
@@ -323,6 +447,56 @@ export function SandboxPage() {
     applySavedFields(uploadIds, 'Copied columns from Upload')
   }
 
+  const finishSandboxRun = useCallback(
+    (result: SandboxQcResult) => {
+      const qcRow = sandboxQcResultToQcResult(result)
+      appendLiveOutputRow(qcRow, 'sandbox')
+      registerExportResult({ ...qcRow, runSource: 'sandbox' })
+      setQcResult(result)
+      setShowResults(true)
+      setRunProgress(100)
+      setRunStatusMessage('QC run complete')
+      setTerminalLines((prev) => [
+        ...prev,
+        {
+          id: `done-${Date.now()}`,
+          at: Date.now(),
+          level: result.verdict === 'FAIL' ? 'ERROR' : result.verdict === 'MANUAL_REVIEW' ? 'WARNING' : 'QC',
+          text: `Final verdict: ${result.verdict.replace(/_/g, ' ')}`,
+        },
+      ])
+
+      if (result.inputTokens > 0 || result.outputTokens > 0) {
+        recordUsage(result.inputTokens, result.outputTokens)
+      }
+
+      const sku = result.identity.find((f) => f.key === 'sku')?.value ?? result.identity[0]?.value
+      if (result.verdict === 'FAIL') {
+        appendLog({ category: 'ERROR', message: `Sandbox FAIL — ${sku}` })
+      } else if (result.verdict === 'MANUAL_REVIEW') {
+        appendLog({ category: 'WARNING', message: `Sandbox MANUAL REVIEW — ${sku}` })
+      } else {
+        appendLog({ category: 'QC', message: `Sandbox PASS — ${sku}` })
+      }
+      showToast(
+        `Sandbox ${result.verdict.replace(/_/g, ' ')}`,
+        result.verdict === 'PASS' ? 'success' : 'warning',
+      )
+    },
+    [
+      appendLiveOutputRow,
+      registerExportResult,
+      appendLog,
+      recordUsage,
+      setQcResult,
+      setRunProgress,
+      setRunStatusMessage,
+      setShowResults,
+      setTerminalLines,
+      showToast,
+    ],
+  )
+
   const handleRun = async () => {
     if (running) return
     if (savedFields.length === 0) {
@@ -344,10 +518,57 @@ export function SandboxPage() {
     clearTimers()
     const gen = bumpRunGeneration()
 
-    let result: SandboxQcResult
+    setErrors([])
+    setQcResult(null)
+    setShowResults(false)
+    setExcelExportPath(null)
+    setRunning(true)
+    setRunProgress(4)
+    setRunStatusMessage('Starting QC pipeline...')
+    runLogBaselineRef.current = logs.length
+    setTerminalLines([
+      {
+        id: `start-${Date.now()}`,
+        at: Date.now(),
+        level: 'SYSTEM',
+        text: 'Sandbox QC run started — streaming live steps below.',
+      },
+    ])
+
+    requestAnimationFrame(() => {
+      liveOutputSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    })
+
+    appendLog({
+      category: 'SYSTEM',
+      message: 'Sandbox QC started',
+      detail: savedFields.map((f) => row[f.id] ?? '').filter(Boolean).join(' · '),
+    })
+
     const qcBridge = window.electronAPI?.qc
-    if (qcBridge?.processRow) {
-      const backend = await qcBridge.processRow({
+    activeSandboxRunGenRef.current = gen
+
+    const unsubAppLog = window.electronAPI?.onAppLog?.((payload) => {
+      if (activeSandboxRunGenRef.current !== gen) return
+      const message = String(payload?.message ?? '').trim()
+      if (!message) return
+      const detail = payload?.detail ? String(payload.detail).trim() : ''
+      const text = detail ? `${message} · ${detail}` : message
+      pushTerminalLine(logCategoryToTerminalLevel(String(payload?.category ?? 'INFO')), text)
+    })
+
+    try {
+      if (!qcBridge?.runPipelineExport) {
+        setErrors(['Sandbox QC requires the Electron app (qc:runPipelineExport).'])
+        pushTerminalLine('ERROR', 'QC pipeline IPC is not available in this environment.')
+        setRunStatusMessage('QC run failed')
+        return
+      }
+
+      pushTerminalLine('SYSTEM', 'Pipeline: runQcPipelineExport (SP-API → vendor scrape → QC → Excel)')
+      setRunStatusMessage('Fetching Amazon data...')
+
+      const pipeline = await runQcPipelineExport({
         row,
         rowIndex: 0,
         headless: settings.headlessScraping,
@@ -355,90 +576,50 @@ export function SandboxPage() {
         settings: {
           titleSimilarityPercent: settings.titleSimilarityPercent,
           imageSimilarityPercent: settings.imageSimilarityPercent,
+          qcTitleLexicalHybrid: settings.qcTitleLexicalHybrid,
+          qcAggressiveAiCostMode: settings.qcAggressiveAiCostMode,
+          qcModelAiEnabled: settings.qcModelAiEnabled,
+          aiQcModelId: settings.aiQcModelId,
+          aiInputPricePerMillionUsd: settings.aiInputPricePerMillionUsd,
+          aiOutputPricePerMillionUsd: settings.aiOutputPricePerMillionUsd,
         },
-        brandAliases: [...aliasPairs],
       })
-      if (!backend.ok) {
-        appendLiveOutputRow(
-          { ...buildFailedQcResult(row, backend.error), runSource: 'sandbox' },
-          'sandbox',
-        )
-        setErrors([backend.error])
+
+      if (!pipeline.ok) {
+        pushVendorLogText(pipeline.vendorLog)
+        const failedRow = { ...buildFailedQcResult(row, pipeline.error), runSource: 'sandbox' as const }
+        appendLiveOutputRow(failedRow, 'sandbox')
+        registerExportResult(failedRow)
+        setErrors([pipeline.error])
         setQcResult(null)
         setShowResults(false)
-        setTerminalLines([])
+        pushTerminalLine('ERROR', pipeline.error ?? 'QC pipeline failed.')
+        setRunStatusMessage('QC run failed')
         return
       }
-      result = listingQcPayloadToSandboxQcResult(backend.result)
-    } else {
-      result = buildSandboxQcResult(row, settings, { brandAliases: aliasPairs })
-    }
 
-    appendLiveOutputRow(sandboxQcResultToQcResult(result), 'sandbox')
-
-    const script = buildSandboxTerminalScript(row, result, {
-      headlessScraping: settings.headlessScraping,
-    })
-
-    setErrors([])
-    setQcResult(null)
-    setShowResults(false)
-    setTerminalLines([])
-    setRunning(true)
-
-    appendLog({
-      category: 'SYSTEM',
-      message: 'Sandbox QC started',
-      detail: result.identity.map((f) => f.value).join(' · '),
-    })
-
-    for (const step of script) {
-      const timerId = window.setTimeout(() => {
-        if (gen !== runGeneration()) return
-        setTerminalLines((prev) => [
-          ...prev,
-          {
-            id: `${gen}-${prev.length}`,
-            at: Date.now(),
-            level: step.level,
-            text: step.text,
-          },
-        ])
-      }, step.delayMs)
-      registerTimer(timerId)
-    }
-
-    const finishAt = script[script.length - 1]?.delayMs ?? 0
-    const doneTimer = window.setTimeout(() => {
-      if (gen !== runGeneration()) return
-      setQcResult(result)
-      setShowResults(true)
+      setExcelExportPath(pipeline.excelFilePath)
+      finishSandboxRun(pipelineSuccessToSandboxQcResult(pipeline))
+      return
+    } finally {
+      unsubAppLog?.()
+      activeSandboxRunGenRef.current = 0
       setRunning(false)
-      if (result.inputTokens > 0 || result.outputTokens > 0) {
-        recordUsage(result.inputTokens, result.outputTokens)
-      }
-
-      const sku = result.identity.find((f) => f.key === 'sku')?.value ?? result.identity[0]?.value
-      if (result.verdict === 'FAIL') {
-        appendLog({ category: 'ERROR', message: `Sandbox FAIL — ${sku}` })
-      } else if (result.verdict === 'MANUAL_REVIEW') {
-        appendLog({ category: 'WARNING', message: `Sandbox MANUAL REVIEW — ${sku}` })
-      } else {
-        appendLog({ category: 'QC', message: `Sandbox PASS — ${sku}` })
-      }
-      showToast(`Sandbox ${result.verdict.replace(/_/g, ' ')}`, result.verdict === 'PASS' ? 'success' : 'warning')
-    }, finishAt + 80)
-    registerTimer(doneTimer)
+    }
   }
 
   const handleClear = () => {
     clearTimers()
     bumpRunGeneration()
     setRunning(false)
+    setRunStatusMessage('')
+    setRunProgress(0)
     setTerminalLines([])
     setQcResult(null)
     setShowResults(false)
     setErrors([])
+    setExcelExportPath(null)
+    purgeQcResultsForExport('sandbox')
   }
 
   const placeholder =
@@ -449,26 +630,37 @@ export function SandboxPage() {
   return (
     <PageFrame
       title="Sandbox"
-      subtitle="Single-SKU QC lab · values-only paste · live terminal output for the full QC flow."
+      subtitle="Single-SKU QC lab · SP-API + vendor scrape + AI QC · Excel test export · live terminal."
       actions={
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
-          {running && <CircularProgress size={16} thickness={5} />}
           <Button
             variant="outlined"
             onClick={handleClear}
-            disabled={!running && terminalLines.length === 0 && !showResults}
+            disabled={running || (terminalLines.length === 0 && !showResults)}
             sx={{ height: 32, fontSize: '12px', borderRadius: 0.5 }}
           >
             Clear
           </Button>
           <Button
             variant="contained"
-            onClick={handleRun}
+            onClick={() => void handleRun()}
             disabled={running || savedFields.length === 0}
-            sx={{ height: 32, fontSize: '12px', borderRadius: 0.5, boxShadow: 'none' }}
+            startIcon={
+              running ? <CircularProgress size={14} thickness={5} color="inherit" /> : undefined
+            }
+            sx={{
+              height: 32,
+              fontSize: '12px',
+              borderRadius: 0.5,
+              boxShadow: 'none',
+              minWidth: 108,
+            }}
           >
-            Run QC
+            {running ? 'Running…' : 'Run QC'}
           </Button>
+          {showResults && qcResult && !running && (
+            <QcVerdictChip verdict={qcResult.verdict} density="compact" />
+          )}
         </Box>
       }
     >
@@ -650,16 +842,18 @@ export function SandboxPage() {
 
         {/* Terminal — full-width row under SKU input; scrolls internally */}
         <Paper
+          ref={liveOutputSectionRef}
           sx={{
             borderRadius: 0.5,
             border: '1px solid',
-            borderColor: 'divider',
+            borderColor: running ? 'primary.main' : 'divider',
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
             minWidth: 0,
             height: { xs: 260, md: 300 },
             flexShrink: 0,
+            transition: 'border-color 0.2s ease',
           }}
         >
           <Box
@@ -673,15 +867,55 @@ export function SandboxPage() {
               justifyContent: 'space-between',
               flexShrink: 0,
               bgcolor: isDark ? 'rgba(0,0,0,0.35)' : 'action.hover',
+              gap: 1,
+              flexWrap: 'wrap',
             }}
           >
-            <Typography sx={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.05em' }}>
-              TERMINAL · LIVE QC OUTPUT
-            </Typography>
-            <Typography sx={{ fontSize: '10px', color: 'text.secondary', fontFamily: fontFamilyMono }}>
-              {running ? 'streaming…' : terminalLines.length > 0 ? `${terminalLines.length} lines` : 'idle'}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+              <Typography sx={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.05em' }}>
+                TERMINAL · LIVE QC OUTPUT
+              </Typography>
+              {running && (
+                <Chip
+                  size="small"
+                  label="RUNNING"
+                  color="primary"
+                  sx={{ height: 20, fontSize: '9px', fontWeight: 800, borderRadius: 0.5 }}
+                />
+              )}
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography sx={{ fontSize: '10px', color: 'text.secondary', fontFamily: fontFamilyMono }}>
+                {running
+                  ? runStatusMessage || 'Working…'
+                  : terminalLines.length > 0
+                    ? `${terminalLines.length} lines`
+                    : 'idle'}
+              </Typography>
+              <CopyLogTextButton
+                getText={() => sandboxTerminalClipboardText(terminalLines)}
+                copyTooltip="Copy terminal log (scraping + AI + QC)"
+                emptyTooltip="Run QC first — no terminal lines yet"
+                onCopied={() => showToast('Terminal log copied', 'success')}
+                onCopyFailed={() => showToast('No terminal log to copy', 'info')}
+              />
+            </Box>
           </Box>
+          {running && (
+            <Box sx={{ px: 1.5, py: 0.75, borderBottom: '1px solid', borderColor: 'divider', flexShrink: 0 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+                <CircularProgress size={14} thickness={5} />
+                <Typography sx={{ fontSize: '11px', fontWeight: 600, color: 'text.primary' }}>
+                  {runStatusMessage || 'Processing…'}
+                </Typography>
+              </Box>
+              <LinearProgress
+                variant={runProgress > 0 ? 'determinate' : 'indeterminate'}
+                value={runProgress > 0 ? runProgress : undefined}
+                sx={{ height: 4, borderRadius: 1 }}
+              />
+            </Box>
+          )}
           <Box
             ref={terminalRef}
             sx={{
@@ -730,64 +964,87 @@ export function SandboxPage() {
               {qcResult.identity.map((f) => `${f.label}: ${f.value}`).join(' · ')}
             </Typography>
           </Box>
-          <QcVerdictChip verdict={qcResult.verdict} density="default" />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+            {excelExportPath && (
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 16 }} />}
+                onClick={() => {
+                  void revealQcExportFile(excelExportPath).then((res) => {
+                    if (!res.ok) {
+                      showToast('Could not open export folder', 'warning')
+                    }
+                  })
+                }}
+                sx={{ height: 32, fontSize: '12px', borderRadius: 0.5 }}
+              >
+                Open Excel report
+              </Button>
+            )}
+            <QcVerdictChip verdict={qcResult.verdict} density="default" />
+          </Box>
         </Paper>
       )}
 
-      {/* Results: raw JSON extracts + QC comparisons (images only in comparison Image row) */}
+      {/* Results: raw JSON on top, comparison table below (slides up on scroll) */}
       {showResults && qcResult && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, minWidth: 0 }}>
+        <SandboxScrollReveal active={showResults}>
           <RawScrapeComparePair
             amazonData={qcResult.asinExtract}
             vendorData={qcResult.vendorExtract}
             asin={qcResult.asinExtract.asin}
             sku={qcResult.vendorExtract.sku}
-            maxHeight={{ xs: 240, lg: 280 }}
+            maxHeight={{ xs: 260, lg: 300 }}
             amazonEmptyMessage="No ASIN extract yet — run Sandbox QC"
             vendorEmptyMessage="No vendor extract yet — run Sandbox QC"
+          />
+
+          <SandboxQcComparisons
+            comparisons={qcResult.comparisons}
+            isDark={isDark}
+            titleScore={qcResult.titleScore}
+            imageScore={qcResult.imageScore}
           />
 
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 1.15fr) minmax(0, 0.85fr)' },
-              gap: 1.5,
-              alignItems: 'start',
+              gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(4, 1fr)' },
+              gap: 1,
+              minWidth: 0,
             }}
           >
-            <SandboxQcComparisons comparisons={qcResult.comparisons} isDark={isDark} />
-
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: { xs: '1fr 1fr', sm: '1fr 1fr' },
-                gap: 1,
-                minWidth: 0,
-              }}
-            >
-              {[
-                ['Input Tokens', qcResult.inputTokens.toLocaleString()],
-                ['Output Tokens', qcResult.outputTokens.toLocaleString()],
-                ['Cost (USD)', formatUsd(qcResult.costUsd)],
-                ['Est. ×1000 Cost', formatUsd(qcResult.estimatedX1000Usd)],
-              ].map(([label, value]) => (
-                <Paper
-                  key={label}
-                  sx={{ p: 1.25, borderRadius: 0.5, border: '1px solid', borderColor: 'divider', minWidth: 0 }}
+            {[
+              ['Input Tokens', qcResult.inputTokens.toLocaleString()],
+              ['Output Tokens', qcResult.outputTokens.toLocaleString()],
+              ['Cost (USD)', formatUsd(qcResult.costUsd)],
+              ['Est. ×1000 Cost', formatUsd(qcResult.estimatedX1000Usd)],
+            ].map(([label, value]) => (
+              <Paper
+                key={label}
+                elevation={0}
+                sx={{
+                  p: 1.25,
+                  borderRadius: 1.5,
+                  border: '1px solid',
+                  borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'divider',
+                  minWidth: 0,
+                  bgcolor: isDark ? '#0c0c0e' : 'background.paper',
+                }}
+              >
+                <Typography
+                  sx={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.04em', color: 'text.secondary' }}
                 >
-                  <Typography
-                    sx={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.04em', color: 'text.secondary' }}
-                  >
-                    {label.toUpperCase()}
-                  </Typography>
-                  <Typography sx={{ fontSize: '15px', fontWeight: 700, mt: 0.35, fontFamily: fontFamilyMono }}>
-                    {value}
-                  </Typography>
-                </Paper>
-              ))}
-            </Box>
+                  {label.toUpperCase()}
+                </Typography>
+                <Typography sx={{ fontSize: '15px', fontWeight: 700, mt: 0.35, fontFamily: fontFamilyMono }}>
+                  {value}
+                </Typography>
+              </Paper>
+            ))}
           </Box>
-        </Box>
+        </SandboxScrollReveal>
       )}
     </PageFrame>
   )

@@ -1,4 +1,8 @@
 import type { QcResult, QcVerdict } from '../types/qc'
+import {
+  GRAND_QC_EXPORT_HEADERS,
+  mapGrandQcExportRowFromQcResult,
+} from './grandQcExportRow'
 
 export type ExportVerdictFilter = 'all' | 'pass' | 'fail' | 'manual' | 'exceptions'
 
@@ -64,23 +68,11 @@ export function filterQcResultsForExport(
   return results.filter((r) => isQcExportException(r))
 }
 
-function rowToCsvLine(result: QcResult): string {
-  const identity = result.identity.map((f) => f.value).join(' | ')
-  const comparisons = result.comparisons
-    .map((c) => `${c.label}: ${c.sourceValue} → ${c.targetValue}`)
-    .join(' | ')
-  return [
-    escapeCsv(result.id),
-    escapeCsv(result.verdict),
-    escapeCsv(identity),
-    escapeCsv(comparisons),
-    String(result.inputTokens ?? 0),
-    String(result.outputTokens ?? 0),
-  ].join(',')
-}
+const CSV_HEADER = GRAND_QC_EXPORT_HEADERS.map(escapeCsv).join(',')
 
-const CSV_HEADER =
-  'Result ID,Verdict,Identity,Comparisons,Input Tokens,Output Tokens'
+function rowToCsvLine(result: QcResult): string {
+  return mapGrandQcExportRowFromQcResult(result).map((v) => escapeCsv(String(v ?? ''))).join(',')
+}
 
 export function buildExportCsv(results: QcResult[]): string {
   if (results.length === 0) return `${CSV_HEADER}\n`

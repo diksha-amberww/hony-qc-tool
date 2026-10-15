@@ -24,7 +24,13 @@ import type {
   CredentialGroupDef,
   CredentialTestFeedback,
 } from '../../types/credentials'
-import { clearCredentials, saveCredentials, testCredentials } from '../../services/credentialsApi'
+import {
+  clearCredentials,
+  saveAndTestCredentials,
+  saveCredentials,
+  testCredentials,
+} from '../../services/credentialsApi'
+import { AI_QC_MODEL_DISPLAY_NAME, DEFAULT_AI_QC_MODEL } from '../../config/aiQc'
 import { useSettings } from '../../context/SettingsContext'
 import { CredentialTestFeedbackPanel } from './CredentialTestFeedbackPanel'
 
@@ -87,6 +93,7 @@ export function CredentialGroupCard({
     () => isGroupFullyConfigured(group, fieldStatus),
     [group, fieldStatus],
   )
+  const showAmazonSavedOnly = minimalUi && fullyConfigured
 
   const anyConfigured = useMemo(
     () => groupHasAnyConfigured(group, fieldStatus),
@@ -119,6 +126,48 @@ export function CredentialGroupCard({
     if (!hasChanges) return false
     return hasRequiredForSave
   }, [hasDraftValues, editingSecrets, hasRequiredForSave])
+
+  const handleSaveAndTest = async () => {
+    if (!hasRequiredForSave) {
+      onToast('Fill all required fields before saving.', 'error')
+      return
+    }
+    setSaving(true)
+    onTestBegin()
+    try {
+      onLog(`Save & test started`, group.name)
+      const result = await saveAndTestCredentials(
+        group.id,
+        draft,
+        { headlessScraping: settings.headlessScraping },
+        (line) => onTestLine(line),
+      )
+      const logLines = Array.isArray(result.log) ? result.log : []
+      if (!result.ok) {
+        const headline = formatTestHeadline(false, result.error ?? 'Save & test failed.')
+        onTestEnd(false, headline, logLines)
+        onToast(result.error ?? 'Could not save credentials.', 'error')
+        onLog(`Save & test failed`, `${group.name} — ${result.error}`)
+        for (const line of logLines) onLog(line)
+        return
+      }
+      onDraftClearSecrets()
+      setEditingSecrets({})
+      setVisibleValues({})
+      const headline = formatTestHeadline(true, result.message ?? '')
+      onTestEnd(true, headline, logLines)
+      for (const line of logLines) onLog(line)
+      onLog(`Credentials saved`, group.name)
+      onRefresh()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Save & test failed.'
+      onTestEnd(false, formatTestHeadline(false, message), [message])
+      onToast(message, 'error')
+      onLog(`Save & test failed`, `${group.name} — ${message}`)
+    } finally {
+      setSaving(false)
+    }
+  }
 
   const handleSave = async () => {
     if (!hasRequiredForSave) {
@@ -234,6 +283,14 @@ export function CredentialGroupCard({
     onDraftChange(field.storageKey, value)
   }
 
+  if (showAmazonSavedOnly) {
+    return (
+      <Box sx={{ pt: embeddedInSection ? 0.5 : 0 }}>
+        <Typography sx={{ fontSize: '12px', color: 'text.primary' }}>Credentials saved.</Typography>
+      </Box>
+    )
+  }
+
   return (
     <Box
       sx={{
@@ -246,7 +303,15 @@ export function CredentialGroupCard({
         gap: 1.25,
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap' }}>
+      <Box
+        sx={{
+          display: minimalUi ? 'none' : 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 1,
+          flexWrap: 'wrap',
+        }}
+      >
         <Box sx={{ minWidth: 0 }}>
           {!embeddedInSection && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexWrap: 'wrap' }}>
@@ -257,12 +322,30 @@ export function CredentialGroupCard({
                 variant="outlined"
                 sx={{ height: 20, fontSize: '9px', fontWeight: 700, borderRadius: 0.5 }}
               />
+              {group.id === 'claude_ai' && (
+                <Chip
+                  size="small"
+                  label={`${AI_QC_MODEL_DISPLAY_NAME} · ${DEFAULT_AI_QC_MODEL}`}
+                  variant="outlined"
+                  color="primary"
+                  sx={{ height: 20, fontSize: '9px', fontWeight: 700, borderRadius: 0.5 }}
+                />
+              )}
             </Box>
           )}
           {!minimalUi && group.description && (
             <Typography sx={{ fontSize: '11px', color: 'text.secondary', mt: embeddedInSection ? 0 : 0.25 }}>
               {group.description}
             </Typography>
+          )}
+          {!minimalUi && group.id === 'claude_ai' && embeddedInSection && (
+            <Chip
+              size="small"
+              label={`QC model: ${AI_QC_MODEL_DISPLAY_NAME} (${DEFAULT_AI_QC_MODEL})`}
+              variant="outlined"
+              color="primary"
+              sx={{ height: 20, fontSize: '9px', fontWeight: 700, borderRadius: 0.5, mt: 0.75 }}
+            />
           )}
         </Box>
         <Chip
@@ -298,11 +381,11 @@ export function CredentialGroupCard({
               key={field.storageKey}
               fullWidth
               size="small"
-              label={field.label}
-              required={field.required !== false}
+              label={minimalUi ? undefined : field.label}
+              required={minimalUi ? false : field.required !== false}
               type={inputType}
               autoComplete="off"
-              placeholder={minimalUi ? undefined : field.placeholder}
+              placeholder={field.placeholder}
               value={display}
               onFocus={() => onFieldFocus(field)}
               onChange={(e) => onFieldChange(field, e.target.value)}
@@ -364,50 +447,68 @@ export function CredentialGroupCard({
       </Box>
 
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
-        <Button
-          variant="contained"
-          size="small"
-          disabled={saving || !canSave}
-          onClick={handleSave}
-          sx={{ height: 30, fontSize: '11px', fontWeight: 600, borderRadius: 0.5 }}
-        >
-          {saving ? <CircularProgress size={16} color="inherit" /> : 'Save'}
-        </Button>
-        <Button
-          variant="outlined"
-          size="small"
-          disabled={testing || !canTest}
-          onClick={handleTest}
-          sx={{
-            height: 30,
-            minWidth: testing ? 36 : undefined,
-            fontSize: '11px',
-            fontWeight: 600,
-            borderRadius: 0.5,
-          }}
-        >
-          {testing ? <CircularProgress size={16} /> : group.testActionLabel}
-        </Button>
-        <Button
-          variant="outlined"
-          size="small"
-          color="error"
-          disabled={clearing || !anyConfigured}
-          onClick={() => setClearConfirmOpen(true)}
-          sx={{ height: 30, fontSize: '11px', fontWeight: 600, borderRadius: 0.5 }}
-        >
-          {clearing ? <CircularProgress size={16} /> : 'Forget'}
-        </Button>
+        {minimalUi ? (
+          <Button
+            variant="contained"
+            size="small"
+            disabled={saving || !canSave}
+            onClick={handleSaveAndTest}
+            sx={{ height: 30, fontSize: '11px', fontWeight: 600, borderRadius: 0.5 }}
+          >
+            {saving ? <CircularProgress size={16} color="inherit" /> : 'Save & Test'}
+          </Button>
+        ) : (
+          <>
+            <Button
+              variant="contained"
+              size="small"
+              disabled={saving || !canSave}
+              onClick={handleSave}
+              sx={{ height: 30, fontSize: '11px', fontWeight: 600, borderRadius: 0.5 }}
+            >
+              {saving ? <CircularProgress size={16} color="inherit" /> : 'Save'}
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              disabled={testing || !canTest}
+              onClick={handleTest}
+              sx={{
+                height: 30,
+                minWidth: testing ? 36 : undefined,
+                fontSize: '11px',
+                fontWeight: 600,
+                borderRadius: 0.5,
+              }}
+            >
+              {testing ? <CircularProgress size={16} /> : group.testActionLabel}
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              color="error"
+              disabled={clearing || !anyConfigured}
+              onClick={() => setClearConfirmOpen(true)}
+              sx={{ height: 30, fontSize: '11px', fontWeight: 600, borderRadius: 0.5 }}
+            >
+              {clearing ? <CircularProgress size={16} /> : 'Forget'}
+            </Button>
+          </>
+        )}
       </Box>
 
-      <CredentialTestFeedbackPanel
-        feedback={
-          testing && testFeedback.status === 'idle'
-            ? { status: 'running', headline: '', lines: [] }
-            : testFeedback
-        }
-        runningLabel={`Running ${group.testActionLabel.toLowerCase()}…`}
-      />
+      {(!minimalUi || testing || testFeedback.status !== 'idle') && (
+        <CredentialTestFeedbackPanel
+          feedback={
+            testing && testFeedback.status === 'idle'
+              ? { status: 'running', headline: '', lines: [] }
+              : testFeedback
+          }
+          runningLabel={`Running ${group.testActionLabel.toLowerCase()}…`}
+          onCopied={() => onToast('Test log copied', 'success')}
+          onCopyFailed={() => onToast('No test log to copy yet', 'info')}
+        />
+      )}
 
       <ConfirmDialog
         open={clearConfirmOpen}

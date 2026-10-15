@@ -7,6 +7,7 @@ import {
 import type {
   CredentialClearResult,
   CredentialSaveAllResult,
+  CredentialSaveAndTestResult,
   CredentialSaveResult,
   CredentialsStatusResponse,
   CredentialTestResult,
@@ -237,6 +238,40 @@ export async function saveCredentials(
     return window.electronAPI!.credentials!.save(groupId, values)
   }
   return fallbackSave(groupId, values)
+}
+
+export async function saveAndTestCredentials(
+  groupId: string,
+  values: Record<string, string>,
+  options?: { headlessScraping?: boolean },
+  onLogLine?: (line: string) => void,
+): Promise<CredentialSaveAndTestResult> {
+  if (hasElectronCredentials()) {
+    const bridge = window.electronAPI!.credentials!
+    const unsubscribe = bridge.onTestLog?.((payload) => {
+      if (payload.groupId === groupId) onLogLine?.(payload.line)
+    })
+    try {
+      const result = await bridge.saveAndTest(groupId, values, options)
+      const log = Array.isArray(result?.log) ? result.log.map(String) : []
+      if (result?.ok) {
+        notifyCredentialsChangedLocally()
+        return { ok: true, message: String(result.message ?? ''), log }
+      }
+      return {
+        ok: false,
+        error: String(result?.error ?? 'Save & test failed.'),
+        log,
+      }
+    } finally {
+      unsubscribe?.()
+    }
+  }
+  return {
+    ok: false,
+    error: 'Save & Test runs in the desktop app (Electron).',
+    log: ['Use npm run dev for secure storage and live credential tests.'],
+  }
 }
 
 export async function saveAllCredentials(

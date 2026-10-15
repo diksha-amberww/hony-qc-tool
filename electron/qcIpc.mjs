@@ -1,5 +1,6 @@
-import { ipcMain } from 'electron'
+import { ipcMain, shell } from 'electron'
 import {
+  clearAllBatchSessions,
   createBatchSession,
   getBatchSession,
   markBatchPaused,
@@ -10,8 +11,17 @@ import {
 } from './qcBatchStore.mjs'
 import { QC_VALIDATE_PREVIEW_ROWS, runUploadValidation } from './qcUploadValidation.mjs'
 import { processQcRow } from './qc/processQcRow.mjs'
+import { runQcPipelineExport } from './qc/runQcPipeline.mjs'
 import { pushAppLog } from './mainProcessLog.mjs'
-import { startBatchProcessingLoop, stopBatchProcessingLoop } from './qc/batchOrchestrator.mjs'
+import {
+  startBatchProcessingLoop,
+  stopAllBatchProcessingLoops,
+  stopBatchProcessingLoop,
+} from './qc/batchOrchestrator.mjs'
+import {
+  getAiUsageMetricsSnapshot,
+  resetAiUsageMetrics,
+} from '../scripts/aiUsageMetrics.mjs'
 
 export function registerQcIpc() {
   ipcMain.handle('qc:validateUpload', async (_event, request) => {
@@ -31,6 +41,7 @@ export function registerQcIpc() {
       sessionId,
       rowCount,
       previewRows,
+      duplicateAsinWarnings: result.duplicateAsinWarnings,
     }
   })
 
@@ -109,6 +120,44 @@ export function registerQcIpc() {
       })
     }
     return processQcRow(payload, appLog)
+  })
+
+  ipcMain.handle('qc:runPipelineExport', async (event, payload) => {
+    const batchLabel =
+      typeof payload?.batchLabel === 'string' ? payload.batchLabel.trim() : undefined
+    const appLog = ({ category, message, detail }) => {
+      pushAppLog(event.sender, {
+        category,
+        message,
+        detail,
+        batchLabel,
+      })
+    }
+    return runQcPipelineExport(payload, appLog)
+  })
+
+  ipcMain.handle('qc:revealExportFile', async (_event, payload) => {
+    const filePath = payload?.filePath
+    if (!filePath || typeof filePath !== 'string') {
+      return { ok: false, error: 'Missing file path.' }
+    }
+    shell.showItemInFolder(filePath)
+    return { ok: true }
+  })
+
+  ipcMain.handle('qc:resetAiMetrics', async () => {
+    resetAiUsageMetrics()
+    return { ok: true }
+  })
+
+  ipcMain.handle('qc:getAiUsageMetrics', async () => {
+    return { ok: true, metrics: getAiUsageMetricsSnapshot() }
+  })
+
+  ipcMain.handle('qc:clearWorkspace', async () => {
+    stopAllBatchProcessingLoops()
+    clearAllBatchSessions()
+    return { ok: true }
   })
 
   ipcMain.handle('qc:getSession', async (_event, payload) => {

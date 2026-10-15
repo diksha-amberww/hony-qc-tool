@@ -37,6 +37,92 @@ function hostMatches(cookieDomain, host) {
   return h === d || h.endsWith(`.${d}`)
 }
 
+function cookiePathMatches(cookiePath, requestPath) {
+  const cp = (cookiePath || '/').trim() || '/'
+  if (cp === '/') return true
+  if (!requestPath.startsWith(cp)) return false
+  if (cp.endsWith('/')) return true
+  if (requestPath.length === cp.length) return true
+  return requestPath.charAt(cp.length) === '/'
+}
+
+/**
+ * @param {Record<string, string>} headers
+ * @param {HoneysCookieJar} jar
+ * @param {string} url
+ * @returns {string}
+ */
+/**
+ * Copy persisted session cookies into an Electron session partition for BrowserWindow navigation.
+ * @param {HoneysCookieJar} jar
+ * @param {import('electron').Session} electronSession
+ * @param {string} origin
+ */
+/**
+ * Copy cookies from an Electron session partition back into the in-memory jar (after Livewire navigation).
+ * @param {HoneysCookieJar} jar
+ * @param {import('electron').Session} electronSession
+ * @param {string} origin
+ */
+export async function syncElectronSessionToHoneysJar(jar, electronSession, origin) {
+  if (!jar || !electronSession) return
+  const base = String(origin ?? '').replace(/\/+$/, '')
+  if (!base) return
+  let cookies = []
+  try {
+    cookies = await electronSession.cookies.get({ url: `${base}/` })
+  } catch {
+    return
+  }
+  for (const cookie of cookies) {
+    jar.ingestElectronCookie(cookie)
+  }
+}
+
+export async function syncHoneysJarToElectronSession(jar, electronSession, origin) {
+  if (!jar || !electronSession) return
+  const base = String(origin ?? '').replace(/\/+$/, '')
+  if (!base) return
+
+  for (const cookie of Object.values(jar.cookies)) {
+    if (!cookie?.name) continue
+    const path = cookie.path || '/'
+    const url = `${base}${path.startsWith('/') ? path : `/${path}`}`
+    const details = {
+      url,
+      name: cookie.name,
+      value: cookie.value ?? '',
+      path: cookie.path || '/',
+      secure: Boolean(cookie.secure),
+      httpOnly: Boolean(cookie.httpOnly),
+    }
+    if (cookie.domain) {
+      details.domain = cookie.domain.startsWith('.') ? cookie.domain : `.${cookie.domain}`
+    }
+    if (cookie.expires instanceof Date && Number.isFinite(cookie.expires.getTime())) {
+      details.expirationDate = cookie.expires.getTime() / 1000
+    }
+    try {
+      await electronSession.cookies.set(details)
+    } catch {
+      try {
+        await electronSession.cookies.set({ ...details, domain: cookie.domain })
+      } catch {
+        // skip individual cookie failures
+      }
+    }
+  }
+}
+
+export function applyJarCookiesToHeaders(headers, jar, url) {
+  const cookieHeader = jar.headerFor(url)
+  if (cookieHeader) {
+    headers.Cookie = cookieHeader
+    headers.cookie = cookieHeader
+  }
+  return cookieHeader
+}
+
 export class HoneysCookieJar {
   /** @param {Record<string, { name: string, value: string, domain: string, path: string, expires?: string | null, maxAge?: number | null, secure?: boolean, httpOnly?: boolean }>} [seed] */
   constructor(seed = {}) {
@@ -64,6 +150,37 @@ export class HoneysCookieJar {
     }
   }
 
+  /** Total cookies stored in the jar (before URL/path filtering). */
+  countStored() {
+    return Object.keys(this.cookies).length
+  }
+
+  /**
+   * Cookies that would be sent on a request to `url`.
+   * @param {string} url
+   */
+  countForUrl(url) {
+    return this.cookieNamesForUrl(url).length
+  }
+
+  /**
+   * Cookie names that would be sent on a request to `url` (values are not logged).
+   * @param {string} url
+   * @returns {string[]}
+   */
+  cookieNamesForUrl(url) {
+    const header = this.headerFor(url)
+    if (!header) return []
+    return header
+      .split(';')
+      .map((part) => {
+        const trimmed = part.trim()
+        const eq = trimmed.indexOf('=')
+        return eq > 0 ? trimmed.slice(0, eq) : trimmed
+      })
+      .filter(Boolean)
+  }
+
   headerFor(url) {
     const { hostname, protocol, pathname } = new URL(url)
     const secure = protocol === 'https:'
@@ -84,7 +201,7 @@ export class HoneysCookieJar {
         continue
       }
       if (!hostMatches(cookie.domain, hostname)) continue
-      if (!pathname.startsWith(cookie.path || '/')) continue
+      if (!cookiePathMatches(cookie.path, pathname)) continue
       if (cookie.secure && !secure) continue
       pairs.push(`${cookie.name}=${cookie.value}`)
     }

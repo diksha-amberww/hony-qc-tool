@@ -1,3 +1,5 @@
+import { cleanProductImageUrl, extractImageUrlFromText } from './cleanImageUrl'
+
 /**
  * Deterministic demo image URLs that actually load in the browser.
  * Seeded so the same SKU/ASIN always maps to the same photo.
@@ -13,12 +15,20 @@ export function resolveQcImageUrls(result: {
   targetImageUrl?: string
   comparisons?: Array<{ key: string; sourceValue: string; targetValue: string }>
 }): { sourceUrl?: string; targetUrl?: string } {
-  if (result.sourceImageUrl || result.targetImageUrl) {
-    return { sourceUrl: result.sourceImageUrl, targetUrl: result.targetImageUrl }
+  const sourceFromTop = cleanProductImageUrl(result.sourceImageUrl)
+  const targetFromTop = cleanProductImageUrl(result.targetImageUrl)
+  if (sourceFromTop || targetFromTop) {
+    return {
+      sourceUrl: sourceFromTop || undefined,
+      targetUrl: targetFromTop || undefined,
+    }
   }
   const imageField = result.comparisons?.find((c) => c.key === 'image')
   if (imageField) {
-    return { sourceUrl: imageField.sourceValue, targetUrl: imageField.targetValue }
+    return {
+      sourceUrl: extractImageUrlFromText(imageField.sourceValue) || undefined,
+      targetUrl: extractImageUrlFromText(imageField.targetValue) || undefined,
+    }
   }
   return {}
 }

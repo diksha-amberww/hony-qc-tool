@@ -47,6 +47,16 @@ export type QcResult = {
   targetRawExtract?: unknown
   inputTokens?: number
   outputTokens?: number
+  titleScore?: number | null
+  imageScore?: number | null
+  /** UPC from upload/input sheet (export column UPC Vendor). */
+  inputRowUpc?: string
+  titleSameProduct?: boolean | null
+  titleTokenSimilarity?: number | null
+  costUsd?: number | null
+  qcModel?: string
+  packEvidenceVendor?: string
+  packEvidenceAmazon?: string
 }
 
 export type { QcLogEntry, LogCategory, LogCategoryInput, AppendLogInput } from './log'

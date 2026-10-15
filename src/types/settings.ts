@@ -1,3 +1,12 @@
+import {
+  DEFAULT_AI_INPUT_PRICE_PER_M,
+  DEFAULT_AI_OUTPUT_PRICE_PER_M,
+  DEFAULT_AI_QC_MODEL,
+} from '../config/aiQc'
+import type { AiQcPricingSettings } from '../config/aiQc'
+
+export type { AiQcPricingSettings } from '../config/aiQc'
+
 /** Vendor-neutral application settings (persisted locally). */
 
 /** Allowed range for Title / Image similarity thresholds in Settings. */
@@ -9,6 +18,15 @@ export type QcThresholdSettings = {
   titleSimilarityPercent: number
   /** Min image similarity required to pass (5–100). */
   imageSimilarityPercent: number
+}
+
+export type QcAiCostSettings = {
+  /** Skip title LLM when lexical similarity is very high/low. */
+  qcTitleLexicalHybrid: boolean
+  /** Skip vision when strong pass/fail signals agree (UPC+model+title+pack+brand). */
+  qcAggressiveAiCostMode: boolean
+  /** Call Claude for ambiguous model numbers when local match fails. */
+  qcModelAiEnabled: boolean
 }
 
 export type ScrapingBehaviorSettings = {
@@ -34,22 +52,44 @@ export type ErrorEngineSettings = {
   errorEngineBackoffBaseMs: number
 }
 
-export type AppSettings = QcThresholdSettings & ScrapingBehaviorSettings & ErrorEngineSettings
+export type AppSettings = QcThresholdSettings &
+  QcAiCostSettings &
+  ScrapingBehaviorSettings &
+  ErrorEngineSettings &
+  AiQcPricingSettings
 
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   titleSimilarityPercent: 70,
   imageSimilarityPercent: 70,
+  qcTitleLexicalHybrid: true,
+  qcAggressiveAiCostMode: false,
+  qcModelAiEnabled: false,
   vendorLoginRequired: true,
   reuseVendorSession: true,
   headlessScraping: true,
   errorEngineEnabled: true,
   errorEngineMaxRetries: 4,
   errorEngineBackoffBaseMs: 2000,
+  aiQcModelId: DEFAULT_AI_QC_MODEL,
+  aiInputPricePerMillionUsd: DEFAULT_AI_INPUT_PRICE_PER_M,
+  aiOutputPricePerMillionUsd: DEFAULT_AI_OUTPUT_PRICE_PER_M,
 }
+
+export const AI_QC_PRICING_KEYS: (keyof AiQcPricingSettings)[] = [
+  'aiQcModelId',
+  'aiInputPricePerMillionUsd',
+  'aiOutputPricePerMillionUsd',
+]
 
 export const QC_THRESHOLD_KEYS: (keyof QcThresholdSettings)[] = [
   'titleSimilarityPercent',
   'imageSimilarityPercent',
+]
+
+export const QC_AI_COST_KEYS: (keyof QcAiCostSettings)[] = [
+  'qcTitleLexicalHybrid',
+  'qcAggressiveAiCostMode',
+  'qcModelAiEnabled',
 ]
 
 export const SCRAPING_BEHAVIOR_KEYS: (keyof ScrapingBehaviorSettings)[] = [

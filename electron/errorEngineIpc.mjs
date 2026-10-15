@@ -2,15 +2,21 @@ import { ipcMain } from 'electron'
 import { templateScrapeFailureFromRow } from './errorEngineScrape.mjs'
 import { getVendorScraper } from './vendor/scrapeRegistry.mjs'
 import { pushAppLog } from './mainProcessLog.mjs'
-import { ensureHoneysPortalSession } from './vendor/honeysPlaceSession.mjs'
+import { clearHoneysSession, ensureHoneysPortalSession } from './vendor/honeysPlaceSession.mjs'
+import { releaseHoneysPortalBrowserWindow } from './vendor/honeysPortalBrowser.mjs'
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 export function registerErrorEngineIpc() {
-  ipcMain.handle('errorEngine:cancelSession', async () => {
-    await delay(30)
+  ipcMain.handle('errorEngine:cancelSession', async (event, payload) => {
+    const headless = payload?.headless !== false
+    releaseHoneysPortalBrowserWindow({
+      headless,
+      log: (line) => pushAppLog(event.sender, { category: 'LOGIN', message: line }),
+    })
+    await clearHoneysSession()
     return { ok: true }
   })
 
@@ -19,12 +25,17 @@ export function registerErrorEngineIpc() {
       return { ok: false, error: 'Relogin disabled (vendor login not required)' }
     }
     const attempt = typeof payload?.attempt === 'number' ? payload.attempt : 1
+    const headless = payload?.headless !== false
     pushAppLog(event.sender, {
       category: 'LOGIN',
       message: `Vendor relogin attempt ${attempt}`,
     })
     const result = await ensureHoneysPortalSession({
       reuseSession: false,
+      freshSession: true,
+      clearStoredSession: attempt <= 1,
+      headless,
+      keepBrowserForScraping: true,
       onLogLine: (line) => pushAppLog(event.sender, { category: 'LOGIN', message: line }),
     })
     if (!result.ok) {
@@ -69,6 +80,12 @@ export function registerErrorEngineIpc() {
       rowIndex,
       headless: payload?.headless !== false,
       batchLabel: payload?.batchLabel,
+      onLogLine: (line) =>
+        pushAppLog(event.sender, {
+          category: 'SCRAPING',
+          message: line,
+          batchLabel: payload?.batchLabel,
+        }),
     })
     if (!result.ok) {
       pushAppLog(event.sender, {

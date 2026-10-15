@@ -30,6 +30,7 @@ import { PageFrame } from '../components/layout/PageFrame'
 import { InputFieldChipSelect } from '../components/input/InputFieldChipSelect'
 import { Pagination, getPageItemRange, DEFAULT_PAGE_SIZE_OPTIONS } from '../components/pagination'
 import { useToast } from '../components/toast'
+import { useBatchDemo } from '../context/BatchDemoContext'
 import { useAppTheme } from '../theme'
 import {
   AVAILABLE_INPUT_FIELDS,
@@ -291,6 +292,43 @@ const ValidationErrors = memo(function ValidationErrors({ errors }: { errors: st
   )
 })
 
+const DuplicateAsinWarnings = memo(function DuplicateAsinWarnings({
+  warnings,
+  onContinueAnyway,
+}: {
+  warnings: string[]
+  onContinueAnyway: () => void
+}) {
+  const visible = warnings.slice(0, ERROR_DISPLAY_LIMIT)
+  const hiddenCount = warnings.length - visible.length
+  return (
+    <Alert
+      severity="warning"
+      sx={{ borderRadius: 0.5, '& .MuiAlert-message': { fontSize: '12px', width: '100%' } }}
+      action={
+        <Button
+          color="inherit"
+          size="small"
+          onClick={onContinueAnyway}
+          sx={{ fontSize: '12px', fontWeight: 600, whiteSpace: 'nowrap' }}
+        >
+          continue anyway
+        </Button>
+      }
+    >
+      <Typography sx={{ fontSize: '12px', fontWeight: 650, mb: 0.75 }}>
+        Duplicate ASINs found. Remove the duplicate row(s) or continue anyway to run QC on all rows.
+      </Typography>
+      {visible.map((w, i) => (
+        <Box key={`${i}-${w.slice(0, 48)}`}>{w}</Box>
+      ))}
+      {hiddenCount > 0 && (
+        <Box sx={{ mt: 0.5, fontWeight: 600 }}>… and {hiddenCount} more duplicate(s)</Box>
+      )}
+    </Alert>
+  )
+})
+
 /**
  * Display-only window over the full validated `rows` array. Pagination never
  * mutates or replaces the underlying dataset (or the original paste text).
@@ -380,6 +418,7 @@ type UploadPageProps = {
 }
 
 export function UploadPage({ onStartQc }: UploadPageProps) {
+  const { reset: resetQcWorkspace } = useBatchDemo()
   const [draftIds, setDraftIds] = useState<string[]>(() => loadSavedFieldIds())
   const [savedIds, setSavedIds] = useState<string[]>(() => loadSavedFieldIds())
   const savedFields = useMemo(() => fieldsFromIds(savedIds), [savedIds])
@@ -405,6 +444,8 @@ export function UploadPage({ onStartQc }: UploadPageProps) {
   const [fileName, setFileName] = useState<string | null>(null)
   const [fileSize, setFileSize] = useState<number | null>(null)
   const [errors, setErrors] = useState<string[]>([])
+  const [duplicateAsinWarnings, setDuplicateAsinWarnings] = useState<string[]>([])
+  const [duplicateAsinAcknowledged, setDuplicateAsinAcknowledged] = useState(false)
   /** Preview slice only — full rows live in the QC batch session (main / in-process store). */
   const [validatedPreview, setValidatedPreview] = useState<ValidatedPreviewState | null>(null)
   const [validationSessionId, setValidationSessionId] = useState<string | null>(null)
@@ -429,6 +470,8 @@ export function UploadPage({ onStartQc }: UploadPageProps) {
     setValidatedPreview((prev) => (prev !== null ? null : prev))
     setValidationSessionId((prev) => (prev !== null ? null : prev))
     setErrors((prev) => (prev.length > 0 ? [] : prev))
+    setDuplicateAsinWarnings((prev) => (prev.length > 0 ? [] : prev))
+    setDuplicateAsinAcknowledged(false)
   }, [])
 
   const clearValidationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -466,6 +509,8 @@ export function UploadPage({ onStartQc }: UploadPageProps) {
       setValidatedPreview(null)
       setValidationSessionId(null)
       setErrors([])
+      setDuplicateAsinWarnings([])
+      setDuplicateAsinAcknowledged(false)
       setFileName(null)
       setFileSize(null)
       fileTextRef.current = ''
@@ -481,25 +526,41 @@ export function UploadPage({ onStartQc }: UploadPageProps) {
     })
   }, [])
 
-  const handleReset = () => {
-    if (isValidating || isStartingQc) return
+  const clearUploadInputs = useCallback(() => {
     validateGenRef.current += 1
     setIsValidating(false)
-    setDraftIds([])
-    setSavedIds([])
-    setMode('paste')
     pasteTextRef.current = ''
     setPasteDefault('')
     setPasteResetKey((k) => k + 1)
     setValidatedPreview(null)
     setValidationSessionId(null)
     setErrors([])
+    setDuplicateAsinWarnings([])
+    setDuplicateAsinAcknowledged(false)
     setPreviewEpoch(0)
     setFileName(null)
     setFileSize(null)
     fileTextRef.current = ''
     clearFileInput()
-    showToast('Upload section reset', 'info')
+  }, [clearFileInput])
+
+  const handleClear = useCallback(() => {
+    if (isValidating || isStartingQc) return
+    clearUploadInputs()
+    void resetQcWorkspace().then(() => {
+      showToast('Workspace cleared — ready for a new batch', 'info')
+    })
+  }, [clearUploadInputs, isStartingQc, isValidating, resetQcWorkspace, showToast])
+
+  const handleReset = () => {
+    if (isValidating || isStartingQc) return
+    setDraftIds([])
+    setSavedIds([])
+    setMode('paste')
+    clearUploadInputs()
+    void resetQcWorkspace().then(() => {
+      showToast('Upload section reset', 'info')
+    })
   }
 
   const handleSaveFields = () => {
@@ -552,6 +613,8 @@ export function UploadPage({ onStartQc }: UploadPageProps) {
     const gen = ++validateGenRef.current
     setIsValidating(true)
     setErrors([])
+    setDuplicateAsinWarnings([])
+    setDuplicateAsinAcknowledged(false)
     setValidatedPreview(null)
     setValidationSessionId(null)
 
@@ -576,6 +639,7 @@ export function UploadPage({ onStartQc }: UploadPageProps) {
         return
       }
 
+      const warnings = response.duplicateAsinWarnings ?? []
       const nextPreview: ValidatedPreviewState = {
         rowCount: response.rowCount,
         previewRows: response.previewRows,
@@ -583,9 +647,18 @@ export function UploadPage({ onStartQc }: UploadPageProps) {
       startTransition(() => {
         setValidatedPreview(nextPreview)
         setValidationSessionId(response.sessionId)
+        setDuplicateAsinWarnings(warnings)
+        setDuplicateAsinAcknowledged(warnings.length === 0)
         setPreviewEpoch((n) => n + 1)
       })
-      showToast(`${response.rowCount.toLocaleString()} rows validated successfully`, 'success')
+      if (warnings.length > 0) {
+        showToast(
+          `${response.rowCount.toLocaleString()} rows parsed — resolve duplicate ASINs or continue anyway`,
+          'warning',
+        )
+      } else {
+        showToast(`${response.rowCount.toLocaleString()} rows validated successfully`, 'success')
+      }
     } catch {
       if (gen !== validateGenRef.current) return
       setErrors(['Validation could not reach the QC engine. Try again.'])
@@ -652,6 +725,9 @@ export function UploadPage({ onStartQc }: UploadPageProps) {
     clearValidationIfNeeded()
   }
 
+  const duplicateAsinBlocksStart =
+    duplicateAsinWarnings.length > 0 && !duplicateAsinAcknowledged
+
   const busy = isValidating || isStartingQc
 
   return (
@@ -673,6 +749,7 @@ export function UploadPage({ onStartQc }: UploadPageProps) {
               !validatedPreview ||
               !validationSessionId ||
               validatedPreview.rowCount === 0 ||
+              duplicateAsinBlocksStart ||
               busy
             }
             onClick={() => void handleStartQc()}
@@ -760,18 +837,34 @@ export function UploadPage({ onStartQc }: UploadPageProps) {
       >
         <Box
           sx={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 1,
             px: 1.5,
             borderBottom: '1px solid',
             borderColor: 'divider',
             bgcolor: 'background.paper',
           }}
         >
-          {savedFields.length === 0 ? (
-            <Typography sx={{ fontSize: '12px', color: 'text.secondary', py: 1.1 }}>
-              Save input fields to show the column header here
-            </Typography>
-          ) : (
-            <TabularColumnHeader fields={savedFields} />
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            {savedFields.length === 0 ? (
+              <Typography sx={{ fontSize: '12px', color: 'text.secondary', py: 1.1 }}>
+                Save input fields to show the column header here
+              </Typography>
+            ) : (
+              <TabularColumnHeader fields={savedFields} />
+            )}
+          </Box>
+          {savedFields.length > 0 && (
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleClear}
+              disabled={busy}
+              sx={{ ...uploadToolbarBtnSx, mt: 0.65, flexShrink: 0 }}
+            >
+              Clear
+            </Button>
           )}
         </Box>
         <PasteDataInput
@@ -795,8 +888,26 @@ export function UploadPage({ onStartQc }: UploadPageProps) {
         aria-hidden={mode !== 'file'}
       >
         {savedFields.length > 0 && (
-          <Box sx={{ mb: 1.5 }}>
-            <TabularColumnHeader fields={savedFields} />
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 1,
+              mb: 1.5,
+            }}
+          >
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <TabularColumnHeader fields={savedFields} />
+            </Box>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={handleClear}
+              disabled={busy}
+              sx={{ ...uploadToolbarBtnSx, flexShrink: 0 }}
+            >
+              Clear
+            </Button>
           </Box>
         )}
         <Button
@@ -824,6 +935,16 @@ export function UploadPage({ onStartQc }: UploadPageProps) {
       </Paper>
 
       {errors.length > 0 && <ValidationErrors errors={errors} />}
+
+      {duplicateAsinWarnings.length > 0 && !duplicateAsinAcknowledged && (
+        <DuplicateAsinWarnings
+          warnings={duplicateAsinWarnings}
+          onContinueAnyway={() => {
+            setDuplicateAsinAcknowledged(true)
+            showToast('Continuing with duplicate ASINs in this batch', 'info')
+          }}
+        />
+      )}
 
       {validatedPreview && (
         <ValidatedPreview key={previewEpoch} validation={validatedPreview} fields={savedFields} />

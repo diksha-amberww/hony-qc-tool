@@ -1,25 +1,11 @@
-const MISSING_MARKERS = new Set(['—', '-', 'n/a', 'na', 'null', 'undefined'])
+import ExcelJS from 'exceljs'
+import {
+  GRAND_QC_EXPORT_HEADERS,
+  mapGrandQcExportRowFromQcResult,
+} from '../scripts/grandQcExport.mjs'
+import { filterQcResultsForExport, isQcExportException } from './qcExportFilters.mjs'
 
-function isMissingValue(value) {
-  const trimmed = (value ?? '').trim()
-  if (!trimmed) return true
-  return MISSING_MARKERS.has(trimmed.toLowerCase())
-}
-
-export function isQcExportException(result) {
-  if (result.identity?.some((field) => isMissingValue(field.value))) return true
-  return (result.comparisons ?? []).some(
-    (field) => isMissingValue(field.sourceValue) || isMissingValue(field.targetValue),
-  )
-}
-
-export function filterQcResultsForExport(results, filter) {
-  if (filter === 'all') return results
-  if (filter === 'pass') return results.filter((r) => r.verdict === 'PASS')
-  if (filter === 'fail') return results.filter((r) => r.verdict === 'FAIL')
-  if (filter === 'manual') return results.filter((r) => r.verdict === 'MANUAL_REVIEW')
-  return results.filter((r) => isQcExportException(r))
-}
+export { filterQcResultsForExport, isQcExportException }
 
 function escapeCsv(value) {
   const str = String(value ?? '')
@@ -27,96 +13,63 @@ function escapeCsv(value) {
   return str
 }
 
-function escapeXml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-}
-
-function verdictLabel(verdict) {
-  return String(verdict).replace(/_/g, ' ')
-}
-
-function rowToCsvLine(result) {
-  const identity = (result.identity ?? []).map((f) => f.value).join(' | ')
-  const comparisons = (result.comparisons ?? [])
-    .map((c) => `${c.label}: ${c.sourceValue} → ${c.targetValue}`)
-    .join(' | ')
-  return [
-    escapeCsv(result.id),
-    escapeCsv(result.verdict),
-    escapeCsv(identity),
-    escapeCsv(comparisons),
-    String(result.inputTokens ?? 0),
-    String(result.outputTokens ?? 0),
-  ].join(',')
-}
-
-const CSV_HEADER = 'Result ID,Verdict,Identity,Comparisons,Input Tokens,Output Tokens'
-
 export function buildExportCsv(results) {
-  if (!results.length) return `${CSV_HEADER}\n`
-  return [CSV_HEADER, ...results.map(rowToCsvLine)].join('\n')
+  const lines = [GRAND_QC_EXPORT_HEADERS.map(escapeCsv).join(',')]
+  for (const result of results) {
+    const cells = mapGrandQcExportRowFromQcResult(result).map((v) => escapeCsv(v))
+    lines.push(cells.join(','))
+  }
+  return `${lines.join('\n')}\n`
 }
 
-export function buildExportSpreadsheetMl(results) {
-  const headerCells = [
-    'Result ID',
-    'Verdict',
-    'Identity',
-    'Comparisons',
-    'Input Tokens',
-    'Output Tokens',
-  ]
-    .map((cell) => `<Cell><Data ss:Type="String">${escapeXml(cell)}</Data></Cell>`)
-    .join('')
+export async function buildExportXlsxBuffer(results) {
+  const workbook = new ExcelJS.Workbook()
+  workbook.creator = 'Hony QC Tool'
+  workbook.created = new Date()
 
-  const dataRows = results.map((result) => {
-    const identity = (result.identity ?? []).map((f) => f.value).join(' | ')
-    const comparisons = (result.comparisons ?? [])
-      .map((c) => `${c.label}: ${c.sourceValue} → ${c.targetValue}`)
-      .join(' | ')
-    const cells = [
-      result.id,
-      verdictLabel(result.verdict),
-      identity,
-      comparisons,
-      String(result.inputTokens ?? 0),
-      String(result.outputTokens ?? 0),
-    ]
-      .map((cell) => `<Cell><Data ss:Type="String">${escapeXml(cell)}</Data></Cell>`)
-      .join('')
-    return `<Row>${cells}</Row>`
+  const sheet = workbook.addWorksheet('QC Export', {
+    views: [{ state: 'frozen', ySplit: 1 }],
   })
 
-  const headerRow = `<Row>${headerCells}</Row>`
+  const headerRow = sheet.addRow([...GRAND_QC_EXPORT_HEADERS])
+  headerRow.eachCell((cell) => {
+    cell.font = { bold: true }
+  })
 
-  return `<?xml version="1.0"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
- xmlns:o="urn:schemas-microsoft-com:office:office"
- xmlns:x="urn:schemas-microsoft-com:office:excel"
- xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
- <Worksheet ss:Name="QC Export">
-  <Table>
-   ${headerRow}
-   ${dataRows.join('\n   ')}
-  </Table>
- </Worksheet>
-</Workbook>`
+  const verdictCol = GRAND_QC_EXPORT_HEADERS.indexOf('VERDICT') + 1
+  const passFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC6EFCE' } }
+  const failFill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFC7CE' } }
+
+  for (const result of results) {
+    const values = mapGrandQcExportRowFromQcResult(result)
+    const row = sheet.addRow(values)
+    const verdict = String(values[2] ?? '').toUpperCase()
+    if (verdict === 'PASS') row.getCell(verdictCol).fill = passFill
+    else if (verdict === 'FAIL') row.getCell(verdictCol).fill = failFill
+  }
+
+  for (let col = 1; col <= GRAND_QC_EXPORT_HEADERS.length; col++) {
+    let maxLen = 14
+    sheet.eachRow((row, rowNumber) => {
+      if (rowNumber > 200) return
+      const text = row.getCell(col).value == null ? '' : String(row.getCell(col).value)
+      maxLen = Math.max(maxLen, Math.min(text.length + 2, 48))
+    })
+    sheet.getColumn(col).width = maxLen
+  }
+
+  return workbook.xlsx.writeBuffer()
 }
 
 export function buildExportFileName({ scope, format, filter, rowCount }) {
   const stamp = new Date().toISOString().slice(0, 10)
   const scopeLabel = scope === 'partial' ? 'Partial' : 'Full'
   const filterLabel = filter === 'all' ? 'all' : filter
-  const ext = format === 'csv' ? 'csv' : 'xls'
+  const ext = format === 'csv' ? 'csv' : 'xlsx'
   return `QC_${scopeLabel}_${stamp}_${filterLabel}_${rowCount}rows.${ext}`
 }
 
-export function runQcExportPipeline(request) {
+export async function runQcExportPipeline(request) {
   const scope = request?.scope
   const format = request?.format
   const filter = request?.filter ?? 'all'
@@ -156,16 +109,24 @@ export function runQcExportPipeline(request) {
     rowCount: filteredRows.length,
   })
 
-  const content =
-    format === 'csv' ? buildExportCsv(filteredRows) : buildExportSpreadsheetMl(filteredRows)
-  const mime =
-    format === 'csv' ? 'text/csv;charset=utf-8' : 'application/vnd.ms-excel'
+  if (format === 'csv') {
+    return {
+      ok: true,
+      fileName,
+      content: buildExportCsv(filteredRows),
+      mime: 'text/csv;charset=utf-8',
+      rowCount: filteredRows.length,
+      format,
+      scope,
+    }
+  }
 
+  const buffer = await buildExportXlsxBuffer(filteredRows)
   return {
     ok: true,
     fileName,
-    content,
-    mime,
+    buffer,
+    mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     rowCount: filteredRows.length,
     format,
     scope,

@@ -79,8 +79,14 @@ export function readLockedExportSnapshot(): CustomExportDraft | null {
   }
 }
 
-export function clearExportLockSnapshot() {
+/** Clears locked batch snapshot and saved column draft (Export Customization). */
+export function clearExportCustomizationData() {
+  localStorage.removeItem(DRAFT_KEY)
   localStorage.removeItem(LOCKED_KEY)
+}
+
+export function clearExportLockSnapshot() {
+  clearExportCustomizationData()
 }
 
 export function mergeDraftWithCatalog(draft: CustomExportDraft, results: QcResult[]): CustomExportDraft {

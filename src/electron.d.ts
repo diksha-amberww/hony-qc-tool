@@ -1,6 +1,7 @@
 import type {
   CredentialClearResult,
   CredentialSaveAllResult,
+  CredentialSaveAndTestResult,
   CredentialSaveResult,
   CredentialsStatusResponse,
   CredentialTestResult,
@@ -21,6 +22,7 @@ import type {
   QcValidateResponse,
 } from './types/qcUpload'
 import type { QcProcessRowResponse } from './types/listingExtract'
+import type { QcPipelineRequest, QcPipelineResponse } from './types/qcPipeline'
 import type { AppSettings } from './types/settings'
 import type { BrandAliasPair } from './types/brandAlias'
 
@@ -29,6 +31,11 @@ export interface ElectronCredentialsBridge {
   getDisplayValues: () => Promise<CredentialDisplayValuesResponse>
   getFormValues: () => Promise<CredentialFormValuesResponse>
   save: (groupId: string, values: Record<string, string>) => Promise<CredentialSaveResult>
+  saveAndTest: (
+    groupId: string,
+    values: Record<string, string>,
+    options?: { headlessScraping?: boolean },
+  ) => Promise<CredentialSaveAndTestResult>
   saveAll: (items: { groupId: string; values: Record<string, string> }[]) => Promise<CredentialSaveAllResult>
   clear: (groupId: string) => Promise<CredentialClearResult>
   test: (
@@ -40,6 +47,14 @@ export interface ElectronCredentialsBridge {
   onChanged?: (callback: () => void) => () => void
 }
 
+export type QcBatchSessionRecoveryPhase =
+  | 'paused'
+  | 'cancelling_session'
+  | 'relogging'
+  | 'resumed'
+  | 'recovered'
+  | 'recovery_failed'
+
 export type QcBatchProcessingEvent =
   | { type: 'row'; sessionId: string; rowIndex: number; result: QcProcessRowResponse }
   | {
@@ -48,9 +63,28 @@ export type QcBatchProcessingEvent =
       rowIndex: number
       kind?: string
       error: string
+      recoveryExhausted?: boolean
+    }
+  | {
+      type: 'sessionRecovery'
+      sessionId: string
+      phase: QcBatchSessionRecoveryPhase
+      rowIndex: number
+      kind?: string
+      error?: string
+      detail?: string
     }
   | { type: 'complete'; sessionId: string; total: number }
   | { type: 'idle'; sessionId: string }
+
+type QcAiSettingsPick = Pick<
+  AppSettings,
+  | 'titleSimilarityPercent'
+  | 'imageSimilarityPercent'
+  | 'aiQcModelId'
+  | 'aiInputPricePerMillionUsd'
+  | 'aiOutputPricePerMillionUsd'
+>
 
 export type QcProcessRowRequest = {
   row: InputRow
@@ -58,7 +92,7 @@ export type QcProcessRowRequest = {
   headless: boolean
   batchLabel?: string
   vendorId: string
-  settings: Pick<AppSettings, 'titleSimilarityPercent' | 'imageSimilarityPercent'>
+  settings: QcAiSettingsPick
   brandAliases: BrandAliasPair[]
 }
 
@@ -68,16 +102,36 @@ export interface ElectronQcBridge {
   pauseBatch: (payload: QcBatchControlRequest) => Promise<QcBatchControlResponse>
   resumeBatch: (payload: QcBatchControlRequest) => Promise<QcBatchControlResponse>
   stopBatch: (payload: QcBatchControlRequest) => Promise<QcBatchControlResponse>
+  clearWorkspace?: () => Promise<{ ok: boolean }>
   getSession: (payload: { sessionId: string }) => Promise<QcBatchSessionResponse>
   exportBatch: (request: QcExportRequest) => Promise<QcExportResponse>
   processRow: (payload: QcProcessRowRequest) => Promise<QcProcessRowResponse>
+  resetAiMetrics?: () => Promise<{ ok: boolean }>
+  getAiUsageMetrics?: () => Promise<{
+    ok: boolean
+    metrics?: {
+      skus: number
+      inputTokens: number
+      outputTokens: number
+      byLabel?: Record<string, { inputTokens: number; outputTokens: number; calls: number }>
+    }
+  }>
+  runPipelineExport: (payload: QcPipelineRequest) => Promise<QcPipelineResponse>
+  revealExportFile: (payload: { filePath: string }) => Promise<{ ok: boolean; error?: string }>
   processBatchInBackground?: (payload: {
     sessionId: string
     batchLabel?: string
     vendorId: string
     headless: boolean
     startRowIndex?: number
-    settings: Pick<AppSettings, 'titleSimilarityPercent' | 'imageSimilarityPercent'>
+    settings: QcAiSettingsPick &
+      Pick<
+        AppSettings,
+        | 'errorEngineEnabled'
+        | 'errorEngineMaxRetries'
+        | 'errorEngineBackoffBaseMs'
+        | 'vendorLoginRequired'
+      >
     brandAliases: BrandAliasPair[]
   }) => Promise<{ ok: boolean; error?: string; alreadyRunning?: boolean }>
   onBatchProcessing?: (callback: (event: QcBatchProcessingEvent) => void) => () => void
@@ -108,10 +162,12 @@ export interface ElectronVendorSessionBridge {
 }
 
 export interface ElectronErrorEngineBridge {
-  cancelSession: () => Promise<{ ok: true }>
-  relogin: (payload: { attempt: number; vendorLoginRequired?: boolean }) => Promise<
-    { ok: true } | { ok: false; error: string }
-  >
+  cancelSession: (payload?: { headless?: boolean }) => Promise<{ ok: true }>
+  relogin: (payload: {
+    attempt: number
+    vendorLoginRequired?: boolean
+    headless?: boolean
+  }) => Promise<{ ok: true } | { ok: false; error: string }>
   executeScrape: (payload: ElectronVendorScrapePayload) => Promise<ElectronVendorScrapeResponse>
 }
 

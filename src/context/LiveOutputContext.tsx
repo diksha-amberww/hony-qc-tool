@@ -12,6 +12,8 @@ type LiveOutputContextValue = {
   rows: QcResult[]
   appendRow: (result: QcResult, source?: QcRunSource) => void
   clearRows: () => void
+  /** Drop rows matching predicate (e.g. sandbox-only clear). */
+  removeRowsWhere: (shouldRemove: (row: QcResult) => boolean) => void
 }
 
 const LiveOutputContext = createContext<LiveOutputContextValue | null>(null)
@@ -28,9 +30,13 @@ export function LiveOutputProvider({ children }: { children: ReactNode }) {
     setRows([])
   }, [])
 
+  const removeRowsWhere = useCallback((shouldRemove: (row: QcResult) => boolean) => {
+    setRows((prev) => prev.filter((row) => !shouldRemove(row)))
+  }, [])
+
   const value = useMemo(
-    () => ({ rows, appendRow, clearRows }),
-    [rows, appendRow, clearRows],
+    () => ({ rows, appendRow, clearRows, removeRowsWhere }),
+    [rows, appendRow, clearRows, removeRowsWhere],
   )
 
   return <LiveOutputContext.Provider value={value}>{children}</LiveOutputContext.Provider>

@@ -1,4 +1,10 @@
 import {
+  DEFAULT_AI_INPUT_PRICE_PER_M,
+  DEFAULT_AI_OUTPUT_PRICE_PER_M,
+  DEFAULT_AI_QC_MODEL,
+  normalizeAiQcModelId,
+} from '../config/aiQc'
+import {
   DEFAULT_APP_SETTINGS,
   ERROR_ENGINE_BACKOFF_MAX_MS,
   ERROR_ENGINE_BACKOFF_MIN_MS,
@@ -6,8 +12,10 @@ import {
   ERROR_ENGINE_RETRY_MIN,
   QC_SIMILARITY_THRESHOLD_MAX,
   QC_SIMILARITY_THRESHOLD_MIN,
+  type AiQcPricingSettings,
   type AppSettings,
   type ErrorEngineSettings,
+  type QcAiCostSettings,
   type QcThresholdSettings,
   type ScrapingBehaviorSettings,
 } from '../types/settings'
@@ -41,6 +49,20 @@ function normalizeThresholds(raw: Partial<QcThresholdSettings>): QcThresholdSett
   }
 }
 
+function normalizeQcAiCost(raw: Partial<QcAiCostSettings>): QcAiCostSettings {
+  return {
+    qcTitleLexicalHybrid: clampBool(
+      raw.qcTitleLexicalHybrid,
+      DEFAULT_APP_SETTINGS.qcTitleLexicalHybrid,
+    ),
+    qcAggressiveAiCostMode: clampBool(
+      raw.qcAggressiveAiCostMode,
+      DEFAULT_APP_SETTINGS.qcAggressiveAiCostMode,
+    ),
+    qcModelAiEnabled: clampBool(raw.qcModelAiEnabled, DEFAULT_APP_SETTINGS.qcModelAiEnabled),
+  }
+}
+
 function normalizeBehavior(raw: Partial<ScrapingBehaviorSettings>): ScrapingBehaviorSettings {
   return {
     vendorLoginRequired: clampBool(
@@ -56,6 +78,26 @@ function clampInt(value: unknown, fallback: number, min: number, max: number): n
   const n = Number(value)
   if (!Number.isFinite(n)) return fallback
   return Math.min(max, Math.max(min, Math.round(n)))
+}
+
+function positiveRate(value: unknown, fallback: number): number {
+  const n = Number(value)
+  if (!Number.isFinite(n) || n < 0) return fallback
+  return n
+}
+
+function normalizeAiQcPricing(raw: Partial<AiQcPricingSettings>): AiQcPricingSettings {
+  return {
+    aiQcModelId: normalizeAiQcModelId(raw.aiQcModelId) || DEFAULT_AI_QC_MODEL,
+    aiInputPricePerMillionUsd: positiveRate(
+      raw.aiInputPricePerMillionUsd,
+      DEFAULT_AI_INPUT_PRICE_PER_M,
+    ),
+    aiOutputPricePerMillionUsd: positiveRate(
+      raw.aiOutputPricePerMillionUsd,
+      DEFAULT_AI_OUTPUT_PRICE_PER_M,
+    ),
+  }
 }
 
 function normalizeErrorEngine(raw: Partial<ErrorEngineSettings>): ErrorEngineSettings {
@@ -80,8 +122,10 @@ export function normalizeAppSettings(raw: Partial<AppSettings> | null | undefine
   if (!raw) return { ...DEFAULT_APP_SETTINGS }
   return {
     ...normalizeThresholds(raw),
+    ...normalizeQcAiCost(raw),
     ...normalizeBehavior(raw),
     ...normalizeErrorEngine(raw),
+    ...normalizeAiQcPricing(raw),
   }
 }
 

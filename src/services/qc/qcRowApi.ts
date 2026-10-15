@@ -9,6 +9,7 @@ import { normalizeScrapeErrorKind } from '../errorEngine/errorEngineService'
 import { scrapeProductForRow } from '../scraping/vendorScrape'
 import { buildQcResultForRow } from './qcEngineService'
 import { buildFailedQcResult, listingQcPayloadToQcResult } from './listingQcMapper'
+import { applyQcThresholdsToResult } from '../../utils/qcThresholdComparison'
 import type { AppendLogInput } from '../../types/log'
 import type { VendorLoginGateRefs } from '../vendorSession/vendorLoginGate'
 
@@ -43,6 +44,12 @@ async function invokeBackendProcessRow(
     settings: {
       titleSimilarityPercent: context.settings.titleSimilarityPercent,
       imageSimilarityPercent: context.settings.imageSimilarityPercent,
+      qcTitleLexicalHybrid: context.settings.qcTitleLexicalHybrid,
+      qcAggressiveAiCostMode: context.settings.qcAggressiveAiCostMode,
+      qcModelAiEnabled: context.settings.qcModelAiEnabled,
+      aiQcModelId: context.settings.aiQcModelId,
+      aiInputPricePerMillionUsd: context.settings.aiInputPricePerMillionUsd,
+      aiOutputPricePerMillionUsd: context.settings.aiOutputPricePerMillionUsd,
     },
     brandAliases: [...context.brandAliases],
   })
@@ -83,7 +90,11 @@ export async function processQcRowForBatch(
     return buildFailedQcResult(row, response.error)
   }
 
-  return listingQcPayloadToQcResult(response.result)
+  return applyQcThresholdsToResult(
+    listingQcPayloadToQcResult(response.result),
+    context.settings,
+    { brandAliases: context.brandAliases },
+  )
 }
 
 /** Single-row QC for Sandbox (backend when Electron is available). */
@@ -117,5 +128,9 @@ export async function processQcRowForSandbox(
     return buildFailedQcResult(row, response.error)
   }
 
-  return listingQcPayloadToQcResult(response.result)
+  return applyQcThresholdsToResult(
+    listingQcPayloadToQcResult(response.result),
+    context.settings,
+    { brandAliases: context.brandAliases },
+  )
 }

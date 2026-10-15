@@ -55,6 +55,13 @@ export type CredentialsStatusResponse = {
 
 export type CredentialSaveResult = { ok: boolean; error?: string }
 
+export type CredentialSaveAndTestResult = {
+  ok: boolean
+  error?: string
+  message?: string
+  log?: string[]
+}
+
 export type CredentialTestResult = {
   ok: boolean
   message: string

@@ -1,3 +1,5 @@
+import { cleanAmazonImageUrl } from './cleanAmazonImageUrl.mjs'
+
 /**
  * @param {string} asin
  * @param {string} marketplaceId
@@ -13,11 +15,8 @@ export function normalizeAmazonListing(asin, marketplaceId, catalogJson) {
   const title = pickString(summary.itemName) || pickString(summary.brand) || asin
   const brand = pickString(summary.brand) || '—'
 
-  const images = Array.isArray(root.images) ? root.images : []
-  const imageBlock = images.find((i) => i?.marketplaceId === marketplaceId) ?? images[0]
-  const imageList = imageBlock?.images ?? []
-  const mainImage = imageList.find((img) => img?.variant === 'MAIN') ?? imageList[0]
-  const imageUrl = pickString(mainImage?.link) || ''
+  const attributes = root.attributes && typeof root.attributes === 'object' ? root.attributes : {}
+  const { imageUrl, imageUrls } = pickAmazonImageUrls(root, marketplaceId, attributes)
 
   const identifiers = Array.isArray(root.identifiers) ? root.identifiers : []
   const idBlock = identifiers.find((i) => i?.marketplaceId === marketplaceId) ?? identifiers[0]
@@ -28,7 +27,6 @@ export function normalizeAmazonListing(asin, marketplaceId, catalogJson) {
     pickIdentifier(idList, 'GTIN') ||
     '—'
 
-  const attributes = root.attributes && typeof root.attributes === 'object' ? root.attributes : {}
   const modelNumber = pickAttribute(attributes, ['model_number', 'part_number', 'manufacturer_part_number'])
   const packSize = pickAttribute(attributes, ['number_of_items', 'item_package_quantity']) || '1'
   const priceUsd = pickPriceUsd(attributes, summary)
@@ -48,8 +46,60 @@ export function normalizeAmazonListing(asin, marketplaceId, catalogJson) {
       marketplaceId,
       listingStatus: pickString(summary.status) || 'Unknown',
       priceUsd,
+      imageUrls,
       spApi: root,
     },
+  }
+}
+
+/**
+ * @param {unknown} catalogJson
+ * @param {string} marketplaceId
+ * @param {Record<string, unknown>} attributes
+ */
+function pickAmazonImageUrls(catalogJson, marketplaceId, attributes) {
+  /** @type {string[]} */
+  const candidates = []
+
+  const images = Array.isArray(catalogJson.images) ? catalogJson.images : []
+  const preferred = images.find((i) => i?.marketplaceId === marketplaceId)
+  const blocksToScan = preferred ? [preferred, ...images.filter((b) => b !== preferred)] : images
+
+  for (const block of blocksToScan) {
+    const imageList = Array.isArray(block?.images) ? block.images : []
+    const ranked = [...imageList].sort((a, b) => {
+      const score = (img) => {
+        let s = 0
+        if (img?.variant === 'MAIN') s += 1000
+        const h = Number(img?.height) || 0
+        const w = Number(img?.width) || 0
+        return s + h * w
+      }
+      return score(b) - score(a)
+    })
+    for (const img of ranked) {
+      const link = cleanAmazonImageUrl(img?.link)
+      if (link) candidates.push(link)
+    }
+  }
+
+  for (const key of [
+    'main_product_image_locator',
+    'other_product_image_locator',
+    'swatch_product_image_locator',
+  ]) {
+    const node = attributes[key]
+    if (!Array.isArray(node)) continue
+    for (const item of node) {
+      const link = cleanAmazonImageUrl(item?.media_location ?? item?.link ?? item?.value)
+      if (link) candidates.push(link)
+    }
+  }
+
+  const unique = [...new Set(candidates)]
+  return {
+    imageUrl: unique[0] ?? '',
+    imageUrls: unique,
   }
 }
 

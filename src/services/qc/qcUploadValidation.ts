@@ -8,7 +8,7 @@ export const QC_UPLOAD_MIN_ROWS = 1
 const ALLOWED_FILE_EXTENSIONS = new Set(['.csv', '.txt', '.tsv'])
 
 export type UploadValidationResult =
-  | { ok: true; rows: InputRow[]; fields: InputFieldDef[] }
+  | { ok: true; rows: InputRow[]; fields: InputFieldDef[]; duplicateAsinWarnings?: string[] }
   | { ok: false; errors: string[] }
 
 function stripBom(raw: string): string {
@@ -103,12 +103,18 @@ export function runUploadValidation(request: QcValidateRequest): UploadValidatio
     errors.push('At least one data row is required')
   }
 
-  const rowErrors = validateRows(rows, fields)
+  const { errors: rowErrors, duplicateAsinWarnings } = validateRows(rows, fields)
   errors.push(...rowErrors)
 
   if (errors.length > 0) {
     return { ok: false, errors }
   }
 
-  return { ok: true, rows, fields }
+  return {
+    ok: true,
+    rows,
+    fields,
+    duplicateAsinWarnings:
+      duplicateAsinWarnings.length > 0 ? duplicateAsinWarnings : undefined,
+  }
 }

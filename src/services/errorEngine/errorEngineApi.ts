@@ -11,10 +11,10 @@ function bridge() {
   return typeof window !== 'undefined' ? window.electronAPI?.errorEngine : undefined
 }
 
-export async function cancelVendorSession(): Promise<void> {
+export async function cancelVendorSession(options?: { headless?: boolean }): Promise<void> {
   const api = bridge()
   if (api?.cancelSession) {
-    await api.cancelSession()
+    await api.cancelSession({ headless: options?.headless })
     return
   }
   await cancelVendorSessionInProcess()
@@ -23,13 +23,18 @@ export async function cancelVendorSession(): Promise<void> {
 export async function reloginVendorSession(
   attempt: number,
   vendorLoginRequired = true,
+  options?: { headless?: boolean },
 ): Promise<VendorReloginResult> {
   if (!vendorLoginRequired) {
     return { ok: false, error: 'Relogin disabled (vendor login not required)' }
   }
   const api = bridge()
   if (api?.relogin) {
-    return api.relogin({ attempt, vendorLoginRequired })
+    return api.relogin({
+      attempt,
+      vendorLoginRequired,
+      headless: options?.headless,
+    })
   }
   return reloginVendorInProcess(attempt)
 }

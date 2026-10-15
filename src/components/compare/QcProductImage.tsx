@@ -3,6 +3,7 @@ import { Box, Dialog, IconButton, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import ZoomInIcon from '@mui/icons-material/ZoomIn'
 import { fontFamilyMono } from '../../theme/typography'
+import { cleanProductImageUrl } from '../../utils/cleanImageUrl'
 
 export type QcProductImageSize = 'sm' | 'md' | 'lg'
 
@@ -38,7 +39,7 @@ export const QcProductImage = memo(function QcProductImage({
   const [failed, setFailed] = useState(false)
   const [open, setOpen] = useState(false)
   const px = SIZE_PX[size]
-  const url = src?.trim() || ''
+  const url = cleanProductImageUrl(src)
   const showImage = Boolean(url) && !failed
   const canEnlarge = enlargeable && showImage
 
@@ -117,6 +118,7 @@ export const QcProductImage = memo(function QcProductImage({
                 src={url}
                 alt={alt}
                 loading="lazy"
+                referrerPolicy="no-referrer"
                 onError={() => setFailed(true)}
                 sx={{
                   width: px,
@@ -226,6 +228,7 @@ export const QcProductImage = memo(function QcProductImage({
             component="img"
             src={url}
             alt={alt}
+            referrerPolicy="no-referrer"
             sx={{
               display: 'block',
               maxWidth: 'min(92vw, 720px)',

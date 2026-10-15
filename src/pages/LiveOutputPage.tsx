@@ -1,8 +1,23 @@
 import { useMemo, useState } from 'react'
-import { Alert, Box, Button, Chip, Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+} from '@mui/material'
 import { PageFrame } from '../components/layout/PageFrame'
 import { Pagination, getPageItemRange, DEFAULT_PAGE_SIZE_OPTIONS } from '../components/pagination'
 import { useBatchDemo } from '../context/BatchDemoContext'
+import { useSettings } from '../context/SettingsContext'
 import { useLiveOutput } from '../context/LiveOutputContext'
 import { useSandboxRun } from '../context/SandboxRunContext'
 import { useErrorEngine } from '../context/ErrorEngineContext'
@@ -56,16 +71,21 @@ function SourceChip({ source }: { source: QcResult['runSource'] }) {
 
 export function LiveOutputPage() {
   const { completed, total, status, pause, resume, stop, reset } = useBatchDemo()
+  const { settings } = useSettings()
   const { rows: allResults, clearRows: clearLiveOutput } = useLiveOutput()
-  const { running: sandboxRunning } = useSandboxRun()
+  const { running: sandboxRunning, runStatusMessage, runProgress } = useSandboxRun()
   const { phase, statusMessage } = useErrorEngine()
   const [viewResult, setViewResult] = useState<QcResult | null>(null)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE)
 
-  const counts = useMemo(() => summarizeCounts(allResults), [allResults])
+  const counts = useMemo(() => {
+    if (total > 0) return summarizeCounts(completed)
+    return summarizeCounts(allResults)
+  }, [allResults, completed, total])
 
-  const displayOrder = useMemo(() => [...allResults].reverse(), [allResults])
+  const tableResults = total > 0 ? completed : allResults
+  const displayOrder = useMemo(() => [...tableResults].reverse(), [tableResults])
   const { start: rangeStart, end: rangeEnd } = getPageItemRange(page, pageSize, displayOrder.length)
   const visibleRows = displayOrder.slice(rangeStart, rangeEnd)
 
@@ -110,6 +130,33 @@ export function LiveOutputPage() {
         >
           {statusMessage}
         </Alert>
+      )}
+
+      {sandboxRunning && (
+        <Paper
+          sx={{
+            p: 1.5,
+            borderRadius: 0.5,
+            border: '1px solid',
+            borderColor: 'primary.main',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <CircularProgress size={16} thickness={5} />
+            <Chip size="small" label="RUNNING" color="primary" sx={{ height: 22, fontWeight: 800, fontSize: '10px' }} />
+            <Typography sx={{ fontSize: '12px', fontWeight: 600 }}>
+              Sandbox QC — {runStatusMessage || 'Processing…'}
+            </Typography>
+          </Box>
+          <LinearProgress
+            variant={runProgress > 0 ? 'determinate' : 'indeterminate'}
+            value={runProgress > 0 ? runProgress : undefined}
+            sx={{ height: 4, borderRadius: 1 }}
+          />
+        </Paper>
       )}
 
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 1.5 }}>
@@ -164,7 +211,7 @@ export function LiveOutputPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {allResults.length === 0 && (
+              {tableResults.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={colSpan} sx={{ fontSize: '12px', color: 'text.secondary', py: 3 }}>
                     {status === 'running' || sandboxRunning
@@ -195,7 +242,9 @@ export function LiveOutputPage() {
                   <TableCell>{identityField(result, 'brand')}</TableCell>
                   {LIVE_RESULT_COLUMNS.map((col) => {
                     const field = comparisonForKey(result, col.key)
-                    const outcome = field ? comparisonOutcome(field) : 'REVIEW'
+                    const outcome = field
+                      ? comparisonOutcome(field, { result, thresholds: settings })
+                      : 'REVIEW'
                     return (
                       <TableCell key={col.key} align="center">
                         <CompareOutcomeChip outcome={outcome} />
@@ -203,7 +252,7 @@ export function LiveOutputPage() {
                     )
                   })}
                   <TableCell sx={{ fontSize: '11px', fontWeight: 600, maxWidth: 200 }}>
-                    {buildVerdictReason(result)}
+                    {buildVerdictReason(result, { result, thresholds: settings })}
                   </TableCell>
                   <TableCell align="right">
                     <Button

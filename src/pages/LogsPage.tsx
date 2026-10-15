@@ -28,6 +28,7 @@ import { useAppTheme } from '../theme'
 import { getLogCategoryTone } from '../utils/logCategoryStyles'
 import { fontFamilyMono } from '../theme/typography'
 import type { QcLogEntry } from '../types/log'
+import { copyTextToClipboard } from '../utils/copyToClipboard'
 
 const PAGE_SIZE_OPTIONS = [...DEFAULT_PAGE_SIZE_OPTIONS]
 const DEFAULT_PAGE_SIZE = 50
@@ -269,8 +270,8 @@ export function LogsPage() {
       return
     }
     const text = buildFilteredLogsClipboardText(filtered)
-    try {
-      await navigator.clipboard.writeText(text)
+    const ok = await copyTextToClipboard(text)
+    if (ok) {
       setCopySucceeded(true)
       if (copyResetTimerRef.current != null) {
         window.clearTimeout(copyResetTimerRef.current)
@@ -279,7 +280,7 @@ export function LogsPage() {
         setCopySucceeded(false)
         copyResetTimerRef.current = null
       }, COPY_SUCCESS_RESET_MS)
-    } catch {
+    } else {
       setCopySucceeded(false)
       showToast('Could not copy logs to clipboard', 'error')
     }

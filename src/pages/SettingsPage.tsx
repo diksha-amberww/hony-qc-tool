@@ -33,10 +33,17 @@ import {
   ERROR_ENGINE_KEYS,
   ERROR_ENGINE_RETRY_MAX,
   ERROR_ENGINE_RETRY_MIN,
+  AI_QC_PRICING_KEYS,
+  QC_AI_COST_KEYS,
   QC_THRESHOLD_KEYS,
   SCRAPING_BEHAVIOR_KEYS,
   type AppSettings,
 } from '../types/settings'
+import {
+  AI_QC_MODEL_DISPLAY_NAME,
+  DEFAULT_AI_QC_MODEL,
+  normalizeAiQcModelId,
+} from '../config/aiQc'
 import { clampSimilarityThresholdPercent } from '../utils/settingsStorage'
 import { useBitrix24Settings } from '../context/Bitrix24SettingsContext'
 
@@ -121,6 +128,21 @@ const thresholdSliderSx = {
 const THRESHOLD_LABELS: Record<(typeof QC_THRESHOLD_KEYS)[number], string> = {
   titleSimilarityPercent: 'Title Similarity',
   imageSimilarityPercent: 'Image Similarity',
+}
+
+const AI_COST_LABELS: Record<(typeof QC_AI_COST_KEYS)[number], string> = {
+  qcTitleLexicalHybrid: 'Title lexical hybrid (skip AI on obvious match/mismatch)',
+  qcAggressiveAiCostMode: 'Skip image AI only when all other checks pass',
+  qcModelAiEnabled: 'Model number AI fallback (when local match fails)',
+}
+
+const AI_COST_HINTS: Record<(typeof QC_AI_COST_KEYS)[number], string> = {
+  qcTitleLexicalHybrid:
+    'Uses free token overlap before calling Claude. Middle band (41–84%) still uses AI for synonyms and size language.',
+  qcAggressiveAiCostMode:
+    'When UPC, model, title, pack, and brand all pass, assumes image match without a vision call. If anything fails, image AI still runs so the comparison dialog shows a real image score.',
+  qcModelAiEnabled:
+    'Off by default. Local rules handle most SKUs; enable only if you need Claude for ambiguous model numbers.',
 }
 
 const THRESHOLD_HINTS: Record<(typeof QC_THRESHOLD_KEYS)[number], string> = {
@@ -282,14 +304,21 @@ const QcThresholdSlider = memo(function QcThresholdSlider({
 function settingsEqual(a: AppSettings, b: AppSettings): boolean {
   return (
     QC_THRESHOLD_KEYS.every((key) => a[key] === b[key]) &&
+    QC_AI_COST_KEYS.every((key) => a[key] === b[key]) &&
     SCRAPING_BEHAVIOR_KEYS.every((key) => a[key] === b[key]) &&
-    ERROR_ENGINE_KEYS.every((key) => a[key] === b[key])
+    ERROR_ENGINE_KEYS.every((key) => a[key] === b[key]) &&
+    AI_QC_PRICING_KEYS.every((key) => a[key] === b[key])
   )
 }
 
 function buildSettingsPatch(draft: AppSettings, saved: AppSettings): Partial<AppSettings> {
   const patch: Partial<AppSettings> = {}
   for (const key of QC_THRESHOLD_KEYS) {
+    if (draft[key] !== saved[key]) {
+      patch[key] = draft[key]
+    }
+  }
+  for (const key of QC_AI_COST_KEYS) {
     if (draft[key] !== saved[key]) {
       patch[key] = draft[key]
     }
@@ -307,6 +336,13 @@ function buildSettingsPatch(draft: AppSettings, saved: AppSettings): Partial<App
   }
   if (draft.errorEngineBackoffBaseMs !== saved.errorEngineBackoffBaseMs) {
     patch.errorEngineBackoffBaseMs = draft.errorEngineBackoffBaseMs
+  }
+  if (draft.aiQcModelId !== saved.aiQcModelId) patch.aiQcModelId = draft.aiQcModelId
+  if (draft.aiInputPricePerMillionUsd !== saved.aiInputPricePerMillionUsd) {
+    patch.aiInputPricePerMillionUsd = draft.aiInputPricePerMillionUsd
+  }
+  if (draft.aiOutputPricePerMillionUsd !== saved.aiOutputPricePerMillionUsd) {
+    patch.aiOutputPricePerMillionUsd = draft.aiOutputPricePerMillionUsd
   }
   return patch
 }
@@ -407,6 +443,10 @@ export function SettingsPage() {
   )
 
   const handleBehaviorChange = useCallback((key: (typeof SCRAPING_BEHAVIOR_KEYS)[number], checked: boolean) => {
+    setDraftSettings((prev) => ({ ...prev, [key]: checked }))
+  }, [])
+
+  const handleAiCostChange = useCallback((key: (typeof QC_AI_COST_KEYS)[number], checked: boolean) => {
     setDraftSettings((prev) => ({ ...prev, [key]: checked }))
   }, [])
 
@@ -543,6 +583,67 @@ export function SettingsPage() {
         </SettingsSection>
 
         <SettingsSection
+          title={`CLAUDE AI (QC) — ${AI_QC_MODEL_DISPLAY_NAME}`}
+          description="Model and per-million token rates used for QC calls and cost estimates. Update when Anthropic changes pricing."
+        >
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' },
+              gap: 1.5,
+            }}
+          >
+            <TextField
+              size="small"
+              fullWidth
+              label="QC model ID"
+              value={draftSettings.aiQcModelId}
+              onChange={(e) =>
+                setDraftSettings((prev) => ({
+                  ...prev,
+                  aiQcModelId: normalizeAiQcModelId(
+                    e.target.value.trim() || DEFAULT_AI_QC_MODEL,
+                  ),
+                }))
+              }
+              sx={fieldSx}
+              helperText={`Default: ${AI_QC_MODEL_DISPLAY_NAME} (${DEFAULT_AI_QC_MODEL})`}
+            />
+            <Box />
+            <TextField
+              size="small"
+              fullWidth
+              type="number"
+              label="Input USD / 1M tokens"
+              value={draftSettings.aiInputPricePerMillionUsd}
+              onChange={(e) =>
+                setDraftSettings((prev) => ({
+                  ...prev,
+                  aiInputPricePerMillionUsd: Number(e.target.value),
+                }))
+              }
+              slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+              sx={fieldSx}
+            />
+            <TextField
+              size="small"
+              fullWidth
+              type="number"
+              label="Output USD / 1M tokens"
+              value={draftSettings.aiOutputPricePerMillionUsd}
+              onChange={(e) =>
+                setDraftSettings((prev) => ({
+                  ...prev,
+                  aiOutputPricePerMillionUsd: Number(e.target.value),
+                }))
+              }
+              slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
+              sx={fieldSx}
+            />
+          </Box>
+        </SettingsSection>
+
+        <SettingsSection
           title="QC THRESHOLDS"
           description={`Shared by live QC and Sandbox comparisons. Adjust sliders, then Save (${QC_SIMILARITY_THRESHOLD_MIN}–${QC_SIMILARITY_THRESHOLD_MAX}%).`}
         >
@@ -562,6 +663,42 @@ export function SettingsPage() {
                 value={field.value}
                 onChange={thresholdChangeHandlers[field.key]}
               />
+            ))}
+          </Box>
+        </SettingsSection>
+
+        <SettingsSection
+          title="QC AI COST"
+          description="Reduce Claude usage without changing the six-check verdict logic (pack, brand, model, UPC, title, image)."
+        >
+          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr', gap: 0, width: '100%' }}>
+            {QC_AI_COST_KEYS.map((key, index) => (
+              <Box
+                key={key}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 1.25,
+                  py: 1.5,
+                  borderTop: index > 0 ? '1px solid' : 'none',
+                  borderColor: 'divider',
+                  minWidth: 0,
+                }}
+              >
+                <Switch
+                  checked={draftSettings[key]}
+                  onChange={(e) => handleAiCostChange(key, e.target.checked)}
+                  sx={{ mt: 0.1, flexShrink: 0 }}
+                />
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography sx={{ fontSize: '12px', fontWeight: 600, lineHeight: 1.4 }}>
+                    {AI_COST_LABELS[key]}
+                  </Typography>
+                  <Typography sx={{ fontSize: '11px', color: 'text.secondary', mt: 0.4, lineHeight: 1.55 }}>
+                    {AI_COST_HINTS[key]}
+                  </Typography>
+                </Box>
+              </Box>
             ))}
           </Box>
         </SettingsSection>

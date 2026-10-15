@@ -157,7 +157,7 @@ export function CredentialsPage() {
   return (
     <PageFrame
       title="Credentials"
-      subtitle="Vendor portal, Amazon SP-API, Claude AI, and email — configured via credentialManifest.json."
+      subtitle="Vendor portal, Amazon SP-API, Claude Haiku 5.5, and email — configured via credentialManifest.json."
       actions={
         <Button
           variant="contained"

@@ -8,11 +8,18 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { getQcBatchSession, pauseQcBatch, resumeQcBatch, stopQcBatch } from '../services/qcApi'
+import {
+  clearQcWorkspace,
+  getQcBatchSession,
+  pauseQcBatch,
+  resumeQcBatch,
+  stopQcBatch,
+} from '../services/qcApi'
 import { ensureVendorLoginBeforeScrape } from '../services/vendorSession/vendorLoginGate'
 import { completeBatchInProcess } from '../services/qc/qcEngineService'
 import { processQcRowForBatch } from '../services/qc/qcRowApi'
 import { buildFailedQcResult, listingQcPayloadToQcResult } from '../services/qc/listingQcMapper'
+import { applyQcThresholdsToResult } from '../utils/qcThresholdComparison'
 import { normalizeScrapeErrorKind } from '../services/errorEngine/errorEngineService'
 import { ScrapeOperationError } from '../errorEngine/types'
 import { VENDOR_INTEGRATION_ID } from '../config/vendorIntegration'
@@ -48,6 +55,13 @@ type BatchDemoContextValue = {
   resume: () => Promise<void>
   stop: () => Promise<void>
   reset: () => Promise<void>
+  /**
+   * Remove QC rows used by Export Customization (and clear saved export draft).
+   * `all` — upload batch + sandbox; `sandbox` — sandbox runs only.
+   */
+  purgeQcResultsForExport: (scope: 'all' | 'sandbox') => void
+  /** Sandbox (or other single-run) results → Export page partial/full CSV & Excel */
+  registerExportResult: (result: QcResult) => void
 }
 
 const BatchDemoContext = createContext<BatchDemoContextValue | null>(null)
@@ -64,8 +78,12 @@ function hasMainBatchRunner() {
 
 export function BatchDemoProvider({ children }: { children: ReactNode }) {
   const { appendLog } = useLogs()
-  const { appendRow: appendLiveOutputRow, clearRows: clearLiveOutputRows } = useLiveOutput()
-  const { recordUsage } = useAiUsage()
+  const {
+    appendRow: appendLiveOutputRow,
+    clearRows: clearLiveOutputRows,
+    removeRowsWhere: removeLiveOutputRowsWhere,
+  } = useLiveOutput()
+  const { recordUsage, recordSkuProcessed } = useAiUsage()
   const { settings } = useSettings()
   const { aliasPairs } = useBrandAliases()
   const [completed, setCompleted] = useState<QcResult[]>([])
@@ -82,6 +100,8 @@ export function BatchDemoProvider({ children }: { children: ReactNode }) {
   const statusRef = useRef<QcProcessStatus>(status)
   statusRef.current = status
   const completedCountRef = useRef(0)
+  /** Prevents duplicate live-output rows when React re-runs state updaters (Strict Mode). */
+  const ingestedRowIndicesRef = useRef(new Set<number>())
   const processingRowRef = useRef(false)
   const vendorRecoveryRef = useRef(false)
   const { handleScrapeFailure, isRecovering, resetRecoveryUi } = useErrorEngine()
@@ -153,24 +173,74 @@ export function BatchDemoProvider({ children }: { children: ReactNode }) {
     [appendLog, completed, settings.headlessScraping, startedAt, total],
   )
 
+  const purgeQcResultsForExport = useCallback(
+    (scope: 'all' | 'sandbox') => {
+      clearExportLockSnapshot()
+      if (scope === 'all') {
+        setCompleted([])
+        completedCountRef.current = 0
+        ingestedRowIndicesRef.current.clear()
+        clearLiveOutputRows()
+        if (statusRef.current === 'idle' || statusRef.current === 'done' || statusRef.current === 'stopped') {
+          setTotal(0)
+        }
+        return
+      }
+      setCompleted((prev) => {
+        const next = prev.filter((r) => r.runSource !== 'sandbox')
+        completedCountRef.current = next.length
+        if (
+          statusRef.current === 'idle' ||
+          statusRef.current === 'done' ||
+          statusRef.current === 'stopped'
+        ) {
+          setTotal(next.length)
+        }
+        return next
+      })
+      removeLiveOutputRowsWhere((r) => r.runSource === 'sandbox')
+    },
+    [clearLiveOutputRows, removeLiveOutputRowsWhere],
+  )
+
+  const registerExportResult = useCallback((result: QcResult) => {
+    setCompleted((prev) => {
+      const row: QcResult = {
+        ...result,
+        runSource: result.runSource ?? 'sandbox',
+      }
+      const next = [...prev, row]
+      completedCountRef.current = next.length
+      setTotal((t) => Math.max(t, next.length))
+      return next
+    })
+    setStartedAt((t) => t ?? Date.now())
+  }, [])
+
   const ingestQcResult = useCallback(
     (rowIndex: number, result: QcResult) => {
+      if (ingestedRowIndicesRef.current.has(rowIndex)) return
+      ingestedRowIndicesRef.current.add(rowIndex)
+
       const inTok = result.inputTokens ?? 0
       const outTok = result.outputTokens ?? 0
       if (inTok > 0 || outTok > 0) {
         recordUsage(inTok, outTok)
+        recordSkuProcessed()
       }
+
+      const row = { ...result, runSource: 'upload' as const }
+      appendLiveOutputRow(row)
+
       setCompleted((prev) => {
         if (prev.length > rowIndex) return prev
-        const row = { ...result, runSource: 'upload' as const }
-        appendLiveOutputRow(row)
         const next = [...prev, row]
         completedCountRef.current = next.length
         return next
       })
       appendRowLogs(result, rowIndex, batchLabelRef.current ?? undefined)
     },
-    [appendRowLogs, recordUsage, appendLiveOutputRow],
+    [appendRowLogs, recordUsage, recordSkuProcessed, appendLiveOutputRow],
   )
 
   const reset = useCallback(async () => {
@@ -181,8 +251,10 @@ export function BatchDemoProvider({ children }: { children: ReactNode }) {
     ) {
       await stopQcBatch({ sessionId })
     }
+    await clearQcWorkspace()
     setCompleted([])
     clearLiveOutputRows()
+    ingestedRowIndicesRef.current.clear()
     queueRef.current = []
     sessionIdRef.current = null
     completedCountRef.current = 0
@@ -211,6 +283,16 @@ export function BatchDemoProvider({ children }: { children: ReactNode }) {
         settings: {
           titleSimilarityPercent: settings.titleSimilarityPercent,
           imageSimilarityPercent: settings.imageSimilarityPercent,
+          qcTitleLexicalHybrid: settings.qcTitleLexicalHybrid,
+          qcAggressiveAiCostMode: settings.qcAggressiveAiCostMode,
+          qcModelAiEnabled: settings.qcModelAiEnabled,
+          aiQcModelId: settings.aiQcModelId,
+          aiInputPricePerMillionUsd: settings.aiInputPricePerMillionUsd,
+          aiOutputPricePerMillionUsd: settings.aiOutputPricePerMillionUsd,
+          errorEngineEnabled: settings.errorEngineEnabled,
+          errorEngineMaxRetries: settings.errorEngineMaxRetries,
+          errorEngineBackoffBaseMs: settings.errorEngineBackoffBaseMs,
+          vendorLoginRequired: settings.vendorLoginRequired,
         },
         brandAliases: [...aliasPairs],
       })
@@ -259,6 +341,8 @@ export function BatchDemoProvider({ children }: { children: ReactNode }) {
       setCurrentBatchLabel(label)
       setCompleted([])
       completedCountRef.current = 0
+      ingestedRowIndicesRef.current.clear()
+      clearLiveOutputRows()
       setStartedAt(Date.now())
       prevStatusRef.current = 'running'
       setStatus('running')
@@ -288,7 +372,7 @@ export function BatchDemoProvider({ children }: { children: ReactNode }) {
         await startMainBatchRunner(payload.sessionId, label, 0)
       }
     },
-    [appendLog, settings, startMainBatchRunner],
+    [appendLog, clearLiveOutputRows, settings, startMainBatchRunner],
   )
 
   const pause = useCallback(async () => {
@@ -353,11 +437,45 @@ export function BatchDemoProvider({ children }: { children: ReactNode }) {
       if (event.sessionId !== sessionIdRef.current) return
       const label = batchLabelRef.current ?? undefined
 
+      if (event.type === 'sessionRecovery') {
+        if (event.phase === 'paused' || event.phase === 'cancelling_session') {
+          setStatus('paused')
+        } else if (
+          event.phase === 'resumed' ||
+          event.phase === 'recovered' ||
+          event.phase === 'relogging'
+        ) {
+          if (event.phase === 'resumed' || event.phase === 'recovered') {
+            setStatus('running')
+            sessionReadyRef.current = true
+            resetRecoveryUi()
+          }
+        } else if (event.phase === 'recovery_failed') {
+          setStatus('paused')
+          sessionReadyRef.current = false
+          resetRecoveryUi()
+          appendLog({
+            category: 'ERROR',
+            message: 'Auto-Relogin failed — QC remains paused',
+            detail: event.detail ?? event.error,
+            batchLabel: label,
+          })
+        }
+        return
+      }
+
       if (event.type === 'row') {
         const row = queueRef.current[event.rowIndex]
         const response = event.result
         if (response.ok) {
-          ingestQcResult(event.rowIndex, listingQcPayloadToQcResult(response.result))
+          ingestQcResult(
+            event.rowIndex,
+            applyQcThresholdsToResult(
+              listingQcPayloadToQcResult(response.result),
+              settings,
+              { brandAliases: [...aliasPairs] },
+            ),
+          )
           return
         }
         if (response.phase === 'vendor') return
@@ -368,6 +486,32 @@ export function BatchDemoProvider({ children }: { children: ReactNode }) {
       }
 
       if (event.type === 'vendorFailure') {
+        if (
+          hasMainBatchRunner() &&
+          settings.errorEngineEnabled &&
+          settings.vendorLoginRequired &&
+          !event.recoveryExhausted &&
+          (event.kind === 'authentication' || event.kind === 'blocked')
+        ) {
+          return
+        }
+        if (
+          hasMainBatchRunner() &&
+          settings.errorEngineEnabled &&
+          settings.vendorLoginRequired &&
+          event.recoveryExhausted
+        ) {
+          setStatus('paused')
+          sessionReadyRef.current = false
+          resetRecoveryUi()
+          appendLog({
+            category: 'ERROR',
+            message: 'Vendor auto-relogin exhausted — QC remains paused',
+            detail: event.error,
+            batchLabel: label,
+          })
+          return
+        }
         if (vendorRecoveryRef.current) return
         vendorRecoveryRef.current = true
         const row = queueRef.current[event.rowIndex]
@@ -408,7 +552,17 @@ export function BatchDemoProvider({ children }: { children: ReactNode }) {
         return
       }
     })
-  }, [appendLog, handleScrapeFailure, ingestQcResult, pause, resume, settings.errorEngineEnabled])
+  }, [
+    appendLog,
+    handleScrapeFailure,
+    ingestQcResult,
+    pause,
+    resume,
+    resetRecoveryUi,
+    settings,
+    aliasPairs,
+    settings.errorEngineEnabled,
+  ])
 
   useEffect(() => {
     const prev = prevStatusRef.current
@@ -556,6 +710,8 @@ export function BatchDemoProvider({ children }: { children: ReactNode }) {
       resume,
       stop,
       reset,
+      purgeQcResultsForExport,
+      registerExportResult,
     }),
     [
       total,
@@ -569,6 +725,8 @@ export function BatchDemoProvider({ children }: { children: ReactNode }) {
       resume,
       stop,
       reset,
+      purgeQcResultsForExport,
+      registerExportResult,
     ],
   )
 

@@ -1,5 +1,7 @@
 import net from 'node:net'
 import { fetchLwaAccessToken } from './amazon/lwaToken.mjs'
+import { buildSpApiGetRequest } from './amazon/spApiSign.mjs'
+import { SP_API_HOST } from './amazon/spApiCredentialKeys.mjs'
 import { testBitrix24Connection } from './bitrix24/bitrix24Api.mjs'
 import {
   clearHoneysSession,
@@ -7,6 +9,11 @@ import {
   formatPortalLoginSuccessMessage,
   resolvePortalEndpoints,
 } from './vendor/honeysPlaceSession.mjs'
+import {
+  AI_QC_MODEL_DISPLAY_NAME,
+  DEFAULT_AI_QC_MODEL,
+  normalizeAiQcModelId,
+} from '../scripts/aiQcConfig.mjs'
 
 const REDACT =
   /(?:sk-[a-zA-Z0-9_-]{8,}|xox[baprs]-\S+|Bearer\s+\S+|password[=:]\s*\S+|api[_-]?key[=:]\s*\S+)/gi
@@ -125,7 +132,8 @@ async function testAnthropic(values, log) {
   }
 
   logLine(log, 'Opening Anthropic API endpoint…')
-  logLine(log, 'POST api.anthropic.com/v1/messages (minimal request)')
+  const apiModelId = normalizeAiQcModelId(DEFAULT_AI_QC_MODEL)
+  logLine(log, `POST api.anthropic.com/v1/messages (${AI_QC_MODEL_DISPLAY_NAME}, model: ${apiModelId})`)
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -134,7 +142,7 @@ async function testAnthropic(values, log) {
       'content-type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
+      model: apiModelId,
       max_tokens: 1,
       messages: [{ role: 'user', content: 'ping' }],
     }),
@@ -145,7 +153,11 @@ async function testAnthropic(values, log) {
     return { ok: false, message: 'Authentication failed. Check the API key.', log }
   }
   if (res.ok) {
-    return { ok: true, message: 'Login successful — Claude API key accepted.', log }
+    return {
+      ok: true,
+      message: `Login successful — ${AI_QC_MODEL_DISPLAY_NAME} API key accepted.`,
+      log,
+    }
   }
   if (res.status >= 400 && res.status < 500) {
     return { ok: true, message: 'API key reached Anthropic (see log for HTTP details).', log }
@@ -228,9 +240,39 @@ async function testAmazonSpApi(values, log) {
   }
 
   logLine(log, 'Access token issued successfully.')
+  logLine(log, `GET ${SP_API_HOST}/sellers/v1/marketplaceParticipations`)
+  const request = buildSpApiGetRequest({
+    host: SP_API_HOST,
+    path: '/sellers/v1/marketplaceParticipations',
+    query: '',
+    accessToken: lwa.accessToken,
+  })
+  const res = await fetch(request.url, { method: 'GET', headers: request.headers })
+  logLine(log, `HTTP ${res.status} ${res.statusText}`)
+  if (!res.ok) {
+    let detail = ''
+    try {
+      const text = await res.text()
+      detail = text.slice(0, 200)
+      try {
+        const json = JSON.parse(text)
+        detail = json?.errors?.[0]?.message ?? json?.message ?? detail
+      } catch {
+        /* use snippet */
+      }
+    } catch {
+      detail = res.statusText
+    }
+    return {
+      ok: false,
+      message: `Amazon SP-API request failed (HTTP ${res.status}): ${detail}`,
+      log,
+    }
+  }
+
   return {
     ok: true,
-    message: 'Login successful — Amazon SP-API token refresh verified.',
+    message: 'Amazon SP-API credentials verified.',
     log,
   }
 }

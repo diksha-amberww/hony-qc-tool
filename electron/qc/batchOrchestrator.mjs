@@ -1,6 +1,12 @@
 import { getBatchSession, markBatchDone } from '../qcBatchStore.mjs'
 import { pushAppLog } from '../mainProcessLog.mjs'
 import { processQcRow } from './processQcRow.mjs'
+import {
+  isVendorSessionFailure,
+  runBatchAutoRelogin,
+  waitForBatchRunningOrStopped,
+  waitForBatchPausedThenRunning,
+} from './batchSessionRecovery.mjs'
 
 const TICK_MS = 650
 
@@ -81,6 +87,7 @@ export async function startBatchProcessingLoop(webContents, payload) {
             vendorId,
             settings,
             brandAliases,
+            keepBrowserAfterScrape: true,
           },
           appLog,
         )
@@ -93,25 +100,55 @@ export async function startBatchProcessingLoop(webContents, payload) {
         })
 
         if (!result.ok && result.phase === 'vendor') {
+          const vendorKind = result.kind ?? 'unknown'
+          const errorEngineEnabled = settings.errorEngineEnabled === true
+          const vendorLoginRequired = settings.vendorLoginRequired !== false
+          const sku = String(row.part_sku ?? row.sku ?? row.upc ?? '').trim()
+
+          const shouldAutoRelogin =
+            errorEngineEnabled &&
+            vendorLoginRequired &&
+            isVendorSessionFailure({ kind: vendorKind, error: result.error })
+
+          if (shouldAutoRelogin) {
+            const recovery = await runBatchAutoRelogin(webContents, {
+              sessionId,
+              rowIndex,
+              batchLabel,
+              headless,
+              sku,
+              errorMessage: result.error,
+              kind: vendorKind,
+              errorEngineMaxRetries: settings.errorEngineMaxRetries,
+              errorEngineBackoffBaseMs: settings.errorEngineBackoffBaseMs,
+            })
+            if (recovery.ok) {
+              continue
+            }
+            webContents.send('qc:batchProcessing', {
+              type: 'vendorFailure',
+              sessionId,
+              rowIndex,
+              kind: vendorKind,
+              error: recovery.error ?? result.error,
+              recoveryExhausted: true,
+            })
+            const waited = await waitForBatchRunningOrStopped(sessionId, abort)
+            if (!waited.running) {
+              break
+            }
+            continue
+          }
+
           webContents.send('qc:batchProcessing', {
             type: 'vendorFailure',
             sessionId,
             rowIndex,
-            kind: result.kind,
+            kind: vendorKind,
             error: result.error,
           })
-          while (!abort.stop) {
-            await sleep(400)
-            const current = getBatchSession(sessionId)
-            if (!current || current.state === 'stopped' || current.state === 'done') {
-              break
-            }
-            if (current.state === 'running') {
-              break
-            }
-          }
-          const afterWait = getBatchSession(sessionId)
-          if (!afterWait || afterWait.state !== 'running') {
+          const waited = await waitForBatchPausedThenRunning(sessionId, abort)
+          if (!waited.running) {
             break
           }
           continue
@@ -134,6 +171,12 @@ export async function startBatchProcessingLoop(webContents, payload) {
 export function stopBatchProcessingLoop(sessionId) {
   const handle = activeLoops.get(sessionId)
   if (handle) handle.stop = true
+}
+
+export function stopAllBatchProcessingLoops() {
+  for (const handle of activeLoops.values()) {
+    handle.stop = true
+  }
 }
 
 export function isBatchProcessingLoopActive(sessionId) {

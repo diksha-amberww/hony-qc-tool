@@ -29,15 +29,17 @@ export const RawExtractPanel = memo(function RawExtractPanel({
 
   return (
     <Paper
+      elevation={0}
       sx={{
-        borderRadius: 0.5,
+        borderRadius: 1.5,
         border: '1px solid',
-        borderColor: 'divider',
+        borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'divider',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
         minWidth: 0,
         maxHeight,
+        bgcolor: isDark ? '#0c0c0e' : 'background.paper',
       }}
     >
       <Box

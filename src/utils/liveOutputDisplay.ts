@@ -1,6 +1,19 @@
 import type { QcComparisonField, QcResult } from '../types/qc'
+import type { QcThresholdSettings } from '../types/settings'
 import type { QcCompareOutcome } from './qcThresholdComparison'
 import { normalizeLoose } from './qcThresholdComparison'
+import { isQcVerdictComparisonKey } from './qcVerdictKeys'
+import {
+  imageCompareOutcomeFromScore,
+  normalizeImageAiScorePercent,
+  normalizeTitleAiScorePercent,
+  titleCompareOutcomeFromScore,
+} from './qcSimilarityDisplay'
+
+export type ComparisonOutcomeContext = {
+  result: QcResult
+  thresholds: QcThresholdSettings
+}
 
 export const LIVE_RESULT_COLUMNS: { key: string; header: string }[] = [
   { key: 'brand', header: 'BRAND RESULT' },
@@ -11,7 +24,24 @@ export const LIVE_RESULT_COLUMNS: { key: string; header: string }[] = [
   { key: 'image', header: 'IMAGE RESULT' },
 ]
 
-export function comparisonOutcome(field: QcComparisonField): QcCompareOutcome {
+export function comparisonOutcome(
+  field: QcComparisonField,
+  context?: ComparisonOutcomeContext,
+): QcCompareOutcome {
+  if (context) {
+    if (field.key === 'image') {
+      const score = normalizeImageAiScorePercent(context.result)
+      if (score != null) {
+        return imageCompareOutcomeFromScore(score, context.thresholds.imageSimilarityPercent)
+      }
+    }
+    if (field.key === 'title') {
+      const score = normalizeTitleAiScorePercent(context.result)
+      if (score != null) {
+        return titleCompareOutcomeFromScore(score, context.thresholds.titleSimilarityPercent)
+      }
+    }
+  }
   if (field.outcome) return field.outcome
   const source = field.sourceValue?.trim()
   const target = field.targetValue?.trim()
@@ -30,21 +60,34 @@ export function identityField(result: QcResult, key: string): string {
 }
 
 export function comparisonForKey(result: QcResult, key: string): QcComparisonField | undefined {
-  return result.comparisons.find((c) => c.key === key)
+  const found = result.comparisons.find((c) => c.key === key)
+  if (found) return found
+  if (key === 'pack') return result.comparisons.find((c) => c.key === 'packSize')
+  if (key === 'packSize') return result.comparisons.find((c) => c.key === 'pack')
+  return undefined
 }
 
-export function buildVerdictReason(result: QcResult): string {
+export function buildVerdictReason(
+  result: QcResult,
+  context?: ComparisonOutcomeContext,
+): string {
   if (result.verdict === 'PASS') {
     return 'PASS: All fields match'
   }
 
-  const mismatch = result.comparisons.find((c) => comparisonOutcome(c) === 'MISMATCH')
+  const mismatch = result.comparisons.find(
+    (c) =>
+      isQcVerdictComparisonKey(c.key) && comparisonOutcome(c, context) === 'MISMATCH',
+  )
   if (mismatch) {
     const label = mismatch.label.replace(/\s+$/g, '')
     return `FAIL: ${label} Mismatch`
   }
 
-  const review = result.comparisons.find((c) => comparisonOutcome(c) === 'REVIEW')
+  const review = result.comparisons.find(
+    (c) =>
+      isQcVerdictComparisonKey(c.key) && comparisonOutcome(c, context) === 'REVIEW',
+  )
   if (review) {
     return `REVIEW: ${review.label}`
   }

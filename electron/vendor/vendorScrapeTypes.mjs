@@ -11,7 +11,10 @@
  * @property {string} line
  * @property {string} modelNumber
  * @property {string} packSize
+ * @property {number} [packSizeValue]
+ * @property {string} [packSizeUnit]
  * @property {string} upc
+ * @property {string} [description]
  * @property {string} imageUrl
  * @property {string} pageUrl
  * @property {Record<string, string | number | boolean | null>} rawAttributes
@@ -23,6 +26,7 @@
  * @property {number} rowIndex
  * @property {boolean} headless
  * @property {string} [batchLabel]
+ * @property {(line: string) => void} [onLogLine]
  */
 
 /**

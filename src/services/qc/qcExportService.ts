@@ -15,7 +15,7 @@ function buildExportFileName(
   const stamp = new Date().toISOString().slice(0, 10)
   const scopeLabel = scope === 'partial' ? 'Partial' : 'Full'
   const filterLabel = filter === 'all' ? 'all' : filter
-  const ext = format === 'csv' ? 'csv' : 'xls'
+  const ext = format === 'csv' ? 'csv' : 'xlsx'
   return `QC_${scopeLabel}_${stamp}_${filterLabel}_${rowCount}rows.${ext}`
 }
 

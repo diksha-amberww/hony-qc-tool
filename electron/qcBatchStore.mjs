@@ -56,4 +56,8 @@ export function markBatchDone(sessionId) {
   }
 }
 
+export function clearAllBatchSessions() {
+  sessions.clear()
+}
+
 export { newSessionId }

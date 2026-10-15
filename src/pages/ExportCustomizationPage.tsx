@@ -31,6 +31,7 @@ import { useAppTheme } from '../theme'
 import { generateCustomExcel } from '../services/customExportApi'
 import type { CustomExportConfig, CustomExportSummary } from '../types/customExport'
 import {
+  createDefaultExportDraft,
   draftToColumnKeys,
   mergeDraftWithCatalog,
   readExportDraft,
@@ -189,6 +190,10 @@ export function ExportCustomizationPage() {
   const mandatoryColumns = useMemo(() => buildMandatoryExportColumns(), [])
 
   useEffect(() => {
+    if (completed.length === 0) {
+      setDraft(createDefaultExportDraft([]))
+      return
+    }
     if (isLocked) {
       const snapshot = readLockedExportSnapshot()
       if (snapshot) setDraft(mergeDraftWithCatalog(snapshot, completed))

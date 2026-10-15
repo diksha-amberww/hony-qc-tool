@@ -9,6 +9,7 @@ import {
   type QcCompareOutcome,
   type QcComparisonOptions,
 } from '../utils/qcThresholdComparison'
+import { QC_VERDICT_COMPARISON_KEYS } from '../utils/qcVerdictKeys'
 
 export type SandboxCompareOutcome = QcCompareOutcome
 
@@ -37,7 +38,10 @@ export type SandboxVendorExtract = {
   line: string
   modelNumber: string
   packSize: string
+  packSizeValue?: number
+  packSizeUnit?: string
   upc: string
+  description?: string
   imageUrl: string
   pageUrl: string
   rawAttributes: Record<string, string | number | boolean | null>
@@ -60,6 +64,14 @@ export type SandboxQcResult = {
   outputTokens: number
   costUsd: number
   estimatedX1000Usd: number
+  titleScore?: number | null
+  imageScore?: number | null
+  inputRowUpc?: string
+  titleSameProduct?: boolean | null
+  titleTokenSimilarity?: number | null
+  qcModel?: string
+  packEvidenceVendor?: string
+  packEvidenceAmazon?: string
 }
 
 function pick(row: InputRow, ...keys: string[]): string {
@@ -212,10 +224,18 @@ function thresholdOutcome(
   return comparisonOutcomeForKey(key, source, target, thresholds, options)
 }
 
-function deriveVerdict(comparisons: SandboxComparison[], seed: QcVerdict): QcVerdict {
-  if (seed === 'FAIL' || seed === 'MANUAL_REVIEW') return seed
-  if (comparisons.some((c) => c.outcome === 'MISMATCH')) return 'FAIL'
-  if (comparisons.some((c) => c.outcome === 'REVIEW')) return 'MANUAL_REVIEW'
+function deriveVerdict(comparisons: SandboxComparison[]): QcVerdict {
+  let hasMismatch = false
+  let hasReview = false
+  for (const key of QC_VERDICT_COMPARISON_KEYS) {
+    const row = comparisons.find((c) => c.key === key)
+    if (!row) return 'FAIL'
+    if (row.outcome === 'MISMATCH') hasMismatch = true
+    else if (row.outcome === 'REVIEW') hasReview = true
+    else if (row.outcome !== 'MATCH') hasMismatch = true
+  }
+  if (hasMismatch) return 'FAIL'
+  if (hasReview) return 'MANUAL_REVIEW'
   return 'PASS'
 }
 
@@ -314,7 +334,7 @@ export function buildSandboxQcResult(
       { key: 'listing_id', label: 'ASIN', value: source.asin },
       { key: 'brand', label: 'Brand', value: source.brand },
     ],
-    verdict: deriveVerdict(comparisons, seed),
+    verdict: deriveVerdict(comparisons),
     comparisons,
     asinExtract,
     vendorExtract,

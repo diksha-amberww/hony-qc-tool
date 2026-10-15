@@ -2,6 +2,14 @@ import type { BrandAliasPair } from '../types/brandAlias'
 import type { AppSettings, QcThresholdSettings } from '../types/settings'
 import type { QcComparisonField, QcResult, QcVerdict } from '../types/qc'
 import { isBrandAliasMatch } from './brandAliasMatch'
+import { brandNamesMatch } from './brandNameMatch'
+import {
+  imageCompareOutcomeFromScore,
+  normalizeImageAiScorePercent,
+  normalizeTitleAiScorePercent,
+  titleCompareOutcomeFromScore,
+} from './qcSimilarityDisplay'
+import { QC_VERDICT_COMPARISON_KEYS } from './qcVerdictKeys'
 
 export type QcComparisonOptions = {
   brandAliases?: readonly BrandAliasPair[]
@@ -97,43 +105,105 @@ export function comparisonOutcomeForKey(
       if (aliases?.length && isBrandAliasMatch(sourceValue, targetValue, aliases)) {
         return 'MATCH'
       }
-      return exactCompareOutcome(sourceValue, targetValue)
+      if (!sourceValue || sourceValue === '—' || !targetValue || targetValue === '—') {
+        return 'REVIEW'
+      }
+      if (brandNamesMatch(sourceValue, targetValue)) return 'MATCH'
+      return 'MISMATCH'
     }
     default:
       return exactCompareOutcome(sourceValue, targetValue)
   }
 }
 
+function outcomeForVerdictField(
+  field: QcComparisonField,
+  thresholds: QcThresholdSettings,
+  options?: QcComparisonOptions,
+  scoreContext?: Pick<QcResult, 'imageScore' | 'titleScore' | 'titleSameProduct'>,
+): QcCompareOutcome {
+  if (field.key === 'image') {
+    return imageCompareOutcomeFromScore(
+      normalizeImageAiScorePercent(scoreContext ?? {}),
+      thresholds.imageSimilarityPercent,
+    )
+  }
+  if (field.key === 'title') {
+    return titleCompareOutcomeFromScore(
+      normalizeTitleAiScorePercent(scoreContext ?? {}),
+      thresholds.titleSimilarityPercent,
+    )
+  }
+  // Brand, model, pack, UPC: trust engine comparison outcome (lenient rules already applied in runQC).
+  if (field.outcome) return field.outcome
+  return comparisonOutcomeForKey(
+    field.key,
+    field.sourceValue,
+    field.targetValue,
+    thresholds,
+    options,
+  )
+}
+
+/** PASS / FAIL / MANUAL_REVIEW from the six core comparison outcomes. */
 export function deriveVerdictFromComparisons(
   comparisons: QcComparisonField[],
   thresholds: QcThresholdSettings,
   options?: QcComparisonOptions,
+  scoreContext?: Pick<QcResult, 'imageScore' | 'titleScore' | 'titleSameProduct'>,
 ): QcVerdict {
   let hasMismatch = false
   let hasReview = false
-  for (const field of comparisons) {
-    const outcome = comparisonOutcomeForKey(
-      field.key,
-      field.sourceValue,
-      field.targetValue,
-      thresholds,
-      options,
-    )
+  for (const key of QC_VERDICT_COMPARISON_KEYS) {
+    const field =
+      comparisons.find((c) => c.key === key) ??
+      comparisons.find((c) => c.key === 'packSize' && key === 'pack')
+    if (!field) return 'FAIL'
+    const outcome = outcomeForVerdictField(field, thresholds, options, scoreContext)
     if (outcome === 'MISMATCH') hasMismatch = true
-    if (outcome === 'REVIEW') hasReview = true
+    else if (outcome === 'REVIEW') hasReview = true
+    else if (outcome !== 'MATCH') hasMismatch = true
   }
   if (hasMismatch) return 'FAIL'
   if (hasReview) return 'MANUAL_REVIEW'
   return 'PASS'
 }
 
-/** Apply shared QC thresholds to a finished result (batch demo / live QC). */
+/** Sync title/image outcomes and verdict with AI scores and Settings thresholds. */
 export function applyQcThresholdsToResult(
   result: QcResult,
   thresholds: Pick<AppSettings, keyof QcThresholdSettings>,
   options?: QcComparisonOptions,
 ): QcResult {
-  const verdict = deriveVerdictFromComparisons(result.comparisons, thresholds, options)
-  if (verdict === result.verdict) return result
-  return { ...result, verdict }
+  const comparisons = result.comparisons.map((field) => {
+    if (field.key === 'image') {
+      const outcome = imageCompareOutcomeFromScore(
+        normalizeImageAiScorePercent(result),
+        thresholds.imageSimilarityPercent,
+      )
+      if (outcome === field.outcome) return field
+      return { ...field, outcome }
+    }
+    if (field.key === 'title') {
+      const outcome = titleCompareOutcomeFromScore(
+        normalizeTitleAiScorePercent(result),
+        thresholds.titleSimilarityPercent,
+      )
+      if (outcome === field.outcome) return field
+      return { ...field, outcome }
+    }
+    return field
+  })
+  const verdict = deriveVerdictFromComparisons(comparisons, thresholds, options, {
+    imageScore: result.imageScore,
+    titleScore: result.titleScore,
+    titleSameProduct: result.titleSameProduct,
+  })
+  if (
+    verdict === result.verdict &&
+    comparisons.every((c, i) => c === result.comparisons[i])
+  ) {
+    return result
+  }
+  return { ...result, comparisons, verdict }
 }

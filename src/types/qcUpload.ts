@@ -20,6 +20,8 @@ export type QcValidateSuccess = {
   sessionId: string
   rowCount: number
   previewRows: InputRow[]
+  /** Duplicate ASIN rows (not blocking until user acknowledges). */
+  duplicateAsinWarnings?: string[]
 }
 
 export type QcValidateFailure = {

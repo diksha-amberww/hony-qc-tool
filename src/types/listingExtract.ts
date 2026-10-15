@@ -25,7 +25,10 @@ export type VendorListingExtract = {
   line: string
   modelNumber: string
   packSize: string
+  packSizeValue?: number
+  packSizeUnit?: string
   upc: string
+  description?: string
   imageUrl: string
   pageUrl: string
   rawAttributes: ListingRawAttributes
@@ -47,6 +50,15 @@ export type ListingQcPayload = {
   vendorExtract: VendorListingExtract
   inputTokens: number
   outputTokens: number
+  inputRowUpc?: string
+  titleScore?: number | null
+  imageScore?: number | null
+  titleSameProduct?: boolean | null
+  titleTokenSimilarity?: number | null
+  costUsd?: number | null
+  qcModel?: string
+  packEvidenceVendor?: string
+  packEvidenceAmazon?: string
 }
 
 export type QcProcessRowSuccess = {

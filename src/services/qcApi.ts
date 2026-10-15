@@ -8,6 +8,7 @@ import type {
   QcValidateResponse,
 } from '../types/qcUpload'
 import {
+  clearQcWorkspaceInProcess,
   getBatchSessionInProcess,
   pauseBatchInProcess,
   resumeBatchInProcess,
@@ -19,6 +20,8 @@ import {
 function qcBridge() {
   return typeof window !== 'undefined' ? window.electronAPI?.qc : undefined
 }
+
+export { runQcPipelineExport, revealQcExportFile } from './qc/qcPipelineApi'
 
 export async function validateUpload(request: QcValidateRequest): Promise<QcValidateResponse> {
   const bridge = qcBridge()
@@ -66,4 +69,13 @@ export async function getQcBatchSession(sessionId: string): Promise<QcBatchSessi
     return bridge.getSession({ sessionId })
   }
   return getBatchSessionInProcess(sessionId)
+}
+
+/** Stops background batch loops (Electron) and drops all validated/running QC sessions from memory. */
+export async function clearQcWorkspace(): Promise<void> {
+  const bridge = qcBridge()
+  if (bridge?.clearWorkspace) {
+    await bridge.clearWorkspace()
+  }
+  clearQcWorkspaceInProcess()
 }

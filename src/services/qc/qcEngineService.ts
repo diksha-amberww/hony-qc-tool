@@ -22,6 +22,7 @@ import {
   markBatchResumed,
   markBatchRunning,
   markBatchStopped,
+  clearBatchSessions,
 } from './qcBatchSession'
 import { runUploadValidation } from './qcUploadValidation'
 import { sandboxQcResultToQcResult } from './sandboxToQcResult'
@@ -56,6 +57,7 @@ export function validateUploadInProcess(request: QcValidateRequest): QcValidateR
     sessionId,
     rowCount,
     previewRows: result.rows.slice(0, QC_VALIDATE_PREVIEW_ROWS),
+    duplicateAsinWarnings: result.duplicateAsinWarnings,
   }
 }
 
@@ -117,6 +119,10 @@ export function getBatchSessionInProcess(sessionId: string): QcBatchSessionRespo
 
 export function completeBatchInProcess(sessionId: string): void {
   markBatchDone(sessionId)
+}
+
+export function clearQcWorkspaceInProcess(): void {
+  clearBatchSessions()
 }
 
 export function buildQcResultForRow(
