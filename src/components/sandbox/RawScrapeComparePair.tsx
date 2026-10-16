@@ -18,7 +18,7 @@ export type RawScrapeComparePairProps = {
 }
 
 /**
- * Side-by-side Amazon + Vendor raw scrape panels.
+ * Side-by-side Vendor + Amazon raw scrape panels (vendor left, Amazon right).
  * Reusable across Sandbox and Live Output SKU viewers.
  */
 export const RawScrapeComparePair = memo(function RawScrapeComparePair({
@@ -43,17 +43,17 @@ export const RawScrapeComparePair = memo(function RawScrapeComparePair({
         minWidth: 0,
       }}
     >
-      <RawAsinExtract
-        data={amazonData}
-        asin={asin}
-        maxHeight={maxHeight}
-        emptyMessage={amazonEmptyMessage}
-      />
       <RawVendorWebsiteExtract
         data={vendorData}
         sku={sku}
         maxHeight={maxHeight}
         emptyMessage={vendorEmptyMessage}
+      />
+      <RawAsinExtract
+        data={amazonData}
+        asin={asin}
+        maxHeight={maxHeight}
+        emptyMessage={amazonEmptyMessage}
       />
     </Box>
   )
