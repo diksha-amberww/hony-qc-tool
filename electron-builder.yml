@@ -1,0 +1,35 @@
+appId: com.hony.qc-tool
+productName: Honey QC Tool
+copyright: Copyright © Hony QC Tool
+
+directories:
+  output: pack
+  buildResources: build
+
+files:
+  - dist/**
+  - electron/**
+  - scripts/**
+  - src/config/credentialManifest.json
+  - package.json
+
+asar: true
+asarUnpack:
+  - "**/node_modules/sharp/**"
+  - "**/node_modules/@img/**"
+
+npmRebuild: true
+
+win:
+  target:
+    - target: dir
+      arch:
+        - x64
+    - target: nsis
+      arch:
+        - x64
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  artifactName: "${productName} Setup ${version}.${ext}"

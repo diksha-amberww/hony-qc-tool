@@ -56,6 +56,8 @@ function loadErrorHtml(message, detail) {
 }
 
 async function resolveDevServerUrl() {
+  if (app.isPackaged) return null
+
   if (process.env.VITE_DEV_SERVER_URL) {
     return process.env.VITE_DEV_SERVER_URL.replace(/\/?$/, '/')
   }

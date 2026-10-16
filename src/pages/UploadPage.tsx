@@ -317,7 +317,7 @@ const DuplicateAsinWarnings = memo(function DuplicateAsinWarnings({
       }
     >
       <Typography sx={{ fontSize: '12px', fontWeight: 650, mb: 0.75 }}>
-        Duplicate ASINs found. Remove the duplicate row(s) or continue anyway to run QC on all rows.
+        Duplicate ASINs found. Remove the SKU or continue anyway to run QC on all rows.
       </Typography>
       {visible.map((w, i) => (
         <Box key={`${i}-${w.slice(0, 48)}`}>{w}</Box>
@@ -611,6 +611,10 @@ export function UploadPage({ onStartQc }: UploadPageProps) {
     }
 
     const gen = ++validateGenRef.current
+    if (clearValidationTimerRef.current) {
+      clearTimeout(clearValidationTimerRef.current)
+      clearValidationTimerRef.current = null
+    }
     setIsValidating(true)
     setErrors([])
     setDuplicateAsinWarnings([])

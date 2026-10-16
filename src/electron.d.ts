@@ -81,6 +81,9 @@ type QcAiSettingsPick = Pick<
   AppSettings,
   | 'titleSimilarityPercent'
   | 'imageSimilarityPercent'
+  | 'qcTitleLexicalHybrid'
+  | 'qcAggressiveAiCostMode'
+  | 'qcModelAiEnabled'
   | 'aiQcModelId'
   | 'aiInputPricePerMillionUsd'
   | 'aiOutputPricePerMillionUsd'

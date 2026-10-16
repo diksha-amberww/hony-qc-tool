@@ -1,5 +1,5 @@
 import type { SandboxQcResult, SandboxComparison } from '../../data/sandboxQc'
-import type { QcPipelineReport, QcPipelineSuccess } from '../../types/qcPipeline'
+import type { QcPipelineSuccess } from '../../types/qcPipeline'
 import type { AmazonListingExtract, VendorListingExtract } from '../../types/listingExtract'
 import type { QcCompareOutcome } from '../../utils/qcThresholdComparison'
 import {

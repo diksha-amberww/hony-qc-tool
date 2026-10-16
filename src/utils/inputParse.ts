@@ -15,9 +15,29 @@ function isValidAsinValue(value: string): boolean {
   return ASIN_RE.test(value)
 }
 
-/** Only standard (non-numeric-leading) ASINs are checked for duplicates. */
+/** Strip common Excel / CSV wrappers so duplicate keys match across rows. */
+function normalizeAsinCell(value: string): string {
+  let s = value.trim()
+  if (s.startsWith('=')) {
+    s = s.slice(1).trim()
+    if (
+      (s.startsWith('"') && s.endsWith('"')) ||
+      (s.startsWith("'") && s.endsWith("'"))
+    ) {
+      s = s.slice(1, -1).trim()
+    }
+  }
+  if (s.startsWith("'") && s.length > 1) {
+    s = s.slice(1).trim()
+  }
+  return s
+}
+
+/** Standard (non-numeric-leading) ASINs only — duplicate SKU/UPC are not checked here. */
 function shouldTrackAsinDuplicate(value: string): boolean {
-  return value.length > 0 && !asinStartsWithDigit(value)
+  const normalized = normalizeAsinCell(value)
+  if (!normalized || asinStartsWithDigit(normalized)) return false
+  return isValidAsinValue(normalized)
 }
 
 export type ValidateRowsResult = {
@@ -154,7 +174,7 @@ export function validateRows(
     return { errors: ['No valid data rows to validate'], duplicateAsinWarnings: [] }
   }
 
-  const asinField = fields.find((f) => f.id === 'asin')
+  const asinField = fields.find((f) => f.id === 'asin' || f.kind === 'asin')
   const skuField = fields.find((f) => f.id === 'part_sku')
   const seenAsins = new Set<string>()
   let truncated = false
@@ -171,7 +191,8 @@ export function validateRows(
     const rowNum = index + 1
 
     for (const field of fields) {
-      const value = (row[field.id] ?? '').trim()
+      const rawValue = (row[field.id] ?? '').trim()
+      const value = field.kind === 'asin' ? normalizeAsinCell(rawValue) : rawValue
       if (!value) {
         if (!pushCapped(errors, `Row ${rowNum}: ${field.label} is empty`, maxErrors)) {
           truncated = true
@@ -202,7 +223,7 @@ export function validateRows(
     if (truncated) break
 
     if (asinField) {
-      const asin = (row[asinField.id] ?? '').trim()
+      const asin = normalizeAsinCell((row[asinField.id] ?? '').trim())
       if (shouldTrackAsinDuplicate(asin)) {
         const asinKey = asin.toUpperCase()
         if (seenAsins.has(asinKey)) {
