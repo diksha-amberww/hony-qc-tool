@@ -25,6 +25,14 @@ function splitLine(line) {
   return line.split(/\t|,/).map((p) => p.trim())
 }
 
+function headerMatchKeys(field) {
+  const keys = [normalizeHeader(field.label), normalizeHeader(field.id)]
+  for (const alias of field.headerAliases ?? []) {
+    keys.push(normalizeHeader(alias))
+  }
+  return keys.filter(Boolean)
+}
+
 function tryMapHeader(cells, fields) {
   const indexByNorm = new Map()
   cells.forEach((cell, i) => {
@@ -33,7 +41,11 @@ function tryMapHeader(cells, fields) {
   })
   const mapping = {}
   for (const field of fields) {
-    const idx = indexByNorm.get(normalizeHeader(field.label))
+    let idx
+    for (const key of headerMatchKeys(field)) {
+      idx = indexByNorm.get(key)
+      if (idx !== undefined) break
+    }
     if (idx === undefined) return null
     mapping[field.id] = idx
   }

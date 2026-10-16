@@ -86,7 +86,7 @@ function AppShell() {
         currentTab={activeTab}
         onSelectTab={setActiveTab}
         onToggle={() => setSidebarOpen((open) => !open)}
-        menuLabel="HONY MENU"
+        menuLabel="HONEY MENU"
       />
       <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
         <AppHeader />

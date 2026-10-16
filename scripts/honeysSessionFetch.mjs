@@ -10,7 +10,7 @@ const BROWSER_HEADERS = {
 }
 
 const SESSION_WAIT_MESSAGE =
-  '⚠️ Session expired! Please log in via the Hony QC Desktop App. Waiting for new session...'
+  '⚠️ Session expired! Please log in via the Honey QC Desktop App. Waiting for new session...'
 
 const DEFAULT_SESSION_POLL_MS = 2_000
 

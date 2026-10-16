@@ -30,7 +30,7 @@ function parseEnvLines(content) {
 
 function serializeEnv(map) {
   const lines = [
-    '# Hony QC Tool — credential store (secrets are encrypted at rest)',
+    '# Honey QC Tool — credential store (secrets are encrypted at rest)',
     '# Managed by the Credentials page; do not paste secrets into logs.',
     '',
   ]

@@ -75,7 +75,7 @@ function applyVerdictStyle(cell, verdict) {
  */
 export function buildQcReportWorkbook(rows) {
   const workbook = new ExcelJS.Workbook()
-  workbook.creator = 'Hony QC Tool'
+  workbook.creator = 'Honey QC Tool'
   workbook.created = new Date()
 
   const sheet = workbook.addWorksheet('QC Report', {

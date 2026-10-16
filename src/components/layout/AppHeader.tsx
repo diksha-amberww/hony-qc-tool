@@ -10,12 +10,10 @@ import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined'
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined'
 import { useAppTheme } from '../../theme'
-import { useQcToolVendorDisplayName } from '../../context/QcToolConfigContext'
 import { QcToolCodename } from './QcToolCodename'
 
 export const AppHeader: React.FC = () => {
   const { mode, toggleTheme } = useAppTheme()
-  const vendorDisplayName = useQcToolVendorDisplayName()
   const isDark = mode === 'dark'
 
   return (
@@ -49,7 +47,7 @@ export const AppHeader: React.FC = () => {
             color: 'text.primary',
           }}
         >
-          HONY QC TOOL
+          HONEY QC TOOL
         </Typography>
 
         <Chip
@@ -66,10 +64,10 @@ export const AppHeader: React.FC = () => {
         />
       </Box>
 
-      <Tooltip title="Hony vendor integration">
+      <Tooltip title="Honey vendor integration">
         <Box
           component="span"
-          aria-label={`Vendor: ${vendorDisplayName}`}
+          aria-label="Honey's Place Logo"
           sx={{
             position: 'absolute',
             left: '50%',
@@ -102,7 +100,7 @@ export const AppHeader: React.FC = () => {
               textOverflow: 'ellipsis',
             }}
           >
-            {vendorDisplayName}
+            Honey&apos;s Place Logo
           </Typography>
         </Box>
       </Tooltip>

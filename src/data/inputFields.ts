@@ -5,11 +5,13 @@ export type InputFieldDef = {
   id: string
   label: string
   kind?: InputFieldKind
+  /** Alternate column headers accepted during paste/upload mapping. */
+  headerAliases?: string[]
 }
 
 /** Available columns a vendor may enable for their QC tool. Not permanently required. */
 export const AVAILABLE_INPUT_FIELDS: InputFieldDef[] = [
-  { id: 'part_sku', label: 'PART SKU' },
+  { id: 'part_sku', label: 'SKU', headerAliases: ['PART SKU'] },
   { id: 'asin', label: 'ASIN', kind: 'asin' },
   { id: 'brand', label: 'Brand' },
   { id: 'line', label: 'Line' },

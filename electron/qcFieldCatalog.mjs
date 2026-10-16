@@ -1,6 +1,6 @@
 /** Mirrors `src/data/inputFields.ts` — keep in sync for main-process validation. */
 export const AVAILABLE_INPUT_FIELDS = [
-  { id: 'part_sku', label: 'PART SKU' },
+  { id: 'part_sku', label: 'SKU', headerAliases: ['PART SKU'] },
   { id: 'asin', label: 'ASIN', kind: 'asin' },
   { id: 'brand', label: 'Brand' },
   { id: 'line', label: 'Line' },

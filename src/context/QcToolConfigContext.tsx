@@ -6,7 +6,7 @@ import {
 } from '../config/qcTool'
 
 type QcToolConfigContextValue = {
-  /** Always exactly four characters for layout-stable display. */
+  /** Fixed-length codename for layout-stable display. */
   codename: string
   /** Full vendor name from integration config. */
   vendorDisplayName: string
@@ -19,7 +19,7 @@ const QcToolConfigContext = createContext<QcToolConfigContextValue>({
 
 export type QcToolConfigProviderProps = {
   children: ReactNode
-  /** Optional 4-character codename for this vendor QC tool build. */
+  /** Optional 5-character codename for this vendor QC tool build. */
   codename?: string
   /** Optional full vendor display name for this QC tool build. */
   vendorDisplayName?: string

@@ -6,7 +6,7 @@ import { useQcToolCodename, useQcToolVendorDisplayName } from '../../context/QcT
 import { fontFamilyMono } from '../../theme/typography'
 
 export type QcToolCodenameProps = {
-  /** Override context codename (e.g. Storybook); must be configurable to four characters. */
+  /** Override context codename (e.g. Storybook); must be configurable to five characters. */
   codename?: string
   tooltip?: string
 }
@@ -29,7 +29,7 @@ export const QcToolCodename = memo(function QcToolCodename({
     <Tooltip title={tip} placement="bottom-end">
       <Chip
         component="span"
-        label={shortLabel || 'HONY'}
+        label={shortLabel || 'HONEY'}
         size="small"
         aria-label={tip}
         sx={(theme) => {
@@ -37,7 +37,7 @@ export const QcToolCodename = memo(function QcToolCodename({
           const primary = theme.palette.primary.main
           return {
             height: 28,
-            minWidth: 58,
+            minWidth: 68,
             flexShrink: 0,
             borderRadius: 0.5,
             fontFamily: fontFamilyMono,

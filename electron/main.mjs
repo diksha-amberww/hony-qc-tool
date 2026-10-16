@@ -41,7 +41,7 @@ function loadErrorHtml(message, detail) {
   const safeMessage = String(message ?? 'Failed to load UI')
   const safeDetail = String(detail ?? '')
   return `<!doctype html>
-<html><head><meta charset="utf-8"/><title>Hony QC Tool — load error</title>
+<html><head><meta charset="utf-8"/><title>Honey QC Tool — load error</title>
 <style>
   body{margin:0;font-family:Segoe UI,system-ui,sans-serif;background:#0c0c0d;color:#f4f4f5;
     display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
@@ -83,7 +83,7 @@ async function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
-    title: 'Hony QC Tool',
+    title: 'Honey QC Tool',
     show: true,
     backgroundColor: '#0c0c0d',
     webPreferences: {
@@ -132,7 +132,7 @@ async function createWindow() {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     console.error('[electron] load failed:', message)
-    showLoadError('Could not open the Hony QC Tool UI', message)
+    showLoadError('Could not open the Honey QC Tool UI', message)
   }
 
   win.once('ready-to-show', () => {

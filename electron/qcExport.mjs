@@ -24,7 +24,7 @@ export function buildExportCsv(results) {
 
 export async function buildExportXlsxBuffer(results) {
   const workbook = new ExcelJS.Workbook()
-  workbook.creator = 'Hony QC Tool'
+  workbook.creator = 'Honey QC Tool'
   workbook.created = new Date()
 
   const sheet = workbook.addWorksheet('QC Export', {
